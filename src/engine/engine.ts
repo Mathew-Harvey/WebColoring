@@ -80,7 +80,6 @@ export class Engine {
   private strokeCanvas: HTMLCanvasElement;
   private strokeCtx: Ctx;
   private overlay: CanvasImageSource;
-  private overlaySmall: HTMLCanvasElement;
   private history: History;
   private tex = new Textures();
 
@@ -92,7 +91,6 @@ export class Engine {
   fillStyle: FillStyle = 'solid';
   stamp: StampShape = 'star';
   stayInside = true;
-  showPatterns = false;
 
   // Interaction.
   private pointers = new Map<number, PointerInfo>();
@@ -131,11 +129,20 @@ export class Engine {
   private numbered: number[] = [];
   private totals = new Int32Array(13);
   private doneCount = new Int32Array(13);
-  private highlight: { canvas: HTMLCanvasElement; ctx: Ctx; x: number; y: number } | null = null;
+  private highlight: { canvas: HTMLCanvasElement; ctx: Ctx; x: number; y: number; w: number; h: number; step: number } | null = null;
   private highlightFor = 0;
+  private pulseUntil = 0;
   private completeFired = false;
 
+  // Screen-sized caches: the paint layer below, and lines plus numbers on top.
+  private baseCache: { canvas: HTMLCanvasElement; ctx: Ctx; key: string } | null = null;
+  private topCache: { canvas: HTMLCanvasElement; ctx: Ctx; key: string } | null = null;
+  private paintVersion = 0;
+  private numbersVersion = 0;
+  private patterns = false;
+
   private raf = 0;
+  private started = false;
   private dpr = 1;
   private resizeObs: ResizeObserver;
   private destroyed = false;
@@ -160,10 +167,6 @@ export class Engine {
     this.strokeCanvas = makeCanvas(this.W, this.H);
     this.strokeCtx = ctx2d(this.strokeCanvas);
     this.overlay = data.overlay;
-    this.overlaySmall = makeCanvas(this.W / 2, this.H / 2);
-    const os = ctx2d(this.overlaySmall);
-    os.imageSmoothingQuality = 'high';
-    os.drawImage(this.overlay, 0, 0, this.W / 2, this.H / 2);
     this.history = new History(this.paintCtx);
     this.cbnPalette = palette;
 
@@ -202,6 +205,11 @@ export class Engine {
     this.resizeObs = new ResizeObserver(() => this.resize());
     this.resizeObs.observe(canvas);
     this.resize();
+
+    // Make brush textures once things are quiet.
+    const idle = (window as unknown as { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number }).requestIdleCallback;
+    if (idle) idle(() => !this.destroyed && this.tex.warm(), { timeout: 4000 });
+    else setTimeout(() => !this.destroyed && this.tex.warm(), 2500);
   }
 
   private on(t: EventTarget, type: string, fn: EventListener, opts?: AddEventListenerOptions) {
@@ -217,13 +225,18 @@ export class Engine {
     this.masks.clear();
     this.history.clear();
     // Free GPU memory promptly (iOS is strict about canvas memory).
-    for (const c of [this.paint, this.strokeCanvas, this.overlaySmall, this.highlight?.canvas]) {
+    for (const c of [this.paint, this.strokeCanvas, this.highlight?.canvas, this.baseCache?.canvas, this.topCache?.canvas]) {
       if (c) {
         c.width = 1;
         c.height = 1;
       }
     }
-    if ('close' in this.overlay && typeof this.overlay.close === 'function') this.overlay.close();
+    for (const img of [this.overlay, this.data.overlayHalf]) if ('close' in img && typeof img.close === 'function') img.close();
+  }
+
+  /** Half-size line art (made by the build script): smoother and cheaper when zoomed out. */
+  private get overlaySmall(): CanvasImageSource {
+    return this.data.overlayHalf;
   }
 
   // ---------------------------------------------------------------- sizing and view
@@ -259,6 +272,17 @@ export class Engine {
   }
 
   // ---------------------------------------------------------------- tool settings
+
+  get showPatterns() {
+    return this.patterns;
+  }
+
+  set showPatterns(v: boolean) {
+    if (v === this.patterns) return;
+    this.patterns = v;
+    this.numbersVersion++;
+    this.requestRender();
+  }
 
   get size() {
     return this.sizes[this.tool] ?? 30;
@@ -542,6 +566,7 @@ export class Engine {
       ctx.drawImage(this.strokeCanvas, rect.x, rect.y, rect.w, rect.h, rect.x, rect.y, rect.w, rect.h);
       ctx.restore();
       this.strokeCtx.clearRect(rect.x, rect.y, rect.w, rect.h);
+      this.paintVersion++;
       commit();
       this.events.history();
       this.events.change();
@@ -624,6 +649,7 @@ export class Engine {
     this.fx = null;
     const commit = this.history.capture(fx.rect);
     this.paintCtx.drawImage(fx.canvas, fx.rect.x, fx.rect.y);
+    this.paintVersion++;
     fx.canvas.width = 1;
     commit(fx.cbn);
     this.events.history();
@@ -655,6 +681,7 @@ export class Engine {
     if (this.stroke) this.endStroke();
     const change = this.history.undo();
     if (change === undefined) return;
+    this.paintVersion++;
     if (change) this.markDone(change.done, false);
     this.feedback.undo();
     this.events.history();
@@ -666,6 +693,7 @@ export class Engine {
     this.finishFx();
     const change = this.history.redo();
     if (change === undefined) return;
+    this.paintVersion++;
     if (change) this.markDone(change.done, true);
     this.feedback.undo();
     this.events.history();
@@ -697,13 +725,18 @@ export class Engine {
 
   setCbnEnabled(on: boolean) {
     this.cbnOn = on && this.numbered.length > 0;
+    this.numbersVersion++;
     this.events.cbn();
     this.requestRender();
   }
 
-  selectNumber(n: number) {
+  /** `pulse` is for when a child picks the number; on page load it just lights up. */
+  selectNumber(n: number, pulse = true) {
     this.cbnSel = n;
+    this.numbersVersion++;
     this.rebuildHighlight();
+    // Pulse for a moment after picking a number, then stay softly lit.
+    this.pulseUntil = pulse ? performance.now() + 3600 : 0;
     this.events.cbn();
     this.requestRender();
   }
@@ -715,6 +748,7 @@ export class Engine {
   }
 
   loadCbnDone(ids: number[]) {
+    this.numbersVersion++;
     this.done.fill(0);
     this.doneCount.fill(0);
     for (const id of ids) {
@@ -724,7 +758,7 @@ export class Engine {
       }
     }
     this.completeFired = this.cbnProgress().done === this.numbered.length && this.numbered.length > 0;
-    this.rebuildHighlight();
+    if (this.cbnSel) this.rebuildHighlight();
     this.events.cbn();
     this.requestRender();
   }
@@ -744,6 +778,7 @@ export class Engine {
 
   private markDone(ids: number[], value: boolean) {
     const R = this.data.regions;
+    this.numbersVersion++;
     for (const id of ids) {
       if (!!this.done[id] === value) continue;
       this.done[id] = value ? 1 : 0;
@@ -751,6 +786,8 @@ export class Engine {
       if (this.highlight && R.n[id] === this.highlightFor) {
         const m = this.masks.get(id);
         const h = this.highlight;
+        const k = 1 / h.step;
+        const dx = (m.x - h.x) * k, dy = (m.y - h.y) * k, dw = m.w * k, dh = m.h * k;
         h.ctx.save();
         h.ctx.globalCompositeOperation = value ? 'destination-out' : 'source-over';
         if (!value) {
@@ -761,8 +798,11 @@ export class Engine {
           t.globalCompositeOperation = 'source-in';
           t.fillStyle = this.highlightColour(R.n[id]);
           t.fillRect(0, 0, m.w, m.h);
-          h.ctx.drawImage(tmp, m.x - h.x, m.y - h.y);
-        } else h.ctx.drawImage(m.canvas, m.x - h.x, m.y - h.y);
+          h.ctx.drawImage(tmp, dx, dy, dw, dh);
+        } else {
+          // Grow the cut-out a touch so no half-pixel fringe is left at the edges.
+          h.ctx.drawImage(m.canvas, dx - 0.5, dy - 0.5, dw + 1, dh + 1);
+        }
         h.ctx.restore();
       }
     }
@@ -792,14 +832,15 @@ export class Engine {
     const n = this.cbnSel;
     if (!n) return;
     const R = this.data.regions;
-    const u = this.masks.union((id) => R.n[id] === n && !this.done[id]);
+    // Half resolution is plenty for a soft glow under the lines, and four times cheaper.
+    const u = this.masks.union((id) => R.n[id] === n && !this.done[id], 2);
     if (!u) return;
     const ctx = ctx2d(u.canvas);
     ctx.globalCompositeOperation = 'source-in';
     ctx.fillStyle = this.highlightColour(n);
-    ctx.fillRect(0, 0, u.w, u.h);
+    ctx.fillRect(0, 0, u.canvas.width, u.canvas.height);
     ctx.globalCompositeOperation = 'source-over';
-    this.highlight = { canvas: u.canvas, ctx, x: u.x, y: u.y };
+    this.highlight = { canvas: u.canvas, ctx, x: u.x, y: u.y, w: u.w, h: u.h, step: u.step };
     this.highlightFor = n;
   }
 
@@ -829,7 +870,7 @@ export class Engine {
       }
     }
     const n = R.n[best];
-    if (this.cbnSel !== n) this.selectNumber(n);
+    if (this.cbnSel !== n) this.selectNumber(n, false);
     const target = this.view.targetFor(R.x[best], R.y[best], R.w[best], R.h[best], 0.4);
     this.view.animateTo(target, this.reducedMotion ? 0 : 450);
     this.hintRegion = best;
@@ -847,6 +888,7 @@ export class Engine {
     this.paintCtx.clearRect(0, 0, this.W, this.H);
     this.paintCtx.drawImage(bmp, 0, 0, this.W, this.H);
     bmp.close();
+    this.paintVersion++;
     this.history.clear();
     this.events.history();
     this.requestRender();
@@ -856,6 +898,7 @@ export class Engine {
     this.finishFx();
     const commit = this.history.capture({ x: 0, y: 0, w: this.W, h: this.H });
     this.paintCtx.clearRect(0, 0, this.W, this.H);
+    this.paintVersion++;
     commit(null);
     this.events.history();
     this.events.change();
@@ -917,12 +960,33 @@ export class Engine {
 
   // ---------------------------------------------------------------- rendering
 
+  /** Starts drawing. Call once the page's saved state is restored, so setup draws only once. */
+  start() {
+    this.started = true;
+    this.requestRender();
+  }
+
   requestRender() {
-    if (this.raf || this.destroyed) return;
+    if (this.raf || this.destroyed || !this.started) return;
     this.raf = requestAnimationFrame((t) => {
       this.raf = 0;
       this.render(t);
     });
+  }
+
+  private cache(which: 'base' | 'top') {
+    const w = this.canvas.width;
+    const h = this.canvas.height;
+    let c = which === 'base' ? this.baseCache : this.topCache;
+    if (!c || c.canvas.width !== w || c.canvas.height !== h) {
+      const canvas = c?.canvas ?? makeCanvas(w, h);
+      canvas.width = w;
+      canvas.height = h;
+      c = { canvas, ctx: ctx2d(canvas, which === 'base' ? { alpha: false } : undefined), key: '' };
+      if (which === 'base') this.baseCache = c;
+      else this.topCache = c;
+    }
+    return c;
   }
 
   private render(now: number) {
@@ -933,22 +997,35 @@ export class Engine {
     const dpr = this.dpr;
     const v = this.view;
     const s = v.scale;
+    const pageTransform = (c: Ctx) => c.setTransform(dpr * s, 0, 0, dpr * s, dpr * v.ox, dpr * v.oy);
+    const viewKey = `${this.canvas.width}x${this.canvas.height}|${s}|${v.ox}|${v.oy}`;
 
+    // Paper and paint, cached until either changes.
+    const base = this.cache('base');
+    const baseKey = `${viewKey}|${this.paintVersion}`;
+    if (base.key !== baseKey) {
+      const b = base.ctx;
+      b.setTransform(1, 0, 0, 1, 0, 0);
+      b.fillStyle = DESK;
+      b.fillRect(0, 0, base.canvas.width, base.canvas.height);
+      pageTransform(b);
+      b.fillStyle = 'rgba(90,60,30,0.10)';
+      b.fillRect(5 / s, 7 / s, this.W, this.H);
+      b.fillStyle = '#ffffff';
+      b.fillRect(0, 0, this.W, this.H);
+      b.imageSmoothingEnabled = true;
+      b.imageSmoothingQuality = 'medium';
+      b.drawImage(this.paint, 0, 0);
+      base.key = baseKey;
+    }
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.globalAlpha = 1;
     ctx.globalCompositeOperation = 'source-over';
-    ctx.fillStyle = DESK;
-    ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    ctx.drawImage(base.canvas, 0, 0);
 
-    ctx.setTransform(dpr * s, 0, 0, dpr * s, dpr * v.ox, dpr * v.oy);
-    ctx.fillStyle = 'rgba(90,60,30,0.10)';
-    ctx.fillRect(5 / s, 7 / s, this.W, this.H);
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, this.W, this.H);
+    pageTransform(ctx);
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = 'medium';
-
-    ctx.drawImage(this.paint, 0, 0);
 
     // Fill reveal.
     const fx = this.fx;
@@ -987,11 +1064,14 @@ export class Engine {
 
     // Colour by numbers highlight.
     if (this.cbnOn && this.highlight) {
-      const pulse = this.reducedMotion ? 0.4 : 0.3 + 0.18 * Math.sin(now / 320);
-      ctx.globalAlpha = pulse;
-      ctx.drawImage(this.highlight.canvas, this.highlight.x, this.highlight.y);
+      const pulsing = !this.reducedMotion && now < this.pulseUntil;
+      // Fade the pulse out so it settles on the resting level without a jump.
+      const k = pulsing ? Math.min(1, (this.pulseUntil - now) / 800) : 0;
+      ctx.globalAlpha = 0.34 + 0.16 * Math.sin((now / 1000) * Math.PI * 1.6) * k;
+      const hl = this.highlight;
+      ctx.drawImage(hl.canvas, hl.x, hl.y, hl.canvas.width * hl.step, hl.canvas.height * hl.step);
       ctx.globalAlpha = 1;
-      if (!this.reducedMotion) again = true;
+      if (pulsing) again = true;
     }
     if (this.hintRegion && now < this.hintUntil) {
       const m = this.masks.get(this.hintRegion);
@@ -1002,11 +1082,26 @@ export class Engine {
       again = true;
     } else this.hintRegion = 0;
 
-    // Lines always on top.
-    ctx.drawImage(s * dpr < 0.55 ? this.overlaySmall : this.overlay, 0, 0, this.W, this.H);
+    // Lines and numbers always on top, cached until the view or numbers change.
+    const top = this.cache('top');
+    const wiggling = this.cbnOn && this.wiggle !== null;
+    const topKey = `${viewKey}|${this.cbnOn ? this.numbersVersion : -1}|${wiggling ? now : 0}`;
+    if (top.key !== topKey) {
+      const t = top.ctx;
+      t.setTransform(1, 0, 0, 1, 0, 0);
+      t.clearRect(0, 0, top.canvas.width, top.canvas.height);
+      pageTransform(t);
+      t.imageSmoothingEnabled = true;
+      t.imageSmoothingQuality = 'medium';
+      t.drawImage(s * dpr < 0.55 ? this.overlaySmall : this.overlay, 0, 0, this.W, this.H);
+      t.setTransform(dpr, 0, 0, dpr, 0, 0);
+      if (this.cbnOn && this.drawNumbers(t, now)) again = true;
+      top.key = topKey;
+    } else if (wiggling) again = true;
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.drawImage(top.canvas, 0, 0);
 
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    if (this.cbnOn) again = this.drawNumbers(ctx, now) || again;
     this.drawCursor(ctx);
 
     if (again) this.requestRender();
@@ -1033,7 +1128,10 @@ export class Engine {
         if (t < 1) {
           x += Math.sin(t * Math.PI * 6) * 6 * (1 - t);
           animating = true;
-        } else this.wiggle = null;
+        } else {
+          this.wiggle = null;
+          this.numbersVersion++;
+        }
       }
       if (size !== font) {
         ctx.font = `800 ${size}px Nunito, ui-rounded, system-ui, sans-serif`;
@@ -1055,7 +1153,7 @@ export class Engine {
       ctx.strokeText(label, x, y + size * 0.04);
       ctx.fillStyle = '#3d3550';
       ctx.fillText(label, x, y + size * 0.04);
-      if (this.showPatterns) {
+      if (this.patterns) {
         const k = (size * 0.7) / 24;
         ctx.save();
         ctx.translate(x + size * 0.55 + (label.length > 1 ? size * 0.2 : 0), y - size * 0.55);

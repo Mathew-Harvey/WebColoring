@@ -27,7 +27,8 @@ function OfflineButton({ book }: { book: BookIndexEntry }) {
   const run = async () => {
     try {
       const b = await loadBook(book.id);
-      const files = b.pages.flatMap((p) => ['overlay.png', 'regions.bin', 'regions.json'].map((f) => pageAsset(b.id, p, f)));
+      const per = ['overlay.png', 'overlay-half.png', 'regions.bin', 'regions.json'];
+      const files = b.pages.flatMap((p) => per.map((f) => pageAsset(b.id, p, f)));
       let n = 0;
       let failed = false;
       setState({ done: 0, total: files.length });
@@ -64,7 +65,7 @@ function OfflineButton({ book }: { book: BookIndexEntry }) {
           : state === 'error'
             ? copy.grownUps.offlineError
             : state
-              ? copy.grownUps.offlineProgress(Math.round(state.done / 3), Math.round(state.total / 3))
+              ? copy.grownUps.offlineProgress(Math.floor(state.done / 4), Math.round(state.total / 4))
               : ''}
       </p>
     </div>

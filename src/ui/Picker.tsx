@@ -84,7 +84,7 @@ export function Picker({ bookId }: { bookId: string }) {
 
       <main>
         <ul class="page-grid">
-          {pages.map((p: PageInfo) => {
+          {pages.map((p: PageInfo, i) => {
             const meta = metas.get(p.id);
             const thumb = thumbs.get(p.id);
             const done = meta?.complete;
@@ -95,13 +95,23 @@ export function Picker({ bookId }: { bookId: string }) {
                   href={href.page(bookId, p.id, filter === 'cbn')}
                   aria-label={`${copy.picker.page(p.n)}${done ? `, ${copy.picker.done}` : meta ? `, ${copy.picker.started}` : ''}`}
                 >
-                  <img src={thumb ?? pageAsset(bookId, p, 'thumb.webp')} alt="" width={480} height={270} loading="lazy" decoding="async" />
+                  <img
+                    src={thumb ?? pageAsset(bookId, p, 'thumb.webp')}
+                    srcset={thumb ? undefined : `${pageAsset(bookId, p, 'thumb-sm.webp')} 384w, ${pageAsset(bookId, p, 'thumb.webp')} 480w`}
+                    sizes="(max-width: 520px) 46vw, 240px"
+                    alt=""
+                    width={480}
+                    height={270}
+                    loading={i < 6 ? 'eager' : 'lazy'}
+                    fetchpriority={i < 2 ? 'high' : undefined}
+                    decoding="async"
+                  />
                   <span class="page-num" aria-hidden="true">
                     {p.n}
                   </span>
                   {p.cbn && p.numbered > 0 && (
                     <span class="badge badge-cbn" aria-hidden="true">
-                      123
+                      <Icon name="numbers" size={30} />
                     </span>
                   )}
                   {done && (

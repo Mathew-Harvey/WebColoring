@@ -1,1 +1,42 @@
-{ "defaults": { "minAreaEasy": 2600, "minAreaDetailed": 7000 } }
+{
+  "_help": "Per-page colour by numbers overrides. Points use 0..1 page coordinates (x across, y down). 'set' gives the region under a point a palette colour, 'free' makes it free colour, 'seal' draws invisible lines [x1, y1, x2, y2] that stop fills leaking through gaps in the art, 'minArea' changes the smallest numbered region (px at 2560x1440).",
+  "defaults": {"minAreaEasy": 2600, "minAreaDetailed": 7000},
+  "page01": {
+    "seal": [
+      [0.1062, 0.8028, 0.1164, 0.8417]
+    ],
+    "set": [
+      {"x": 0.211, "y": 0.833, "n": "brown"},
+      {"x": 0.75, "y": 0.778, "n": "brown"},
+      {"x": 0.094, "y": 0.278, "n": "leaf"},
+      {"x": 0.859, "y": 0.208, "n": "grass"},
+      {"x": 0.215, "y": 0.396, "n": "sand"},
+      {"x": 0.707, "y": 0.389, "n": "sand"},
+      {"x": 0.5, "y": 0.694, "n": "sky"}
+    ]
+  },
+  "page13": {
+    "set": [
+      {"x": 0.352, "y": 0.325, "n": "sand"},
+      {"x": 0.5, "y": 0.306, "n": "sand"},
+      {"x": 0.582, "y": 0.517, "n": "yellow"},
+      {"x": 0.594, "y": 0.563, "n": "yellow"},
+      {"x": 0.633, "y": 0.528, "n": "yellow"},
+      {"x": 0.168, "y": 0.486, "n": "red"},
+      {"x": 0.223, "y": 0.438, "n": "red"},
+      {"x": 0.219, "y": 0.507, "n": "red"},
+      {"x": 0.262, "y": 0.486, "n": "grass"},
+      {"x": 0.32, "y": 0.53, "n": "sand"}
+    ]
+  },
+  "page28": {
+    "set": [
+      {"x": 0.625, "y": 0.861, "n": "blue"},
+      {"x": 0.313, "y": 0.722, "n": "sky"},
+      {"x": 0.809, "y": 0.417, "n": "brown"},
+      {"x": 0.83, "y": 0.417, "n": "brown"},
+      {"x": 0.086, "y": 0.25, "n": "brown"},
+      {"x": 0.105, "y": 0.25, "n": "brown"}
+    ]
+  }
+}

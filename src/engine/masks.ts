@@ -73,8 +73,8 @@ export class RegionMasks {
     return mask;
   }
 
-  /** Union of all regions matching `test`, cropped to their combined bounds. */
-  union(test: (id: number) => boolean): Omit<Mask, 'id'> | null {
+  /** Union of all regions matching `test`, cropped to their combined bounds, at 1/`step` size. */
+  union(test: (id: number) => boolean, step = 1): (Omit<Mask, 'id'> & { step: number }) | null {
     const R = this.data.regions;
     let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
     for (let id = 1; id <= R.count; id++) {
@@ -85,23 +85,25 @@ export class RegionMasks {
       y1 = Math.max(y1, R.y[id] + R.h[id]);
     }
     if (x1 < x0) return null;
-    return this.build(test, x0, y0, x1 - x0, y1 - y0);
+    return { ...this.build(test, x0, y0, x1 - x0, y1 - y0, step), step };
   }
 
-  private build(test: (id: number) => boolean, bx: number, by: number, bw: number, bh: number) {
+  private build(test: (id: number) => boolean, bx: number, by: number, bw: number, bh: number, step = 1) {
     const { w, ids } = this.data;
-    const canvas = makeCanvas(bw, bh);
+    const cw = Math.ceil(bw / step);
+    const ch = Math.ceil(bh / step);
+    const canvas = makeCanvas(cw, ch);
     const ctx = ctx2d(canvas);
-    const img = ctx.createImageData(bw, bh);
+    const img = ctx.createImageData(cw, ch);
     const px = new Uint32Array(img.data.buffer);
     // Cache the last answer: neighbouring pixels are usually the same region.
     let lastId = -1;
     let lastHit = false;
-    for (let y = 0; y < bh; y++) {
-      const row = (by + y) * w + bx;
-      const out = y * bw;
-      for (let x = 0; x < bw; x++) {
-        const id = ids[row + x];
+    for (let y = 0; y < ch; y++) {
+      const row = (by + y * step) * w + bx;
+      const out = y * cw;
+      for (let x = 0; x < cw; x++) {
+        const id = ids[row + x * step];
         if (!id) continue;
         if (id !== lastId) {
           lastId = id;

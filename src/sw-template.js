@@ -22,7 +22,7 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-const isPageAsset = (url) => /\/books\/[^/]+\/pages\/[^/]+\/(line\.png|overlay\.png|regions\.bin|regions\.json)$/.test(url.pathname);
+const isPageAsset = (url) => /\/books\/[^/]+\/pages\/[^/]+\/(line\.png|overlay\.png|overlay-half\.png|regions\.bin|regions\.json)$/.test(url.pathname);
 
 self.addEventListener('fetch', (event) => {
   const req = event.request;

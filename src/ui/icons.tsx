@@ -70,9 +70,7 @@ function draw(name: IconName, tip: string): JSX.Element {
       return (
         <g>
           <rect x="4" y="9" width="40" height="30" rx="10" fill="#fff" stroke={INK} stroke-width={3} />
-          <text x="24" y="31" text-anchor="middle" font-family="Nunito, ui-rounded, system-ui, sans-serif" font-weight="900" font-size="17" fill={INK}>
-            123
-          </text>
+          <path fill="none" stroke={INK} stroke-width={3.4} stroke-linecap="round" stroke-linejoin="round" d="M11.5 19.5 15 17v14M20 20.5a4 4 0 0 1 7.6 1.6c0 2.6-7.6 8.9-7.6 8.9h8M31.5 17h7l-4.2 5.2a4.6 4.6 0 1 1-3.6 7.6" />
         </g>
       );
     case 'save':

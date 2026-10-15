@@ -51,7 +51,6 @@ export function HoldButton({ onDone, label, hint, ms = 1500, class: cls, childre
     <button
       type="button"
       class={`hold ${cls ?? ''}`}
-      aria-label={`${label}. ${hint}`}
       onPointerDown={(e) => {
         (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId);
         begin();
@@ -89,7 +88,7 @@ export function HoldButton({ onDone, label, hint, ms = 1500, class: cls, childre
         <span class="hold-icon">{children}</span>
       </span>
       <span class="hold-text">
-        <span class="hold-label">{label}</span>
+        <span class="hold-label">{label}</span>{' '}
         <span class="hold-hint">{hint}</span>
       </span>
     </button>

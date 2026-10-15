@@ -68,13 +68,17 @@ const smooth = (e0: number, e1: number, x: number) => {
 
 /** Procedural paper grain and brush sprites, cached per colour. */
 export class Textures {
-  private grain: Float32Array;
-  private fine: Float32Array;
+  private grain!: Float32Array;
+  private fine!: Float32Array;
+  private ready = false;
   readonly size = 256;
   private patterns = new Map<string, CanvasPattern>();
   private sprites = new Map<string, HTMLCanvasElement>();
 
-  constructor() {
+  /** Builds the noise on first use (or when the browser is idle) to keep page start fast. */
+  warm() {
+    if (this.ready) return;
+    this.ready = true;
     const n = this.size;
     const rand = mulberry32(1234);
     // Value noise (coarse) plus white noise (fine) gives a waxy paper tooth.
@@ -124,9 +128,17 @@ export class Textures {
     const fineTooth = blur(white.map(() => rand()), 1);
     // Equalise so a threshold of t covers exactly (1 - t) of the paper.
     const equalise = (v: Float32Array) => {
-      const order = Array.from(v.keys()).sort((a, b) => v[a] - v[b]);
+      const bins = 2048;
+      const hist = new Uint32Array(bins + 1);
+      for (const x of v) hist[Math.min(bins, Math.max(0, Math.round(x * bins)))]++;
+      const cdf = new Float32Array(bins + 1);
+      let acc = 0;
+      for (let b = 0; b <= bins; b++) {
+        cdf[b] = (acc + hist[b] / 2) / v.length;
+        acc += hist[b];
+      }
       const out = new Float32Array(v.length);
-      order.forEach((idx, rank) => (out[idx] = rank / (v.length - 1)));
+      for (let i = 0; i < v.length; i++) out[i] = cdf[Math.min(bins, Math.max(0, Math.round(v[i] * bins)))];
       return out;
     };
     const mixG = new Float32Array(n * n);
@@ -144,6 +156,7 @@ export class Textures {
     const key = `${fine ? 'f' : 'g'}${hex}${cover}`;
     let pat = this.patterns.get(key);
     if (pat) return pat;
+    this.warm();
     const n = this.size;
     const c = makeCanvas(n, n);
     const cx = ctx2d(c);

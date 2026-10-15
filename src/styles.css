@@ -98,7 +98,7 @@ a {
 }
 
 .tiny {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 800;
   line-height: 1.1;
   letter-spacing: 0.01em;
@@ -519,10 +519,10 @@ a {
 }
 
 .badge-cbn {
-  left: 8px;
-  padding: 0 9px;
-  background: #fff;
-  color: var(--ink);
+  left: 6px;
+  top: 4px;
+  box-shadow: none;
+  background: none;
 }
 
 .badge-done {
@@ -597,7 +597,7 @@ a {
 }
 
 .icon-btn .tiny {
-  font-size: 9.5px;
+  font-size: 11px;
   margin-top: -2px;
 }
 
@@ -654,6 +654,24 @@ a {
   display: block;
   touch-action: none;
   cursor: crosshair;
+  opacity: 0;
+}
+
+.paper.ready {
+  opacity: 1;
+  transition: opacity 0.15s ease;
+}
+
+/* The page thumbnail stands in while the full page loads. */
+.stage-preview {
+  position: absolute;
+  inset: 12px;
+  width: calc(100% - 24px);
+  height: calc(100% - 24px);
+  object-fit: contain;
+  opacity: 0.6;
+  filter: blur(1px);
+  pointer-events: none;
 }
 
 .stage-msg {

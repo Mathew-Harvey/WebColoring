@@ -26,7 +26,7 @@ function serviceWorker(): Plugin {
       walk(outDir);
       const precache = files
         .filter((f) => f !== 'sw.js' && !f.endsWith('.map'))
-        .filter((f) => !/^books\/[^/]+\/pages\/[^/]+\/(line\.png|overlay\.png|regions\.bin|regions\.json)$/.test(f))
+        .filter((f) => !/^books\/[^/]+\/pages\/[^/]+\/(line\.png|overlay\.png|overlay-half\.png|regions\.bin|regions\.json)$/.test(f))
         .filter((f) => !f.endsWith('OFL.txt'))
         .sort();
       const hash = crypto.createHash('sha256');

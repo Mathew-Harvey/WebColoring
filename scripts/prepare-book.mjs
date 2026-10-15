@@ -7,9 +7,10 @@
 // public/books/<id>/pages/pageNN/:
 //   line.png      pure black/white line layer (lossless, gaps closed)
 //   overlay.png   transparent line overlay used for rendering (anti-aliased)
+//   overlay-half.png  the same at half size, for zoomed-out views
 //   regions.bin   region map: RLE of Uint16 region ids, zlib-compressed
 //   regions.json  per-region stats (area, centroid, label point, bbox, number)
-//   thumb.webp    small thumbnail for the page picker
+//   thumb.webp    thumbnail for the page picker (thumb-sm.webp for small screens)
 // plus public/books/<id>/book.json and an updated public/books/index.json.
 //
 // Optional inputs in books/<id>/:
@@ -590,15 +591,27 @@ async function processPage(file, pageNo, difficulty) {
   }
 
   // Per-page overrides: points in 0..1 page coordinates.
+  // The region under a point, or the nearest one within 16 px when it lands on a line.
   const regionAt = (p) => {
-    const x = Math.round(p.x * (W - 1));
-    const y = Math.round(p.y * (H - 1));
-    return ids[y * W + x];
+    const cx = Math.round(p.x * (W - 1));
+    const cy = Math.round(p.y * (H - 1));
+    let best = 0;
+    let bestD = Infinity;
+    for (let dy = -16; dy <= 16; dy++) {
+      for (let dx = -16; dx <= 16; dx++) {
+        const x = cx + dx, y = cy + dy;
+        if (x < 0 || y < 0 || x >= W || y >= H) continue;
+        const r = ids[y * W + x];
+        const d = dx * dx + dy * dy;
+        if (r && d < bestD) { bestD = d; best = r; }
+      }
+    }
+    return best;
   };
   for (const p of ov.set || []) {
     const r = regionAt(p);
     if (r) numberOf[r] = colourNumber(p.n ?? p.colour ?? p.color);
-    else console.warn(`  ${id}: override point ${p.x},${p.y} is on a line`);
+    else console.warn(`  ${id}: no region near override point ${p.x},${p.y}`);
   }
   for (const p of ov.free || []) {
     const r = regionAt(p);
@@ -631,6 +644,11 @@ async function processPage(file, pageNo, difficulty) {
   await sharp(overlayBuf, { raw: { width: W, height: H, channels: 2 } })
     .png({ compressionLevel: 9, palette: true, colours: 16, dither: 0, effort: 10 })
     .toFile(path.join(pageDir, 'overlay.png'));
+  // Half-size overlay: phones draw this when zoomed out, so it is smooth and cheap.
+  await sharp(overlayBuf, { raw: { width: W, height: H, channels: 2 } })
+    .resize(W / 2, H / 2, { kernel: 'lanczos3' })
+    .png({ compressionLevel: 9, palette: true, colours: 16, dither: 0, effort: 10 })
+    .toFile(path.join(pageDir, 'overlay-half.png'));
   const regionBin = encodeRegionMap(ids, W, H, count);
   fs.writeFileSync(path.join(pageDir, 'regions.bin'), regionBin);
   fs.writeFileSync(
@@ -649,6 +667,10 @@ async function processPage(file, pageNo, difficulty) {
     .resize(480, 270, { kernel: 'lanczos3' })
     .webp({ quality: 82 })
     .toFile(path.join(pageDir, 'thumb.webp'));
+  await sharp(thumbRgb, { raw: { width: W, height: H, channels: 1 } })
+    .resize(384, 216, { kernel: 'lanczos3' })
+    .webp({ quality: 78 })
+    .toFile(path.join(pageDir, 'thumb-sm.webp'));
 
   if (debugDir) {
     fs.mkdirSync(debugDir, { recursive: true });

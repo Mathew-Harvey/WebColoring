@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { copy } from '../copy';
 import { buzz, sound } from '../audio/sound';
-import { loadBook, type Book, type PageInfo } from '../data/books';
+import { loadBook, pageAsset, type Book, type PageInfo } from '../data/books';
 import { getLocal, setLocal } from '../data/settings';
 import { artKey, deleteArt, getMeta, getPaint, requestPersistence, saveArt } from '../data/storage';
 import type { BrushId } from '../engine/brushes';
@@ -81,6 +81,26 @@ const feedback: Feedback = {
   },
   undo: () => sound.undo(),
 };
+
+/** A soft stand-in for the page while it loads. */
+function Preview({ src }: { src: string }) {
+  const ref = useRef<HTMLCanvasElement>(null);
+  useEffect(() => {
+    const img = new Image();
+    img.onload = () => {
+      const c = ref.current;
+      if (!c) return;
+      c.width = img.naturalWidth;
+      c.height = img.naturalHeight;
+      c.getContext('2d')?.drawImage(img, 0, 0);
+    };
+    img.src = src;
+    return () => {
+      img.onload = null;
+    };
+  }, [src]);
+  return <canvas ref={ref} class="stage-preview" aria-hidden="true" />;
+}
 
 export function Colouring({ bookId, pageId, done, cbn }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -182,7 +202,13 @@ export function Colouring({ bookId, pageId, done, cbn }: Props) {
       if (!page) throw new Error('no page');
       pageRef.current = page;
       if (!cancelled) setBook(b);
+      // Let the toolbar paint before the big page downloads start.
+      await new Promise((r) => requestAnimationFrame(() => setTimeout(r, 0)));
+      if (cancelled) return;
       const [data, meta, paint] = await Promise.all([loadPageData(bookId, page), getMeta(key), getPaint(key)]);
+      // Short breaks between the heavy steps keep the page responsive while it opens.
+      const breathe = () => new Promise((r) => setTimeout(r, 0));
+      await breathe();
       if (cancelled || !canvasRef.current) return;
       engine = new Engine(
         canvasRef.current,
@@ -215,17 +241,22 @@ export function Colouring({ bookId, pageId, done, cbn }: Props) {
         reducedMotion,
       );
       engineRef.current = engine;
+      await breathe();
+      if (cancelled) return;
       if (location.search.includes('e2e')) (window as unknown as { __wc: Engine }).__wc = engine;
       if (paint) await engine.loadPaint(paint).catch(() => {});
       if (meta) completeRef.current = meta.complete;
       if (meta && meta.v === page.v) engine.loadCbnDone(meta.cbnDone);
+      await breathe();
+      if (cancelled) return;
       const wantCbn = (cbn || (meta ? meta.cbnOn : page.cbn)) && engine.hasNumbers;
       engine.setCbnEnabled(wantCbn);
       if (wantCbn) {
         const next = engine.cbnProgress().numbers.find((n) => n.done < n.total);
-        if (next) engine.selectNumber(next.n);
+        if (next) engine.selectNumber(next.n, false);
         updatePrefs({ tool: 'fill', fillStyle: 'solid' });
       }
+      engine.start();
       if (!cancelled) setStatus('ready');
     })().catch(() => !cancelled && setStatus('error'));
 
@@ -365,7 +396,7 @@ export function Colouring({ bookId, pageId, done, cbn }: Props) {
           <Icon name="redo" size={30} />
         </button>
         <span class="topbar-gap" />
-        {e?.hasNumbers && (
+        {(e ? e.hasNumbers : !!page?.numbered) && (
           <button type="button" class={`icon-btn toggle ${cbnOn ? 'on' : ''}`} aria-pressed={cbnOn} aria-label={cbnOn ? copy.colouring.cbnOn : copy.colouring.cbnOff} onClick={toggleCbn}>
             <Icon name="numbers" size={34} />
             <span class="tiny" aria-hidden="true">
@@ -426,10 +457,13 @@ export function Colouring({ bookId, pageId, done, cbn }: Props) {
       <main class="stage">
         <canvas
           ref={canvasRef}
-          class="paper"
+          class={`paper ${status === 'ready' ? 'ready' : ''}`}
           role="img"
           aria-label={copy.colouring.canvasLabel(page?.n ?? 0)}
         />
+        {status !== 'ready' && page && (
+          <Preview src={pageAsset(bookId, page, 'thumb-sm.webp')} />
+        )}
         {status === 'loading' && (
           <div class="stage-msg">
             <span class="spinner" aria-hidden="true" />

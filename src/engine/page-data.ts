@@ -22,6 +22,7 @@ export interface PageData {
   ids: Uint16Array;
   regions: Regions;
   overlay: CanvasImageSource;
+  overlayHalf: CanvasImageSource;
 }
 
 /** Decodes regions.bin: "WCR1" | u16 w | u16 h | u16 count | zlib(varint pairs id,len). */
@@ -107,6 +108,8 @@ async function loadImage(url: string): Promise<CanvasImageSource> {
 }
 
 export async function loadPageData(bookId: string, page: PageInfo): Promise<PageData> {
+  const halfP = loadImage(pageAsset(bookId, page, 'overlay-half.png'));
+  halfP.catch(() => {});
   const [bin, json, overlay] = await Promise.all([
     fetch(pageAsset(bookId, page, 'regions.bin')).then((r) => {
       if (!r.ok) throw new Error(`${r.status} regions.bin`);
@@ -118,6 +121,7 @@ export async function loadPageData(bookId: string, page: PageInfo): Promise<Page
     }),
     loadImage(pageAsset(bookId, page, 'overlay.png')),
   ]);
+  const half = await halfP.catch(() => overlay);
   const map = decodeRegionMap(bin);
-  return { w: map.w, h: map.h, ids: map.ids, regions: parseRegions(json, map.count), overlay };
+  return { w: map.w, h: map.h, ids: map.ids, regions: parseRegions(json, map.count), overlay, overlayHalf: half };
 }
