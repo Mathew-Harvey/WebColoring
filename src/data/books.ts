@@ -40,7 +40,9 @@ export interface Book {
   pages: PageInfo[];
 }
 
-const BASE = './books/';
+// The built site lives at the repository root and reads book data from public/.
+declare const __PUBLIC__: string;
+const BASE = `./${__PUBLIC__}books/`;
 
 let indexPromise: Promise<BookIndexEntry[]> | null = null;
 const bookCache = new Map<string, Promise<Book>>();

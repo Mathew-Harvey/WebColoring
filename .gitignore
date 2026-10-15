@@ -1,5 +1,4 @@
 node_modules
-dist
 debug
 *.log
 .DS_Store

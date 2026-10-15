@@ -12,11 +12,15 @@ Every book by Mat Harvey sits on a bookshelf, and each one gently points to its 
 ```sh
 npm install
 npm run dev          # http://localhost:5173
-npm run build        # type-checks, then builds to dist/
-npm run preview      # serves dist/ on http://localhost:4173
+npm run build        # type-checks, then writes the finished site to the repository root
+npm run preview      # serves the built site on http://localhost:4173
 ```
 
 Node 20 or newer.
+
+The source page is `src/index.html`. The files at the repository root named `index.html`, `assets/`,
+`sw.js` and `manifest.webmanifest` are build output: do not edit them by hand. They are committed because
+GitHub Pages publishes the main branch as it is (see Deploying).
 
 ## Adding a book
 
@@ -105,7 +109,8 @@ Points use 0 to 1 page coordinates (x across, y down) and snap to the nearest re
 | `src/audio/sound.ts` | Procedural sounds (Web Audio) and haptics. |
 | `src/data/` | Book manifests, IndexedDB storage, settings and backups. |
 | `src/ui/` | Screens and controls (Preact). |
-| `src/sw-template.js` | Service worker, built into `dist/sw.js` with the precache list. |
+| `src/index.html` | The page the build starts from. |
+| `src/sw-template.js` | Service worker, built into `sw.js` with the precache list. |
 | `scripts/` | `prepare-book.mjs`, `make-icons.mjs`, `inspect-regions.mjs`. |
 | `tests/` | Browser checks (Playwright). |
 
@@ -127,9 +132,19 @@ do not have one.
 
 ## Deploying
 
-`.github/workflows/deploy.yml` builds and publishes `dist/` to GitHub Pages on every push to `main`.
-One-time setup: in the repository settings, open Pages and set Source to "GitHub Actions".
-The site is fully relative, so it works at `https://<user>.github.io/<repo>/` or on any static host.
+GitHub Pages serves the `main` branch from the repository root (Settings, Pages, "Deploy from a branch",
+`main`, `/ (root)`). To publish a change:
+
+```sh
+npm run build
+git add -A && git commit -m "..." && git push
+```
+
+The built site reads book data, icons and other public files from `public/`, so they are published
+without being copied. `.nojekyll` tells Pages to serve the files as they are. CI fails if the committed
+build is out of date, so a forgotten `npm run build` is caught.
+
+The site is fully relative, so the same files also work at any path on any static host.
 
 ## Privacy
 

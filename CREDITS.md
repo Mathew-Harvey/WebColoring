@@ -13,7 +13,7 @@ No audio samples or recordings are used.
 ## Font
 
 Nunito, by the Nunito Project Authors. SIL Open Font License 1.1. Bundled from
-`@fontsource-variable/nunito`; the licence is in `public/fonts/OFL.txt`.
+`@fontsource-variable/nunito`; the licence is in `src/assets/fonts/OFL.txt`.
 
 ## Code libraries
 

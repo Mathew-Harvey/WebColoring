@@ -3,7 +3,6 @@ name: CI
 on:
   pull_request:
   push:
-    branches-ignore: [main]
 
 permissions:
   contents: read
@@ -21,6 +20,15 @@ jobs:
         env:
           PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
       - run: npm run build
+      - name: Built site is committed and up to date
+        run: |
+          # GitHub Pages serves the main branch as committed, so the build must be checked in.
+          git add -A index.html assets sw.js manifest.webmanifest
+          if ! git diff --cached --quiet; then
+            git diff --cached --stat
+            echo "::error::The built site is out of date. Run 'npm run build' and commit the result."
+            exit 1
+          fi
       - name: Content rules
         run: |
           ! grep -rniIw "minecraft\|lego\|cube world" src scripts public/books/index.json public/books/*/book.json README.md CREDITS.md
