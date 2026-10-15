@@ -73,8 +73,9 @@ async function desktop(browser) {
   page.on('request', (r) => requests.push(r.url()));
 
   await page.goto(BASE);
-  await page.waitForSelector('.book-tile');
-  check(`${ENGINE}: home shows the bookshelf`, (await page.locator('.book-tile').count()) === BOOKS);
+  // a.book-tile skips the loading placeholder, which shares the class.
+  await page.waitForSelector('a.book-tile');
+  check(`${ENGINE}: home shows the bookshelf`, (await page.locator('a.book-tile').count()) === BOOKS);
   check(`${ENGINE}: promo card hidden while storeUrl is null`, (await page.locator('.promo').count()) === 0);
 
   // Free colouring on a detailed page (colour by numbers off by default).
@@ -269,14 +270,17 @@ async function desktop(browser) {
     await completeCbn(page, pid);
   }
 
-  // Every page of the dragon book opens, and one can be finished by numbers.
-  const scaly = JSON.parse(fs.readFileSync(new URL('../public/books/scaly-pals/book.json', import.meta.url), 'utf8'));
-  const failed = [];
-  for (const p of scaly.pages) {
-    await openPage(page, p.id, '', 'scaly-pals').catch(() => failed.push(p.id));
+  // Every page of the other books opens, and one page of each can be finished by numbers
+  // (the mandala book also checks a square canvas).
+  for (const [book, pid] of [['scaly-pals', 'page26'], ['still-water-mandalas', 'page20']]) {
+    const info = JSON.parse(fs.readFileSync(new URL(`../public/books/${book}/book.json`, import.meta.url), 'utf8'));
+    const failed = [];
+    for (const p of info.pages) {
+      await openPage(page, p.id, '', book).catch(() => failed.push(p.id));
+    }
+    check(`${book}: all ${info.pages.length} pages open`, failed.length === 0, failed.join(' '));
+    await completeCbn(page, pid, book);
   }
-  check(`scaly-pals: all ${scaly.pages.length} pages open`, failed.length === 0, failed.join(' '));
-  await completeCbn(page, 'page26', 'scaly-pals');
 
   // No third-party requests.
   const origin = new URL(BASE).origin;

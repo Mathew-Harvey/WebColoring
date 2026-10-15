@@ -14,7 +14,8 @@
 // plus public/books/<id>/book.json and an updated public/books/index.json.
 //
 // Optional inputs in books/<id>/:
-//   book.config.json   { subtitle, storeUrl, easy: [...], detailed: [...], cbnPalette }
+//   book.config.json   { subtitle, storeUrl, easy: [...], detailed: [...], cbnPalette,
+//                        canvas: [width, height], closeRadius, speckArea }
 //   cbn-overrides.json per-page colour by numbers overrides (see README)
 
 import fs from 'node:fs';
@@ -22,9 +23,6 @@ import path from 'node:path';
 import zlib from 'node:zlib';
 import crypto from 'node:crypto';
 import sharp from 'sharp';
-
-const W = 2560;
-const H = 1440;
 
 // ---------------------------------------------------------------- args
 
@@ -65,6 +63,10 @@ const overrides = readJson(path.join(bookDir, 'cbn-overrides.json'), {});
 const prevBook = readJson(path.join(outDir, 'book.json'), null);
 
 const title = String(args.title || config.title || prevBook?.title || bookId);
+
+// Every page of a book shares one canvas. 2560x1440 suits landscape art; a book of round
+// or portrait designs can ask for another size (an even number of px each way).
+const [W, H] = config.canvas ?? [2560, 1440];
 
 // ---------------------------------------------------------------- palette
 
@@ -393,8 +395,9 @@ function hash32(n) {
 // ---------------------------------------------------------------- page processing
 
 const THRESHOLD = 168; // grey below this is line
-const CLOSE_RADIUS = 2; // closes gaps up to ~4 px at 2560 (2 px at the source size)
-const SPECK_AREA = 40; // white specks smaller than this become line
+// Fine, clean line art (mandalas) keeps more detail with a smaller closeRadius and speckArea.
+const CLOSE_RADIUS = config.closeRadius ?? 2; // closes gaps up to ~4 px at 2560 (2 px at the source size)
+const SPECK_AREA = config.speckArea ?? 40; // white specks smaller than this become line
 const LABEL_MIN_RADIUS = 12; // a number needs this much room (px at 2560)
 const BRIDGE = { line: 14, border: 44, cone: 45 }; // max bridge lengths (px at 2560)
 
@@ -664,11 +667,11 @@ async function processPage(file, pageNo, difficulty) {
   const thumbRgb = Buffer.alloc(W * H);
   for (let i = 0; i < W * H; i++) thumbRgb[i] = 255 - overlayBuf[i * 2 + 1];
   await sharp(thumbRgb, { raw: { width: W, height: H, channels: 1 } })
-    .resize(480, 270, { kernel: 'lanczos3' })
+    .resize(480, Math.round((480 * H) / W), { kernel: 'lanczos3' })
     .webp({ quality: 82 })
     .toFile(path.join(pageDir, 'thumb.webp'));
   await sharp(thumbRgb, { raw: { width: W, height: H, channels: 1 } })
-    .resize(384, 216, { kernel: 'lanczos3' })
+    .resize(384, Math.round((384 * H) / W), { kernel: 'lanczos3' })
     .webp({ quality: 78 })
     .toFile(path.join(pageDir, 'thumb-sm.webp'));
 

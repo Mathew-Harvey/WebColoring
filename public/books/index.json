@@ -17,6 +17,15 @@
    "pageCount": 30,
    "storeUrl": null,
    "order": 1
+  },
+  {
+   "id": "still-water-mandalas",
+   "title": "Still Water Mandalas",
+   "subtitle": "Mandala Coloring Book for Adults: 30 Detailed Designs for Relaxation",
+   "cover": "still-water-mandalas/cover-small.webp",
+   "pageCount": 30,
+   "storeUrl": null,
+   "order": 2
   }
  ]
 }

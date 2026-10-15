@@ -1,0 +1,542 @@
+{
+ "id": "still-water-mandalas",
+ "title": "Still Water Mandalas",
+ "subtitle": "Mandala Coloring Book for Adults: 30 Detailed Designs for Relaxation",
+ "storeUrl": null,
+ "cover": "cover.webp",
+ "coverSmall": "cover-small.webp",
+ "width": 2400,
+ "height": 2400,
+ "cbnPalette": [
+  {
+   "key": "sky",
+   "hex": "#7cc8f8"
+  },
+  {
+   "key": "grass",
+   "hex": "#7ccf5e"
+  },
+  {
+   "key": "leaf",
+   "hex": "#2f9e5a"
+  },
+  {
+   "key": "yellow",
+   "hex": "#ffd83d"
+  },
+  {
+   "key": "orange",
+   "hex": "#ff9a3c"
+  },
+  {
+   "key": "red",
+   "hex": "#ef5a52"
+  },
+  {
+   "key": "pink",
+   "hex": "#ff8fc8"
+  },
+  {
+   "key": "purple",
+   "hex": "#a57de0"
+  },
+  {
+   "key": "brown",
+   "hex": "#a8714a"
+  },
+  {
+   "key": "sand",
+   "hex": "#f3cf98"
+  },
+  {
+   "key": "grey",
+   "hex": "#a9b2bd"
+  },
+  {
+   "key": "blue",
+   "hex": "#3e7fe0"
+  }
+ ],
+ "pages": [
+  {
+   "id": "page01",
+   "n": 1,
+   "title": null,
+   "difficulty": "detailed",
+   "cbn": false,
+   "regionCount": 1943,
+   "numbered": 53,
+   "artRect": [
+    0,
+    80,
+    2400,
+    2240
+   ],
+   "v": "fbbd124279"
+  },
+  {
+   "id": "page02",
+   "n": 2,
+   "title": null,
+   "difficulty": "detailed",
+   "cbn": false,
+   "regionCount": 359,
+   "numbered": 123,
+   "artRect": [
+    7,
+    0,
+    2386,
+    2400
+   ],
+   "v": "095ac28930"
+  },
+  {
+   "id": "page03",
+   "n": 3,
+   "title": null,
+   "difficulty": "detailed",
+   "cbn": false,
+   "regionCount": 986,
+   "numbered": 79,
+   "artRect": [
+    0,
+    88,
+    2400,
+    2224
+   ],
+   "v": "59ed767e31"
+  },
+  {
+   "id": "page04",
+   "n": 4,
+   "title": null,
+   "difficulty": "detailed",
+   "cbn": false,
+   "regionCount": 752,
+   "numbered": 64,
+   "artRect": [
+    341,
+    0,
+    1717,
+    2400
+   ],
+   "v": "4158e95993"
+  },
+  {
+   "id": "page05",
+   "n": 5,
+   "title": null,
+   "difficulty": "detailed",
+   "cbn": false,
+   "regionCount": 666,
+   "numbered": 48,
+   "artRect": [
+    289,
+    0,
+    1822,
+    2400
+   ],
+   "v": "83c35968ee"
+  },
+  {
+   "id": "page06",
+   "n": 6,
+   "title": null,
+   "difficulty": "detailed",
+   "cbn": false,
+   "regionCount": 1843,
+   "numbered": 45,
+   "artRect": [
+    0,
+    152,
+    2400,
+    2095
+   ],
+   "v": "b5a0ac737c"
+  },
+  {
+   "id": "page07",
+   "n": 7,
+   "title": null,
+   "difficulty": "detailed",
+   "cbn": false,
+   "regionCount": 381,
+   "numbered": 87,
+   "artRect": [
+    0,
+    25,
+    2400,
+    2350
+   ],
+   "v": "121d8c2c72"
+  },
+  {
+   "id": "page08",
+   "n": 8,
+   "title": null,
+   "difficulty": "detailed",
+   "cbn": false,
+   "regionCount": 975,
+   "numbered": 80,
+   "artRect": [
+    0,
+    62,
+    2400,
+    2275
+   ],
+   "v": "ce8af93257"
+  },
+  {
+   "id": "page09",
+   "n": 9,
+   "title": null,
+   "difficulty": "detailed",
+   "cbn": false,
+   "regionCount": 862,
+   "numbered": 42,
+   "artRect": [
+    0,
+    82,
+    2400,
+    2236
+   ],
+   "v": "528cf64039"
+  },
+  {
+   "id": "page10",
+   "n": 10,
+   "title": null,
+   "difficulty": "detailed",
+   "cbn": false,
+   "regionCount": 1560,
+   "numbered": 6,
+   "artRect": [
+    501,
+    0,
+    1397,
+    2400
+   ],
+   "v": "a34de00ba9"
+  },
+  {
+   "id": "page11",
+   "n": 11,
+   "title": null,
+   "difficulty": "detailed",
+   "cbn": false,
+   "regionCount": 3063,
+   "numbered": 16,
+   "artRect": [
+    0,
+    489,
+    2400,
+    1422
+   ],
+   "v": "1f993cf2fb"
+  },
+  {
+   "id": "page12",
+   "n": 12,
+   "title": null,
+   "difficulty": "detailed",
+   "cbn": false,
+   "regionCount": 2324,
+   "numbered": 4,
+   "artRect": [
+    0,
+    478,
+    2400,
+    1443
+   ],
+   "v": "119150ab6e"
+  },
+  {
+   "id": "page13",
+   "n": 13,
+   "title": null,
+   "difficulty": "detailed",
+   "cbn": false,
+   "regionCount": 588,
+   "numbered": 104,
+   "artRect": [
+    0,
+    187,
+    2400,
+    2025
+   ],
+   "v": "8c95331f1a"
+  },
+  {
+   "id": "page14",
+   "n": 14,
+   "title": null,
+   "difficulty": "detailed",
+   "cbn": false,
+   "regionCount": 544,
+   "numbered": 77,
+   "artRect": [
+    7,
+    0,
+    2385,
+    2400
+   ],
+   "v": "6b2834a575"
+  },
+  {
+   "id": "page15",
+   "n": 15,
+   "title": null,
+   "difficulty": "detailed",
+   "cbn": false,
+   "regionCount": 1575,
+   "numbered": 1,
+   "artRect": [
+    354,
+    0,
+    1691,
+    2400
+   ],
+   "v": "fe73a3498b"
+  },
+  {
+   "id": "page16",
+   "n": 16,
+   "title": null,
+   "difficulty": "detailed",
+   "cbn": false,
+   "regionCount": 1103,
+   "numbered": 41,
+   "artRect": [
+    0,
+    15,
+    2400,
+    2370
+   ],
+   "v": "1ae1957c80"
+  },
+  {
+   "id": "page17",
+   "n": 17,
+   "title": null,
+   "difficulty": "detailed",
+   "cbn": false,
+   "regionCount": 1275,
+   "numbered": 72,
+   "artRect": [
+    0,
+    5,
+    2400,
+    2389
+   ],
+   "v": "f70f6c4b63"
+  },
+  {
+   "id": "page18",
+   "n": 18,
+   "title": null,
+   "difficulty": "detailed",
+   "cbn": false,
+   "regionCount": 1517,
+   "numbered": 18,
+   "artRect": [
+    0,
+    414,
+    2400,
+    1572
+   ],
+   "v": "3786fe8d6f"
+  },
+  {
+   "id": "page19",
+   "n": 19,
+   "title": null,
+   "difficulty": "detailed",
+   "cbn": false,
+   "regionCount": 2759,
+   "numbered": 15,
+   "artRect": [
+    0,
+    395,
+    2400,
+    1609
+   ],
+   "v": "48ee0ee75b"
+  },
+  {
+   "id": "page20",
+   "n": 20,
+   "title": null,
+   "difficulty": "detailed",
+   "cbn": false,
+   "regionCount": 133,
+   "numbered": 93,
+   "artRect": [
+    0,
+    9,
+    2400,
+    2382
+   ],
+   "v": "48baaeed42"
+  },
+  {
+   "id": "page21",
+   "n": 21,
+   "title": null,
+   "difficulty": "detailed",
+   "cbn": false,
+   "regionCount": 1207,
+   "numbered": 73,
+   "artRect": [
+    0,
+    67,
+    2400,
+    2265
+   ],
+   "v": "e5c2f3aea0"
+  },
+  {
+   "id": "page22",
+   "n": 22,
+   "title": null,
+   "difficulty": "detailed",
+   "cbn": false,
+   "regionCount": 981,
+   "numbered": 42,
+   "artRect": [
+    0,
+    471,
+    2400,
+    1457
+   ],
+   "v": "583c755e5f"
+  },
+  {
+   "id": "page23",
+   "n": 23,
+   "title": null,
+   "difficulty": "detailed",
+   "cbn": false,
+   "regionCount": 429,
+   "numbered": 37,
+   "artRect": [
+    0,
+    5,
+    2400,
+    2390
+   ],
+   "v": "7418202cac"
+  },
+  {
+   "id": "page24",
+   "n": 24,
+   "title": null,
+   "difficulty": "detailed",
+   "cbn": false,
+   "regionCount": 747,
+   "numbered": 89,
+   "artRect": [
+    0,
+    29,
+    2400,
+    2342
+   ],
+   "v": "5145300e8d"
+  },
+  {
+   "id": "page25",
+   "n": 25,
+   "title": null,
+   "difficulty": "detailed",
+   "cbn": false,
+   "regionCount": 1580,
+   "numbered": 16,
+   "artRect": [
+    0,
+    425,
+    2400,
+    1550
+   ],
+   "v": "926b049f1a"
+  },
+  {
+   "id": "page26",
+   "n": 26,
+   "title": null,
+   "difficulty": "detailed",
+   "cbn": false,
+   "regionCount": 618,
+   "numbered": 81,
+   "artRect": [
+    0,
+    13,
+    2400,
+    2374
+   ],
+   "v": "2a639aefa0"
+  },
+  {
+   "id": "page27",
+   "n": 27,
+   "title": null,
+   "difficulty": "detailed",
+   "cbn": false,
+   "regionCount": 657,
+   "numbered": 84,
+   "artRect": [
+    0,
+    8,
+    2400,
+    2384
+   ],
+   "v": "8490bbb920"
+  },
+  {
+   "id": "page28",
+   "n": 28,
+   "title": null,
+   "difficulty": "detailed",
+   "cbn": false,
+   "regionCount": 649,
+   "numbered": 84,
+   "artRect": [
+    0,
+    61,
+    2400,
+    2278
+   ],
+   "v": "91f82df52a"
+  },
+  {
+   "id": "page29",
+   "n": 29,
+   "title": null,
+   "difficulty": "detailed",
+   "cbn": false,
+   "regionCount": 2906,
+   "numbered": 58,
+   "artRect": [
+    0,
+    42,
+    2400,
+    2316
+   ],
+   "v": "80d5261412"
+  },
+  {
+   "id": "page30",
+   "n": 30,
+   "title": null,
+   "difficulty": "detailed",
+   "cbn": false,
+   "regionCount": 820,
+   "numbered": 69,
+   "artRect": [
+    0,
+    96,
+    2400,
+    2208
+   ],
+   "v": "f1de875588"
+  }
+ ]
+}

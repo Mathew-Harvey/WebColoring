@@ -24,8 +24,8 @@ GitHub Pages publishes the main branch as it is (see Deploying).
 
 ## Adding a book
 
-Put the line art in a folder: `page01.jpg` to `pageNN.jpg` (any suffix is fine, for example
-`page22-cat-sofa.jpg`) plus an optional `cover.jpg`. Then run:
+Put the line art in a folder: `page01.jpg` to `pageNN.jpg` (PNG works too, and any suffix is fine, for
+example `page22-cat-sofa.jpg`) plus an optional `cover.jpg` (16:9, shown on the shelf). Then run:
 
 ```sh
 npm run prepare-book -- --src <folder> --id <book-id> --title "<title>"
@@ -74,6 +74,14 @@ leaks easy to spot.
 
 Pages listed as `easy` open with colour by numbers on. `detailed` pages use bigger number regions.
 Without lists, busy pages are marked detailed automatically.
+
+Optional settings for art that is not landscape scenes:
+
+| Key | Meaning |
+| --- | --- |
+| `canvas` | Page size in px, default `[2560, 1440]`. Round or portrait designs suit a square canvas such as `[2400, 2400]`, which keeps fine detail that a 1440 px tall page would lose. Picker tiles follow the page shape. |
+| `closeRadius` | How far line gaps are closed, default `2`. |
+| `speckArea` | White specks smaller than this (px) become line, default `40`. Lower it to keep tiny cells in fine pattern work. |
 
 While `storeUrl` is `null`, every "Get the paperback" card is hidden. To add the link later, set it in
 `book.config.json` and run `prepare-book` again (or edit `storeUrl` in `public/books/<id>/book.json` and

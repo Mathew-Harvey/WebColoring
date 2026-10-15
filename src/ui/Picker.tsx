@@ -40,6 +40,9 @@ export function Picker({ bookId }: { bookId: string }) {
     setLocal(`filter.${bookId}`, f);
   };
 
+  // Tiles take the shape of the book's pages (most are 16:9, round designs are square).
+  const pageW = book?.width ?? 2560;
+  const pageH = book?.height ?? 1440;
   const pages = (book?.pages ?? []).filter((p) => {
     if (filter === 'easy') return p.difficulty === 'easy';
     if (filter === 'detailed') return p.difficulty === 'detailed';
@@ -101,7 +104,8 @@ export function Picker({ bookId }: { bookId: string }) {
                     sizes="(max-width: 520px) 46vw, 240px"
                     alt=""
                     width={480}
-                    height={270}
+                    height={Math.round((480 * pageH) / pageW)}
+                    style={{ aspectRatio: `${pageW} / ${pageH}` }}
                     loading={i < 6 ? 'eager' : 'lazy'}
                     fetchpriority={i < 2 ? 'high' : undefined}
                     decoding="async"

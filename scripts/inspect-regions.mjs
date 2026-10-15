@@ -21,5 +21,5 @@ for (let i = 0; i < w * h; i++) {
   if (!id) { rgb[i*3]=rgb[i*3+1]=rgb[i*3+2]=0; continue; }
   const c = cmap.get(id); if (c) { rgb[i*3]=c[0]; rgb[i*3+1]=c[1]; rgb[i*3+2]=c[2]; }
 }
-await sharp(rgb, { raw: { width: w, height: h, channels: 3 } }).resize(1280, 720).png().toFile(out);
+await sharp(rgb, { raw: { width: w, height: h, channels: 3 } }).resize(1280).png().toFile(out);
 console.log(order.map(([a, id]) => `${id}:${(a / (w*h) * 100).toFixed(1)}%`).join(' '));

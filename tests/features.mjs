@@ -110,6 +110,8 @@ check('backup: restores from the file', /Restored [1-9]/.test(restored), restore
 // Hold-to-open the grown-ups area.
 await page.goto(BASE);
 await page.waitForSelector('.hold');
+// With several books the button can sit below the fold.
+await page.locator('.home-foot .hold').scrollIntoViewIfNeeded();
 const box = await page.locator('.home-foot .hold').boundingBox();
 await page.mouse.move(box.x + 20, box.y + 20);
 await page.mouse.down();
