@@ -1,11 +1,13 @@
 // End-to-end checks for WebColoring.
 //   npm run build && npx vite preview --port 4173 &
 //   node tests/e2e.mjs [baseUrl]
-// Runs on Chromium desktop and Chrome Android emulation (touch).
-import { chromium, devices } from 'playwright';
+// Runs on Chromium desktop and Chrome Android emulation (touch), or with
+// BROWSER=webkit on WebKit desktop and iPhone emulation.
+import { chromium, webkit, devices } from 'playwright';
 import fs from 'node:fs';
 
 const BASE = (process.argv[2] || 'http://localhost:4173/').replace(/\/?$/, '/');
+const ENGINE = process.env.BROWSER === 'webkit' ? 'webkit' : 'chromium';
 const SHOTS = 'debug/e2e';
 fs.mkdirSync(SHOTS, { recursive: true });
 
@@ -21,6 +23,7 @@ const TOOL_LABELS = {
 };
 
 async function openPage(page, pageId, query = '') {
+  await page.evaluate(() => (window.__wc = null)).catch(() => {});
   await page.goto(`${BASE}?e2e#/book/blocky-builders/${pageId}${query}`);
   await page.waitForFunction(() => window.__wc && !document.querySelector('.stage-msg'), null, { timeout: 30000 });
   await page.waitForTimeout(300);
@@ -70,13 +73,13 @@ async function desktop(browser) {
 
   await page.goto(BASE);
   await page.waitForSelector('.book-tile');
-  check('desktop: home shows the bookshelf', (await page.locator('.book-tile').count()) === 1);
-  check('desktop: promo card hidden while storeUrl is null', (await page.locator('.promo').count()) === 0);
+  check(`${ENGINE}: home shows the bookshelf`, (await page.locator('.book-tile').count()) === 1);
+  check(`${ENGINE}: promo card hidden while storeUrl is null`, (await page.locator('.promo').count()) === 0);
 
   // Free colouring on a detailed page (colour by numbers off by default).
   await openPage(page, 'page05');
   const cbnOff = await page.evaluate(() => !window.__wc.cbnEnabled);
-  check('desktop: detailed page opens with colour by numbers off', cbnOff);
+  check(`${ENGINE}: detailed page opens with colour by numbers off`, cbnOff);
 
   const regions = await bigRegions(page, 14);
   // Fill.
@@ -268,8 +271,8 @@ async function desktop(browser) {
   // No third-party requests.
   const origin = new URL(BASE).origin;
   const foreign = requests.filter((u) => !u.startsWith(origin) && !u.startsWith('blob:') && !u.startsWith('data:'));
-  check('desktop: no requests to other sites', foreign.length === 0, foreign.slice(0, 3).join(' '));
-  check('desktop: no console errors', errors.length === 0, errors.slice(0, 3).join(' | '));
+  check(`${ENGINE}: no requests to other sites`, foreign.length === 0, foreign.slice(0, 3).join(' '));
+  check(`${ENGINE}: no console errors`, errors.length === 0, errors.slice(0, 3).join(' | '));
   await ctx.close();
 }
 
@@ -323,14 +326,36 @@ async function completeCbn(page, pid) {
 
 // ------------------------------------------------------------------ Android emulation (touch)
 
+/** Touch input: real touch events through CDP on Chromium, pointer events on WebKit. */
+async function touchDriver(ctx, page) {
+  if (ENGINE === 'chromium') {
+    const cdp = await ctx.newCDPSession(page);
+    return (type, points) => cdp.send('Input.dispatchTouchEvent', { type, touchPoints: points.map(([x, y], id) => ({ x, y, id })) });
+  }
+  let down = [];
+  return (type, points) =>
+    page.evaluate(
+      ([type, points, prev]) => {
+        const c = document.querySelector('.paper');
+        const fire = (name, [x, y], id) =>
+          c.dispatchEvent(new PointerEvent(name, { pointerId: 20 + id, pointerType: 'touch', isPrimary: id === 0, clientX: x, clientY: y, bubbles: true, cancelable: true, pressure: 0.5, buttons: name === 'pointerup' ? 0 : 1 }));
+        if (type === 'touchStart') points.forEach((p, id) => fire('pointerdown', p, id));
+        else if (type === 'touchMove') points.forEach((p, id) => fire('pointermove', p, id));
+        else prev.forEach((p, id) => fire('pointerup', p, id));
+      },
+      [type, points, down],
+    ).then(() => {
+      down = type === 'touchEnd' ? [] : points;
+    });
+}
+
 async function android(browser) {
-  const ctx = await browser.newContext({ ...devices['Pixel 7'] });
+  const ctx = await browser.newContext({ ...devices[ENGINE === 'webkit' ? 'iPhone 14' : 'Pixel 7'] });
   const page = await ctx.newPage();
   const errors = [];
   page.on('pageerror', (e) => errors.push(e.message));
   await openPage(page, 'page05');
-  const cdp = await ctx.newCDPSession(page);
-  const touch = (type, points) => cdp.send('Input.dispatchTouchEvent', { type, touchPoints: points.map(([x, y], id) => ({ x, y, id })) });
+  const touch = await touchDriver(ctx, page);
 
   const regions = await bigRegions(page, 6);
   // One-finger draw.
@@ -343,7 +368,7 @@ async function android(browser) {
   await touch('touchEnd', []);
   await page.waitForTimeout(100);
   const c = await coverage(page, r.id);
-  check('android: one-finger drawing works', c.inside > 50 && c.outside === 0, `inside=${c.inside}`);
+  check(`${ENGINE === 'webkit' ? 'iphone' : 'android'}: one-finger drawing works`, c.inside > 50 && c.outside === 0, `inside=${c.inside}`);
 
   // Pinch zoom.
   const box = await page.locator('.paper').boundingBox();
@@ -356,8 +381,8 @@ async function android(browser) {
   await touch('touchEnd', []);
   const s1 = await page.evaluate(() => window.__wc.view.scale);
   const h1 = await page.evaluate(() => window.__wc.historySize);
-  check('android: pinch zooms in', s1 > s0 * 2.5, `${s0.toFixed(3)} -> ${s1.toFixed(3)}`);
-  check('android: pinch does not leave a stroke', h1 === h0, `${h0}->${h1}`);
+  check(`${ENGINE === 'webkit' ? 'iphone' : 'android'}: pinch zooms in`, s1 > s0 * 2.5, `${s0.toFixed(3)} -> ${s1.toFixed(3)}`);
+  check(`${ENGINE === 'webkit' ? 'iphone' : 'android'}: pinch does not leave a stroke`, h1 === h0, `${h0}->${h1}`);
 
   // Two-finger pan.
   const o0 = await page.evaluate(() => window.__wc.view.ox);
@@ -365,7 +390,7 @@ async function android(browser) {
   for (let i = 1; i <= 10; i++) await touch('touchMove', [[cx - 40 - i * 8, cy], [cx + 40 - i * 8, cy]]);
   await touch('touchEnd', []);
   const o1 = await page.evaluate(() => window.__wc.view.ox);
-  check('android: two-finger pan moves the page', o1 < o0 - 40, `${Math.round(o0)} -> ${Math.round(o1)}`);
+  check(`${ENGINE === 'webkit' ? 'iphone' : 'android'}: two-finger pan moves the page`, o1 < o0 - 40, `${Math.round(o0)} -> ${Math.round(o1)}`);
 
   // Double tap to fit.
   await touch('touchStart', [[cx, cy]]);
@@ -374,7 +399,7 @@ async function android(browser) {
   await touch('touchStart', [[cx, cy]]);
   await touch('touchEnd', []);
   await page.waitForTimeout(450);
-  check('android: double tap fits the page', await page.evaluate(() => window.__wc.isFit));
+  check(`${ENGINE === 'webkit' ? 'iphone' : 'android'}: double tap fits the page`, await page.evaluate(() => window.__wc.isFit));
 
   // Tap to fill.
   await page.click('.rail-tools button[aria-label="Fill"]');
@@ -384,7 +409,7 @@ async function android(browser) {
   await page.touchscreen.tap(tx, ty);
   await page.waitForTimeout(600);
   const c2 = await coverage(page, r2.id);
-  check('android: tap to fill works', c2.inside > 1000 && c2.outside === c1.outside, `inside=${c2.inside}`);
+  check(`${ENGINE === 'webkit' ? 'iphone' : 'android'}: tap to fill works`, c2.inside > 1000 && c2.outside === c1.outside, `inside=${c2.inside}`);
   await page.screenshot({ path: `${SHOTS}/android.png` });
 
   // Colour by numbers by touch on page 13.
@@ -397,13 +422,14 @@ async function android(browser) {
     await page.waitForTimeout(350);
   }
   const done = await page.evaluate(() => window.__wc.cbnProgress().done);
-  check('android: colour by numbers by touch', done >= 3, `${done}`);
+  check(`${ENGINE === 'webkit' ? 'iphone' : 'android'}: colour by numbers by touch`, done >= 3, `${done}`);
   await page.screenshot({ path: `${SHOTS}/android-cbn.png` });
-  check('android: no page errors', errors.length === 0, errors.join(' | '));
+  check(`${ENGINE === 'webkit' ? 'iphone' : 'android'}: no page errors`, errors.length === 0, errors.join(' | '));
   await ctx.close();
 }
 
-const browser = await chromium.launch();
+const browser = await (ENGINE === 'webkit' ? webkit : chromium).launch();
+console.log(`Browser: ${ENGINE} ${browser.version()}`);
 try {
   await desktop(browser);
   await android(browser);

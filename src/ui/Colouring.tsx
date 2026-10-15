@@ -421,10 +421,10 @@ export function Colouring({ bookId, pageId, done, cbn }: Props) {
         </button>
         {side && (
           <>
-            <button type="button" class="icon-btn" aria-label={copy.colouring.zoomOut} onClick={() => e?.zoomBy(0.8)}>
+            <button type="button" class="icon-btn zoom-btn" aria-label={copy.colouring.zoomOut} onClick={() => e?.zoomBy(0.8)}>
               <Icon name="zoomOut" size={30} />
             </button>
-            <button type="button" class="icon-btn" aria-label={copy.colouring.zoomIn} onClick={() => e?.zoomBy(1.25)}>
+            <button type="button" class="icon-btn zoom-btn" aria-label={copy.colouring.zoomIn} onClick={() => e?.zoomBy(1.25)}>
               <Icon name="zoomIn" size={30} />
             </button>
           </>

@@ -453,6 +453,12 @@ a {
   flex: none;
 }
 
+.chip .tiny {
+  white-space: normal;
+  text-align: center;
+  max-width: 84px;
+}
+
 .chip.on {
   background: var(--sel);
   box-shadow: 0 3px 0 #d89c1c, 0 8px 18px rgba(216, 156, 28, 0.3);
@@ -599,6 +605,16 @@ a {
 .icon-btn .tiny {
   font-size: 11px;
   margin-top: -2px;
+}
+
+.zoom-btn {
+  display: none;
+}
+
+@media (min-width: 1000px) {
+  .zoom-btn {
+    display: inline-flex;
+  }
 }
 
 .icon-btn.toggle.on {

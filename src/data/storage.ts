@@ -13,6 +13,19 @@ export interface PageMeta {
   updated: number;
 }
 
+// Images are stored as ArrayBuffers, not Blobs: Safari in private mode cannot store Blobs.
+interface Stored {
+  type: string;
+  buf: ArrayBuffer;
+}
+
+type StoredMeta = Omit<PageMeta, 'thumb'> & { thumb: Stored | null };
+
+const toStored = async (b: Blob | null): Promise<Stored | null> => (b ? { type: b.type, buf: await b.arrayBuffer() } : null);
+const fromStored = (s: Stored | Blob | null | undefined): Blob | null =>
+  !s ? null : s instanceof Blob ? s : new Blob([s.buf], { type: s.type });
+const fromStoredMeta = (m: StoredMeta): PageMeta => ({ ...m, thumb: fromStored(m.thumb) });
+
 const DB_NAME = 'webcoloring';
 const DB_VERSION = 1;
 
@@ -55,7 +68,8 @@ export const artKey = (bookId: string, pageId: string) => `${bookId}/${pageId}`;
 
 export async function getMeta(key: string): Promise<PageMeta | undefined> {
   try {
-    return await tx<PageMeta | undefined>(['pages'], 'readonly', (t) => t.objectStore('pages').get(key));
+    const m = await tx<StoredMeta | undefined>(['pages'], 'readonly', (t) => t.objectStore('pages').get(key));
+    return m ? fromStoredMeta(m) : undefined;
   } catch {
     return undefined;
   }
@@ -63,7 +77,8 @@ export async function getMeta(key: string): Promise<PageMeta | undefined> {
 
 export async function getPaint(key: string): Promise<Blob | undefined> {
   try {
-    return await tx<Blob | undefined>(['paint'], 'readonly', (t) => t.objectStore('paint').get(key));
+    const s = await tx<Stored | undefined>(['paint'], 'readonly', (t) => t.objectStore('paint').get(key));
+    return fromStored(s) ?? undefined;
   } catch {
     return undefined;
   }
@@ -71,17 +86,20 @@ export async function getPaint(key: string): Promise<Blob | undefined> {
 
 export async function listMeta(bookId?: string): Promise<PageMeta[]> {
   try {
-    const all = await tx<PageMeta[]>(['pages'], 'readonly', (t) => t.objectStore('pages').getAll());
-    return bookId ? all.filter((m) => m.bookId === bookId) : all;
+    const all = await tx<StoredMeta[]>(['pages'], 'readonly', (t) => t.objectStore('pages').getAll());
+    return (bookId ? all.filter((m) => m.bookId === bookId) : all).map(fromStoredMeta);
   } catch {
     return [];
   }
 }
 
 export async function saveArt(meta: PageMeta, paint: Blob | null): Promise<void> {
+  // Read the images first: a transaction closes if it waits on anything else.
+  const [thumb, paintData] = await Promise.all([toStored(meta.thumb), toStored(paint)]);
+  const stored: StoredMeta = { ...meta, thumb };
   await tx(['pages', 'paint'], 'readwrite', (t) => {
-    t.objectStore('pages').put(meta);
-    if (paint) t.objectStore('paint').put(paint, meta.key);
+    t.objectStore('pages').put(stored);
+    if (paintData) t.objectStore('paint').put(paintData, meta.key);
     else t.objectStore('paint').delete(meta.key);
   });
 }
