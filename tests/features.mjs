@@ -145,22 +145,35 @@ await page2.route('**/books/blocky-builders/book.json', async (route) => {
   route.fulfill({ response: res, json });
 });
 await page2.goto(`${BASE}?store#/`);
-await page2.waitForSelector('.promo');
-check('store: home shows a "Get the real book" card per book', (await page2.locator('.promo-home').count()) === BOOKS);
-await page2.screenshot({ path: `${OUT}/home-store.png` });
-const hold = await page2.locator('.promo-home .hold').first().boundingBox();
+await page2.waitForSelector('.paper-banner');
+// The shelf built into the page draws first; the (faked) index.json then brings the store links.
+const onSale = await page2.waitForFunction(() => !document.querySelector('.paper-banner .soon-pill'), null, { timeout: 5000 }).then(() => true, () => false);
+check('store: home banner drops "Coming soon" once books are on sale', onSale);
+await page2.goto(`${BASE}?store#/paper`);
+await page2.waitForSelector('.paper-card .hold-buy');
+check('store: paper books page has a buy button per book', (await page2.locator('.paper-card .hold-buy').count()) === BOOKS);
+check('store: no "Coming soon" sticker once on sale', (await page2.locator('.soon-ribbon').count()) === 0);
+await page2.screenshot({ path: `${OUT}/paper-store.png`, fullPage: true });
+const hold = await page2.locator('.paper-card .hold-buy').first().boundingBox();
 await page2.mouse.move(hold.x + 20, hold.y + 20);
+await page2.mouse.down();
+await page2.waitForTimeout(300);
+await page2.mouse.up();
+check('store: a quick tap does not open the store', (await page2.evaluate(() => window.__opened ?? null)) === null);
 await page2.mouse.down();
 await page2.waitForTimeout(1800);
 await page2.mouse.up();
 check('store: holding the button opens the store link', (await page2.evaluate(() => window.__opened)) === STORE);
 await page2.goto(`${BASE}?store#/book/blocky-builders`);
-await page2.waitForSelector('.promo-picker');
-check('store: picker shows the paperback card', true);
+await page2.waitForSelector('.paper-picker .hold-buy');
+check('store: picker shows the paperback card with a buy button', true);
 await page2.goto(`${BASE}?store&e2e#/book/blocky-builders/page05/done`);
-await page2.waitForSelector('.finished .promo-finished');
-check('store: finished screen shows the gentle link', true);
+await page2.waitForSelector('.finished .paper-finished');
+check('store: finished screen links to the paper book', (await page2.getAttribute('.paper-finished', 'href')) === '#/paper/blocky-builders');
 await page2.screenshot({ path: `${OUT}/finished-store.png` });
+await page2.goto(`${BASE}?store#/grown-ups`);
+await page2.waitForSelector('.gu-paper .btn-buy');
+check('store: grown-ups area links straight to the store', (await page2.locator(`.gu-paper a.btn-buy[href="${STORE}"]`).count()) === BOOKS);
 
 // Print layout fits one landscape A4 and US Letter page.
 await page.goto(`${BASE}?e2e#/book/blocky-builders/page05`);

@@ -76,7 +76,17 @@ async function desktop(browser) {
   // a.book-tile skips the loading placeholder, which shares the class.
   await page.waitForSelector('a.book-tile');
   check(`${ENGINE}: home shows the bookshelf`, (await page.locator('a.book-tile').count()) === BOOKS);
-  check(`${ENGINE}: promo card hidden while storeUrl is null`, (await page.locator('.promo').count()) === 0);
+  // No store links yet: the paper books show "Coming soon" and nothing can be bought.
+  await page.waitForSelector('.paper-banner');
+  check(`${ENGINE}: home offers the paper books, marked coming soon`, (await page.locator('.paper-banner .soon-pill').count()) === 1);
+  await page.click('.paper-banner .btn-paper');
+  await page.waitForSelector('.paper-card');
+  check(
+    `${ENGINE}: paper books page shows every book as coming soon`,
+    (await page.locator('.paper-card').count()) === BOOKS &&
+      (await page.locator('.paper-card .soon-ribbon').count()) === BOOKS &&
+      (await page.locator('.hold-buy, .btn-buy').count()) === 0,
+  );
 
   // Free colouring on a detailed page (colour by numbers off by default).
   await openPage(page, 'page05');

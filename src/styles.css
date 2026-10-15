@@ -315,45 +315,419 @@ a {
   padding-top: 32px;
 }
 
-/* ------------------------------------------------------------------ promo */
+/* ------------------------------------------------------------------ paper books */
 
-.promo {
+/* Faint ruled lines, like a page from an exercise book. */
+.paper-banner,
+.paper-hero,
+.paper-picker {
+  background:
+    repeating-linear-gradient(180deg, transparent 0 31px, rgba(124, 200, 248, 0.16) 31px 32px),
+    #fffdf7;
+  box-shadow: var(--shadow);
+}
+
+.paperback {
+  position: relative;
+  display: block;
+  flex: none;
+  border-radius: 3px 9px 9px 3px;
+  background: #fff;
+  /* Page edges, then the shadow on the table. */
+  box-shadow:
+    1px 1px 0 #efe6d8,
+    3px 3px 0 #fff,
+    4px 4px 0 #e2d7c4,
+    0 14px 26px rgba(61, 53, 80, 0.22);
+}
+
+.paperback img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: inherit;
+}
+
+/* The fold along the spine. */
+.paperback::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.22) 0, rgba(255, 255, 255, 0.35) 2.2%, rgba(0, 0, 0, 0.08) 4.5%, transparent 9%);
+  pointer-events: none;
+}
+
+.paperback-art {
+  border-radius: 12px;
+}
+
+.paperback-art::after {
+  display: none;
+}
+
+.soon-ribbon {
+  position: absolute;
+  bottom: 14px;
+  right: -10px;
+  z-index: 1;
+  padding: 4px 10px;
+  border-radius: 8px 0 8px 8px;
+  background: #ffd83d;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 900;
+  white-space: nowrap;
+  box-shadow: 0 3px 0 rgba(166, 120, 0, 0.35);
+  transform: rotate(-4deg);
+}
+
+.soon-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: #fff1d6;
+  border: 2px solid rgba(255, 154, 60, 0.5);
+  color: var(--orange-ink);
+  font-size: 14px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.crayon {
+  position: absolute;
+  display: block;
+  height: auto;
+  filter: drop-shadow(0 6px 6px rgba(61, 53, 80, 0.25));
+}
+
+.btn-paper,
+.btn-buy,
+.hold.hold-buy {
+  background: var(--yellow);
+  box-shadow: 0 4px 0 #d9b200, 0 10px 20px rgba(61, 53, 80, 0.12);
+}
+
+.hold.hold-buy {
+  padding-right: 22px;
+}
+
+.hold-buy .hold-text .hold-label {
+  font-size: 17px;
+}
+
+.hold-buy .hold-text .hold-hint {
+  color: var(--ink);
+}
+
+.text-link {
+  color: #1f5fbf;
+  font-weight: 800;
+}
+
+/* Home: below the shelf. */
+.paper-banner {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 14px;
-  border-radius: 18px;
-  background: #fffdf8;
-  border: 2px dashed rgba(166, 75, 0, 0.3);
+  gap: 28px;
+  max-width: 920px;
+  margin: 40px auto 0;
+  padding: 26px 32px;
+  border-radius: 28px;
+  overflow: hidden;
 }
 
-.promo-text {
+.paper-fan {
+  position: relative;
+  flex: none;
+  width: 300px;
+  height: 220px;
+}
+
+.paper-fan .paperback {
+  position: absolute;
+  bottom: 18px;
+  width: 118px;
+}
+
+.paper-fan .paperback-art {
+  width: 190px;
+  bottom: 104px;
+}
+
+.paper-fan .crayon-a {
+  left: 0;
+  bottom: -6px;
+  width: 150px;
+  z-index: 2;
+  transform: rotate(-10deg);
+}
+
+.paper-fan .crayon-b {
+  right: -6px;
+  bottom: 2px;
+  width: 132px;
+  z-index: 2;
+  transform: rotate(196deg);
+}
+
+.paper-banner-text h2 {
+  margin: 0 0 6px;
+  font-size: 27px;
+  font-weight: 1000;
+  line-height: 1.15;
+}
+
+.paper-banner-text p {
+  margin: 0 0 16px;
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.45;
+  color: var(--ink-soft);
+}
+
+.paper-banner-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Picker: under the page grid. */
+.paper-picker {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  max-width: 660px;
+  margin: 34px auto 8px;
+  padding: 22px 26px;
+  border-radius: 26px;
+}
+
+.paper-picker .paperback {
+  width: 118px;
+}
+
+.paper-picker .paperback-art {
+  width: 190px;
+}
+
+/* Finished screen: one quiet line. */
+.paper-finished {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  max-width: 440px;
+  margin: 2px auto 0;
+  padding: 8px 18px 8px 10px;
+  border-radius: 18px;
+  border: 2px dashed rgba(166, 75, 0, 0.3);
+  background: #fffdf7;
+  color: inherit;
+  text-decoration: none;
+}
+
+.paper-finished .paperback {
+  width: 44px;
+  box-shadow: 1px 1px 0 #efe6d8, 2px 2px 0 #e2d7c4, 0 6px 10px rgba(61, 53, 80, 0.2);
+}
+
+.paper-finished .paperback-art {
+  width: 74px;
+}
+
+.paper-finished-text {
   display: flex;
   flex-direction: column;
-  flex: 1;
-  min-width: 0;
+  text-align: left;
+  line-height: 1.25;
 }
 
-.promo-text strong {
+.paper-finished-text strong {
   font-size: 16px;
   font-weight: 900;
 }
 
-.promo-text span {
-  font-size: 14px;
+/* The paper books page. */
+.paper-body {
+  max-width: 1000px;
+  margin: 18px auto 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.paper-hero {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+  /* Text sits on the ruled lines: 32 px rows, the first rule at 31 px. */
+  padding: 38px 30px 26px;
+  border-radius: 28px;
+  overflow: hidden;
+}
+
+.paper-hero-text p {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 32px;
   color: var(--ink-soft);
 }
 
-.promo-picker {
-  max-width: 560px;
-  margin: 28px auto 8px;
+.paper-hero-text p:first-child {
+  font-size: 21px;
+  font-weight: 900;
+  color: var(--ink);
 }
 
-.promo-finished {
-  justify-content: center;
-  border: 0;
-  background: none;
+.paper-hero-art {
+  position: relative;
+  flex: none;
+  width: 190px;
+  height: 130px;
+}
+
+.paper-hero-art .crayon {
+  width: 170px;
+  left: 10px;
+}
+
+.paper-hero-art .crayon-1 {
+  top: 6px;
+  transform: rotate(-14deg);
+}
+
+.paper-hero-art .crayon-2 {
+  top: 44px;
+  transform: rotate(-4deg);
+}
+
+.paper-hero-art .crayon-3 {
+  top: 82px;
+  transform: rotate(6deg);
+}
+
+.paper-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+}
+
+.paper-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 26px 24px 24px;
+  border-radius: var(--radius);
+  background: var(--card);
+  box-shadow: var(--shadow);
+  scroll-margin: 24px;
+}
+
+.paper-card.is-highlight {
+  outline: 4px solid var(--sel);
+  outline-offset: 2px;
+}
+
+.paper-card .paperback {
+  width: min(210px, 64%);
+  transition: transform 0.25s ease;
+}
+
+.paper-card .paperback-art {
+  width: 100%;
+}
+
+.paper-card:hover .paperback {
+  transform: rotate(-2deg) translateY(-4px);
+}
+
+.paper-info {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.paper-title {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 1000;
+  line-height: 1.15;
+}
+
+.paper-sub {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.4;
+  color: var(--ink-soft);
+}
+
+.paper-details {
+  list-style: none;
+  margin: 2px 0 4px;
   padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.paper-details li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.paper-details svg {
+  flex: none;
+  margin-top: 1px;
+}
+
+.paper-soon {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 10px;
+  margin: 2px 0 0;
+}
+
+@media (max-width: 700px) {
+  .paper-banner,
+  .paper-picker,
+  .paper-hero {
+    flex-direction: column;
+    text-align: center;
+    padding: 22px 20px;
+  }
+
+  .paper-hero {
+    padding: 38px 20px 26px;
+  }
+
+  .paper-banner-actions,
+  .paper-picker .paper-info,
+  .paper-picker .paper-soon {
+    justify-content: center;
+    align-items: center;
+  }
+
+  .paper-fan {
+    width: 290px;
+    height: 200px;
+  }
+
+  .paper-hero-art {
+    display: none;
+  }
 }
 
 /* ------------------------------------------------------------------ hold button */
@@ -1419,21 +1793,31 @@ input[type='range']::-moz-range-thumb {
   line-height: 1.45;
 }
 
-.gu-books {
-  list-style: none;
-  margin: 0;
-  padding: 0;
+.gu-paper .paper-card {
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 18px;
+  padding: 16px 0 6px;
+  border-radius: 0;
+  box-shadow: none;
+  border-top: 2px solid var(--line);
 }
 
-.gu-books li {
-  padding: 6px 0;
+.gu-paper .paper-card:first-child {
+  border-top: 0;
+  padding-top: 4px;
 }
 
-.gu-books a {
-  display: inline-block;
-  margin-top: 4px;
-  color: #1f5fbf;
-  font-weight: 800;
+.gu-paper .paper-card .paperback {
+  width: 92px;
+}
+
+.gu-paper .paper-card .paperback-art {
+  width: 150px;
+}
+
+.gu-paper .paper-title {
+  font-size: 19px;
 }
 
 .toggle-row {

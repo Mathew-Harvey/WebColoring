@@ -53,6 +53,10 @@ const manifest = (prefix: string) =>
 
 const escapeHtml = (t: string) => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
 
+// The bookshelf is written into index.html so it draws at full size straight away, without
+// waiting for index.json (the app still fetches it to pick up anything newer).
+const bookIndex = () => JSON.stringify(JSON.parse(fs.readFileSync(path.join(pub, 'books/index.json'), 'utf8'))).replace(/</g, '\\u003c');
+
 function copyInHtml(build: boolean): Plugin {
   return {
     name: 'webcoloring-copy',
@@ -67,7 +71,8 @@ function copyInHtml(build: boolean): Plugin {
           .replace(/%SHARE_TITLE%/g, escapeHtml(copy.share.title))
           .replace(/%SHARE_DESCRIPTION%/g, escapeHtml(copy.share.description))
           .replace(/%SHARE_IMAGE_ALT%/g, escapeHtml(copy.share.imageAlt))
-          .replace(/%SHARE_IMAGE%/g, escapeHtml(shareImage()));
+          .replace(/%SHARE_IMAGE%/g, escapeHtml(shareImage()))
+          .replace('%BOOK_INDEX%', () => bookIndex());
         // In the built site, icons are read from public/.
         return build ? html.replace(/"\.\/icons\//g, '"./public/icons/') : html;
       },

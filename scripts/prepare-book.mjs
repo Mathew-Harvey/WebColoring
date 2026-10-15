@@ -15,7 +15,9 @@
 //
 // Optional inputs in books/<id>/:
 //   book.config.json   { subtitle, storeUrl, easy: [...], detailed: [...], cbnPalette,
-//                        canvas: [width, height], closeRadius, speckArea }
+//                        canvas: [width, height], closeRadius, speckArea,
+//                        paperback: { ages, forGrownUps, size, singleSided } }
+// and in the source folder, cover.jpg (16:9, for the shelf) and front.jpg (the real front cover).
 //   cbn-overrides.json per-page colour by numbers overrides (see README)
 
 import fs from 'node:fs';
@@ -779,6 +781,11 @@ async function main() {
     await sharp(path.join(srcDir, coverFile)).resize(960).webp({ quality: 80 }).toFile(path.join(outDir, 'cover.webp'));
     await sharp(path.join(srcDir, coverFile)).resize(480).webp({ quality: 78 }).toFile(path.join(outDir, 'cover-small.webp'));
   }
+  // The real front cover of the paperback, shown where the paper book is offered.
+  const frontFile = fs.readdirSync(srcDir).find((f) => /^front\.(jpe?g|png|webp)$/i.test(f));
+  if (frontFile) {
+    await sharp(path.join(srcDir, frontFile)).resize(480).webp({ quality: 80 }).toFile(path.join(outDir, 'front.webp'));
+  }
 
   const book = {
     id: bookId,
@@ -787,6 +794,8 @@ async function main() {
     storeUrl: args['store-url'] ? String(args['store-url']) : config.storeUrl ?? null,
     cover: coverFile ? 'cover.webp' : null,
     coverSmall: coverFile ? 'cover-small.webp' : null,
+    front: frontFile ? 'front.webp' : null,
+    paperback: config.paperback ?? null,
     width: W,
     height: H,
     cbnPalette: CBN_PALETTE,
@@ -811,6 +820,8 @@ async function main() {
     title,
     subtitle: book.subtitle,
     cover: book.coverSmall ? `${bookId}/${book.coverSmall}` : null,
+    front: book.front ? `${bookId}/${book.front}` : null,
+    paperback: book.paperback,
     pageCount: pages.length,
     storeUrl: book.storeUrl,
     order: config.order ?? index.books.find((b) => b.id === bookId)?.order ?? index.books.length,

@@ -5,6 +5,7 @@ export type Route =
   | { name: 'picker'; bookId: string }
   | { name: 'colour'; bookId: string; pageId: string; done: boolean; cbn: boolean }
   | { name: 'grownups' }
+  | { name: 'paper'; bookId: string | null }
   | { name: 'notfound' };
 
 export function parseRoute(hash: string): Route {
@@ -13,6 +14,7 @@ export function parseRoute(hash: string): Route {
   const params = new URLSearchParams(query);
   if (!parts.length) return { name: 'home' };
   if (parts[0] === 'grown-ups' && parts.length === 1) return { name: 'grownups' };
+  if (parts[0] === 'paper' && parts.length <= 2) return { name: 'paper', bookId: parts[1] ?? null };
   if (parts[0] === 'book' && parts.length === 2) return { name: 'picker', bookId: parts[1] };
   if (parts[0] === 'book' && (parts.length === 3 || (parts.length === 4 && parts[3] === 'done'))) {
     return { name: 'colour', bookId: parts[1], pageId: parts[2], done: parts[3] === 'done', cbn: params.get('cbn') === '1' };
@@ -26,6 +28,7 @@ export const href = {
   page: (book: string, page: string, cbn = false) => `#/book/${encodeURIComponent(book)}/${encodeURIComponent(page)}${cbn ? '?cbn=1' : ''}`,
   done: (book: string, page: string) => `#/book/${encodeURIComponent(book)}/${encodeURIComponent(page)}/done`,
   grownUps: () => '#/grown-ups',
+  paper: (book?: string) => (book ? `#/paper/${encodeURIComponent(book)}` : '#/paper'),
 };
 
 export function navigate(to: string, replace = false) {

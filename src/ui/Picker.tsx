@@ -4,7 +4,7 @@ import { getLocal, setLocal } from '../data/settings';
 import { loadBook, pageAsset, type Book, type PageInfo } from '../data/books';
 import { listMeta, type PageMeta } from '../data/storage';
 import { Icon, type IconName } from './icons';
-import { PromoCard } from './PromoCard';
+import { PaperPickerCard } from './Paper';
 import { href } from './router';
 
 type Filter = 'all' | 'easy' | 'detailed' | 'cbn';
@@ -129,7 +129,7 @@ export function Picker({ bookId }: { bookId: string }) {
           })}
         </ul>
         {book && !pages.length && <p class="notice">{copy.picker.empty}</p>}
-        {book && <PromoCard storeUrl={book.storeUrl} title={book.title} variant="picker" />}
+        {book && <PaperPickerCard bookId={bookId} />}
       </main>
     </div>
   );

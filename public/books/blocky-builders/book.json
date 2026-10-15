@@ -5,6 +5,10 @@
  "storeUrl": null,
  "cover": "cover.webp",
  "coverSmall": "cover-small.webp",
+ "front": null,
+ "paperback": {
+  "ages": "6 to 10"
+ },
  "width": 2560,
  "height": 1440,
  "cbnPalette": [

@@ -3,6 +3,24 @@
   "subtitle": "A Block Town Coloring Book for Kids Ages 6-10",
   "storeUrl": null,
   "order": 0,
-  "easy": ["1-3", 8, 9, "12-15", "18-21", "23-27"],
-  "detailed": ["4-7", 10, 11, 16, 17, 22, "28-30"]
+  "easy": [
+    "1-3",
+    8,
+    9,
+    "12-15",
+    "18-21",
+    "23-27"
+  ],
+  "detailed": [
+    "4-7",
+    10,
+    11,
+    16,
+    17,
+    22,
+    "28-30"
+  ],
+  "paperback": {
+    "ages": "6 to 10"
+  }
 }

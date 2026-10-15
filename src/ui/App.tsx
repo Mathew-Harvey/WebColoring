@@ -3,6 +3,7 @@ import { copy } from '../copy';
 import { Colouring } from './Colouring';
 import { GrownUps } from './GrownUps';
 import { Home } from './Home';
+import { PaperPage } from './Paper';
 import { Picker } from './Picker';
 import { href, useRoute } from './router';
 
@@ -26,7 +27,7 @@ export function App() {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, [route.name, route.name === 'picker' ? route.bookId : '']);
+  }, [route.name, route.name === 'picker' || route.name === 'paper' ? route.bookId : '']);
 
   let screen;
   switch (route.name) {
@@ -41,6 +42,9 @@ export function App() {
       break;
     case 'grownups':
       screen = <GrownUps />;
+      break;
+    case 'paper':
+      screen = <PaperPage bookId={route.bookId} />;
       break;
     default:
       screen = (

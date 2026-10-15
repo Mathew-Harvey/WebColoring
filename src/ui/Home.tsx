@@ -1,18 +1,18 @@
 import { useEffect, useState } from 'preact/hooks';
 import { copy } from '../copy';
-import { indexAsset, loadIndex, type BookIndexEntry } from '../data/books';
+import { indexAsset, loadIndex, peekIndex, type BookIndexEntry } from '../data/books';
 import { HoldButton } from './HoldButton';
 import { Icon } from './icons';
 import { Logo } from './Logo';
-import { PromoCard } from './PromoCard';
+import { PaperBanner } from './Paper';
 import { href, navigate } from './router';
 
 export function Home() {
-  const [books, setBooks] = useState<BookIndexEntry[] | null>(null);
+  const [books, setBooks] = useState<BookIndexEntry[] | null>(peekIndex);
   const [error, setError] = useState(false);
 
   useEffect(() => {
-    loadIndex().then(setBooks, () => setError(true));
+    loadIndex().then(setBooks, () => !peekIndex() && setError(true));
   }, []);
 
   return (
@@ -41,12 +41,12 @@ export function Home() {
                   <Icon name="star" size={18} /> {copy.home.pages(b.pageCount)}
                 </span>
               </a>
-              <PromoCard storeUrl={b.storeUrl} title={b.title} variant="home" />
             </div>
           ))}
           {books === null && !error && <div class="shelf-item"><div class="book-tile skeleton" /></div>}
         </div>
         <div class="shelf-board" aria-hidden="true" />
+        {books && <PaperBanner books={books} />}
       </main>
 
       <footer class="home-foot">

@@ -5,6 +5,12 @@
  "storeUrl": null,
  "cover": "cover.webp",
  "coverSmall": "cover-small.webp",
+ "front": "front.webp",
+ "paperback": {
+  "forGrownUps": true,
+  "size": "8.5 x 11 in",
+  "singleSided": true
+ },
  "width": 2400,
  "height": 2400,
  "cbnPalette": [

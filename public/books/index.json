@@ -5,6 +5,10 @@
    "title": "Blocky Builders",
    "subtitle": "A Block Town Coloring Book for Kids Ages 6-10",
    "cover": "blocky-builders/cover-small.webp",
+   "front": null,
+   "paperback": {
+    "ages": "6 to 10"
+   },
    "pageCount": 30,
    "storeUrl": null,
    "order": 0
@@ -14,6 +18,12 @@
    "title": "Scaly Pals",
    "subtitle": "A Dragon Coloring Book for Kids Ages 6-11",
    "cover": "scaly-pals/cover-small.webp",
+   "front": "scaly-pals/front.webp",
+   "paperback": {
+    "ages": "6 to 11",
+    "size": "8.5 x 11 in",
+    "singleSided": true
+   },
    "pageCount": 30,
    "storeUrl": null,
    "order": 1
@@ -23,6 +33,12 @@
    "title": "Still Water Mandalas",
    "subtitle": "Mandala Coloring Book for Adults: 30 Detailed Designs for Relaxation",
    "cover": "still-water-mandalas/cover-small.webp",
+   "front": "still-water-mandalas/front.webp",
+   "paperback": {
+    "forGrownUps": true,
+    "size": "8.5 x 11 in",
+    "singleSided": true
+   },
    "pageCount": 30,
    "storeUrl": null,
    "order": 2

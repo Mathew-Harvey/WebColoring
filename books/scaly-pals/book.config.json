@@ -2,5 +2,10 @@
   "title": "Scaly Pals",
   "subtitle": "A Dragon Coloring Book for Kids Ages 6-11",
   "storeUrl": null,
-  "order": 1
+  "order": 1,
+  "paperback": {
+    "ages": "6 to 11",
+    "size": "8.5 x 11 in",
+    "singleSided": true
+  }
 }

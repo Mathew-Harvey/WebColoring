@@ -25,7 +25,8 @@ GitHub Pages publishes the main branch as it is (see Deploying).
 ## Adding a book
 
 Put the line art in a folder: `page01.jpg` to `pageNN.jpg` (PNG works too, and any suffix is fine, for
-example `page22-cat-sofa.jpg`) plus an optional `cover.jpg` (16:9, shown on the shelf). Then run:
+example `page22-cat-sofa.jpg`), plus optionally `cover.jpg` (16:9 art for the shelf) and `front.jpg`
+(the real front cover of the paperback, shown wherever the paper book is offered). Then run:
 
 ```sh
 npm run prepare-book -- --src <folder> --id <book-id> --title "<title>"
@@ -83,9 +84,24 @@ Optional settings for art that is not landscape scenes:
 | `closeRadius` | How far line gaps are closed, default `2`. |
 | `speckArea` | White specks smaller than this (px) become line, default `40`. Lower it to keep tiny cells in fine pattern work. |
 
-While `storeUrl` is `null`, every "Get the paperback" card is hidden. To add the link later, set it in
-`book.config.json` and run `prepare-book` again (or edit `storeUrl` in `public/books/<id>/book.json` and
-`public/books/index.json` by hand), then rebuild.
+### The paper books
+
+Every book is offered as a paperback on the home screen (below the shelf), under its page picker, on
+the finished screen, in the grown-ups area and on its own page (`#/paper`). That page has the covers,
+the details and the way to buy.
+
+- While `storeUrl` is `null` the book shows a "Coming soon" badge. Once it is set, a "Get the paperback"
+  button appears. Outside the grown-ups area it opens Amazon only after a grown-up holds it down.
+- To add the link, set `storeUrl` in `book.config.json` and run
+  `npm run prepare-book -- --src books/<id>/src --id <id> --only 0` (this rewrites the book files
+  without redoing any pages), then `npm run build`.
+- `paperback` in `book.config.json` fills in the details list. Each key is optional:
+
+```json
+"paperback": { "ages": "6 to 11", "size": "8.5 x 11 in", "singleSided": true }
+```
+
+Use `"forGrownUps": true` in place of `ages` for books made for adults.
 
 ### Colour by numbers overrides: `books/<book-id>/cbn-overrides.json`
 

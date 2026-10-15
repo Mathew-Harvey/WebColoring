@@ -2,11 +2,12 @@ import { useEffect, useRef, useState } from 'preact/hooks';
 import { copy } from '../copy';
 import { hapticsSupported } from '../audio/sound';
 import { exportBackup, importBackup } from '../data/backup';
-import { loadBook, loadIndex, pageAsset, safeStoreUrl, type BookIndexEntry } from '../data/books';
+import { loadBook, loadIndex, pageAsset, type BookIndexEntry } from '../data/books';
 import { updateSettings } from '../data/settings';
 import { clearAll } from '../data/storage';
 import { useSettings } from './hooks';
 import { Icon } from './icons';
+import { PaperBookCard } from './Paper';
 import { href } from './router';
 import { downloadBlob } from './share';
 
@@ -131,25 +132,11 @@ export function GrownUps() {
 
         <section class="card">
           <h2>{copy.grownUps.booksTitle}</h2>
-          <ul class="gu-books">
-            {books.map((b) => {
-              const url = safeStoreUrl(b.storeUrl);
-              return (
-                <li key={b.id}>
-                  <strong>{b.title}</strong>
-                  {b.subtitle && <span class="small"> {b.subtitle}</span>}
-                  <br />
-                  {url ? (
-                    <a href={url} target="_blank" rel="noopener noreferrer">
-                      {copy.promo.button} <span class="sr-only">{copy.promo.opensNewTab}</span>
-                    </a>
-                  ) : (
-                    <span class="small">{copy.grownUps.bookComingSoon}</span>
-                  )}
-                </li>
-              );
-            })}
-          </ul>
+          <div class="gu-paper">
+            {books.map((b) => (
+              <PaperBookCard key={b.id} book={b} gated={false} compact />
+            ))}
+          </div>
         </section>
 
         <section class="card">

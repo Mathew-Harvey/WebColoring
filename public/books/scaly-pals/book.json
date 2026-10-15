@@ -5,6 +5,12 @@
  "storeUrl": null,
  "cover": "cover.webp",
  "coverSmall": "cover-small.webp",
+ "front": "front.webp",
+ "paperback": {
+  "ages": "6 to 11",
+  "size": "8.5 x 11 in",
+  "singleSided": true
+ },
  "width": 2560,
  "height": 1440,
  "cbnPalette": [

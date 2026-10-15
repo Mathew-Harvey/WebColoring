@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { copy } from '../copy';
 import { buzz, sound } from '../audio/sound';
-import { loadBook, pageAsset, type Book, type PageInfo } from '../data/books';
+import { loadBook, pageAsset, type PageInfo } from '../data/books';
 import { getLocal, setLocal } from '../data/settings';
 import { artKey, deleteArt, getMeta, getPaint, requestPersistence, saveArt, storageWorks, trackSave } from '../data/storage';
 import type { BrushId } from '../engine/brushes';
@@ -112,7 +112,6 @@ export function Colouring({ bookId, pageId, done, cbn }: Props) {
   const canSave = useRef(false);
   const doneTimer = useRef(0);
   const saveTimer = useRef(0);
-  const [book, setBook] = useState<Book | null>(null);
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
   const [attempt, setAttempt] = useState(0);
   const [, setTick] = useState(0);
@@ -221,7 +220,8 @@ export function Colouring({ bookId, pageId, done, cbn }: Props) {
       const page = b.pages.find((p) => p.id === pageId);
       if (!page) throw new Error('no page');
       pageRef.current = page;
-      if (!cancelled) setBook(b);
+      // Show the soft preview of the page now that we know which one it is.
+      if (!cancelled) bump();
       // Let the toolbar paint before the big page downloads start.
       await new Promise((r) => requestAnimationFrame(() => setTimeout(r, 0)));
       if (cancelled) return;
@@ -559,8 +559,7 @@ export function Colouring({ bookId, pageId, done, cbn }: Props) {
       {done && status === 'ready' && (
         <Finished
           image={finishedImg}
-          storeUrl={book?.storeUrl ?? null}
-          bookTitle={book?.title ?? ''}
+          bookId={bookId}
           reducedMotion={reducedMotion}
           onSave={async () => {
             await savePicture(await fullPicture(), fileName);

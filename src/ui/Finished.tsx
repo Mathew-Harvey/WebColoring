@@ -1,12 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { copy } from '../copy';
 import { Icon } from './icons';
-import { PromoCard } from './PromoCard';
+import { PaperFinished } from './Paper';
 
 interface Props {
   image: HTMLCanvasElement | null;
-  storeUrl: string | null;
-  bookTitle: string;
+  bookId: string;
   reducedMotion: boolean;
   onSave: () => Promise<void>;
   onPrint: () => Promise<void>;
@@ -51,7 +50,7 @@ function Confetti() {
   );
 }
 
-export function Finished({ image, storeUrl, bookTitle, reducedMotion, onSave, onPrint, onKeepGoing, onMorePages }: Props) {
+export function Finished({ image, bookId, reducedMotion, onSave, onPrint, onKeepGoing, onMorePages }: Props) {
   const [saved, setSaved] = useState(false);
   const [busy, setBusy] = useState(false);
   const pic = useRef<HTMLDivElement>(null);
@@ -112,7 +111,7 @@ export function Finished({ image, storeUrl, bookTitle, reducedMotion, onSave, on
             <Icon name="grid" size={26} /> {copy.finished.morePages}
           </button>
         </div>
-        <PromoCard storeUrl={storeUrl} title={bookTitle} variant="finished" />
+        <PaperFinished bookId={bookId} />
       </div>
     </div>
   );

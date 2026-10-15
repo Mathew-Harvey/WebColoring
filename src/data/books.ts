@@ -1,10 +1,22 @@
 // Book manifests produced by scripts/prepare-book.mjs.
 
+/** What the printed book is like, from book.config.json. Every field is optional. */
+export interface Paperback {
+  ages?: string;
+  forGrownUps?: boolean;
+  size?: string;
+  singleSided?: boolean;
+}
+
 export interface BookIndexEntry {
   id: string;
   title: string;
   subtitle: string | null;
+  /** 16:9 art for the shelf. */
   cover: string | null;
+  /** The real front cover of the paperback. */
+  front?: string | null;
+  paperback?: Paperback | null;
   pageCount: number;
   storeUrl: string | null;
   order: number;
@@ -34,6 +46,8 @@ export interface Book {
   storeUrl: string | null;
   cover: string | null;
   coverSmall: string | null;
+  front?: string | null;
+  paperback?: Paperback | null;
   width: number;
   height: number;
   cbnPalette: PaletteEntry[];
@@ -52,6 +66,19 @@ async function getJson<T>(url: string): Promise<T> {
   if (!res.ok) throw new Error(`${res.status} ${url}`);
   return (await res.json()) as T;
 }
+
+// The build writes the bookshelf into index.html (see vite.config.ts).
+const inlineIndex: BookIndexEntry[] | null = (() => {
+  try {
+    const text = document.getElementById('book-index')?.textContent;
+    return text ? (JSON.parse(text) as { books: BookIndexEntry[] }).books : null;
+  } catch {
+    return null;
+  }
+})();
+
+/** The bookshelf as built into the page, so screens can draw it before index.json arrives. */
+export const peekIndex = () => inlineIndex;
 
 export function loadIndex(): Promise<BookIndexEntry[]> {
   if (!indexPromise) {
