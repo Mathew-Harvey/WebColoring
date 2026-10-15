@@ -13,6 +13,18 @@ const pub = path.join(repo, 'public');
 
 // Files that are only fetched when a page is opened, so they are not precached.
 const PAGE_ASSET = /books\/[^/]+\/pages\/[^/]+\/(line\.png|overlay\.png|overlay-half\.png|regions\.bin|regions\.json)$/;
+// The social preview card is only fetched by other sites, so it is not precached either.
+const SHARE_CARD = 'public/share.jpg';
+
+// Social previews need absolute links, so they point at the live site (package.json "homepage").
+const pkg = JSON.parse(fs.readFileSync(path.join(repo, 'package.json'), 'utf8'));
+const siteUrl: string = pkg.homepage;
+// The ?v= changes with the image, so sites that cache previews fetch a new card.
+const shareImage = () => {
+  const file = path.join(repo, SHARE_CARD);
+  const v = fs.existsSync(file) ? crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex').slice(0, 8) : '0';
+  return `${siteUrl}${SHARE_CARD}?v=${v}`;
+};
 
 // Text in index.html and the web app manifest comes from src/copy.ts like the rest of the copy.
 const manifest = (prefix: string) =>
@@ -50,7 +62,12 @@ function copyInHtml(build: boolean): Plugin {
         html = html
           .replace(/%APP_NAME%/g, escapeHtml(copy.appName))
           .replace(/%APP_DESCRIPTION%/g, escapeHtml(copy.metaDescription))
-          .replace(/%APP_NOSCRIPT%/g, escapeHtml(copy.noScript));
+          .replace(/%APP_NOSCRIPT%/g, escapeHtml(copy.noScript))
+          .replace(/%SITE_URL%/g, escapeHtml(siteUrl))
+          .replace(/%SHARE_TITLE%/g, escapeHtml(copy.share.title))
+          .replace(/%SHARE_DESCRIPTION%/g, escapeHtml(copy.share.description))
+          .replace(/%SHARE_IMAGE_ALT%/g, escapeHtml(copy.share.imageAlt))
+          .replace(/%SHARE_IMAGE%/g, escapeHtml(shareImage()));
         // In the built site, icons are read from public/.
         return build ? html.replace(/"\.\/icons\//g, '"./public/icons/') : html;
       },
@@ -91,7 +108,7 @@ function siteBuild(): Plugin {
     },
     closeBundle() {
       const built = ['index.html', 'manifest.webmanifest', ...walk(path.join(repo, 'assets'), repo)];
-      const publicFiles = walk(pub, repo).filter((f) => !PAGE_ASSET.test(f) && !f.endsWith('.txt'));
+      const publicFiles = walk(pub, repo).filter((f) => !PAGE_ASSET.test(f) && f !== SHARE_CARD && !f.endsWith('.txt'));
       const precache = [...built, ...publicFiles].sort();
       const hash = crypto.createHash('sha256');
       for (const f of precache) hash.update(f).update(fs.readFileSync(path.join(repo, f)));
@@ -104,8 +121,6 @@ function siteBuild(): Plugin {
     },
   };
 }
-
-const pkg = JSON.parse(fs.readFileSync(path.join(repo, 'package.json'), 'utf8'));
 
 export default defineConfig(({ command }) => {
   const build = command === 'build';

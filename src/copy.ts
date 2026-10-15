@@ -8,6 +8,16 @@ export const copy = {
   metaDescription: 'Free colouring pages for kids. No ads, no accounts. Works offline.',
   noScript: 'WebColoring needs JavaScript to colour pages.',
 
+  // The preview card shown when the site is shared on Facebook, WhatsApp, X and others.
+  share: {
+    title: 'WebColoring: free colouring pages for kids',
+    description: 'Fill, paint and colour by numbers on any phone, tablet or computer. No ads, no accounts. Works offline.',
+    imageAlt: 'A treehouse colouring page, half coloured in, next to the WebColoring name.',
+    // Text drawn on the card image itself (npm run social).
+    headline: 'Free colouring pages for kids',
+    points: ['No ads', 'No accounts', 'Works offline'],
+  },
+
   home: {
     shelfLabel: 'Your books',
     openBook: (title: string) => `Open ${title}`,

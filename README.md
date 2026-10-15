@@ -111,7 +111,7 @@ Points use 0 to 1 page coordinates (x across, y down) and snap to the nearest re
 | `src/ui/` | Screens and controls (Preact). |
 | `src/index.html` | The page the build starts from. |
 | `src/sw-template.js` | Service worker, built into `sw.js` with the precache list. |
-| `scripts/` | `prepare-book.mjs`, `make-icons.mjs`, `inspect-regions.mjs`. |
+| `scripts/` | `prepare-book.mjs`, `make-icons.mjs`, `make-social.mjs`, `inspect-regions.mjs`. |
 | `tests/` | Browser checks (Playwright). |
 
 ## Tests
@@ -144,7 +144,18 @@ The built site reads book data, icons and other public files from `public/`, so 
 without being copied. `.nojekyll` tells Pages to serve the files as they are. CI fails if the committed
 build is out of date, so a forgotten `npm run build` is caught.
 
-The site is fully relative, so the same files also work at any path on any static host.
+The site is fully relative, so the same files also work at any path on any static host. The one
+exception is the social preview tags, which need absolute links and use `homepage` in `package.json`.
+
+### Social preview
+
+When the site is shared on Facebook, WhatsApp, X, iMessage and others, they show `public/share.jpg`
+(1200x630) with the title and description from `share` in `src/copy.ts`. To redraw the card, for example
+after changing that text, run `npm run social` (Node 22.6 or newer, with a Playwright Chromium), then
+`npm run build`.
+
+Sites keep their own copy of a preview for a while. After a change, paste the link into the
+[Facebook Sharing Debugger](https://developers.facebook.com/tools/debug/) and press "Scrape Again".
 
 ## Privacy
 

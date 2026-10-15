@@ -2,6 +2,7 @@
   "name": "webcoloring",
   "private": true,
   "version": "1.0.0",
+  "homepage": "https://webcoloring.org/",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -10,6 +11,7 @@
     "typecheck": "tsc --noEmit",
     "prepare-book": "node scripts/prepare-book.mjs",
     "icons": "node scripts/make-icons.mjs",
+    "social": "node scripts/make-social.mjs",
     "test:e2e": "node tests/e2e.mjs",
     "test:features": "node tests/features.mjs",
     "test:offline": "node tests/offline.mjs",
