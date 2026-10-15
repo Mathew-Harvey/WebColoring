@@ -1,0 +1,13 @@
+{
+ "books": [
+  {
+   "id": "blocky-builders",
+   "title": "Blocky Builders",
+   "subtitle": "A Block Town Coloring Book for Kids Ages 6-10",
+   "cover": "blocky-builders/cover-small.webp",
+   "pageCount": 30,
+   "storeUrl": null,
+   "order": 0
+  }
+ ]
+}

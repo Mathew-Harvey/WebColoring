@@ -1,0 +1,24 @@
+{
+  "name": "webcoloring",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "prepare-book": "node scripts/prepare-book.mjs"
+  },
+  "dependencies": {
+    "fflate": "^0.8.3",
+    "preact": "^11.0.1"
+  },
+  "devDependencies": {
+    "@fontsource-variable/nunito": "^5.3.0",
+    "playwright": "1.56",
+    "sharp": "^0.35.5",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.4"
+  }
+}

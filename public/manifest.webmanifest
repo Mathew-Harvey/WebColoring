@@ -1,0 +1,18 @@
+{
+  "name": "WebColoring",
+  "short_name": "WebColoring",
+  "description": "Free colouring pages for kids. No ads, no accounts. Works offline.",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#fff8ef",
+  "theme_color": "#fff8ef",
+  "categories": ["kids", "education", "entertainment"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

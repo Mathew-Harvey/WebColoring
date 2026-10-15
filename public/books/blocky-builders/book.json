@@ -1,0 +1,512 @@
+{
+ "id": "blocky-builders",
+ "title": "Blocky Builders",
+ "subtitle": "A Block Town Coloring Book for Kids Ages 6-10",
+ "storeUrl": null,
+ "cover": "cover.webp",
+ "coverSmall": "cover-small.webp",
+ "width": 2560,
+ "height": 1440,
+ "cbnPalette": [
+  {
+   "key": "sky",
+   "hex": "#7cc8f8"
+  },
+  {
+   "key": "grass",
+   "hex": "#7ccf5e"
+  },
+  {
+   "key": "leaf",
+   "hex": "#2f9e5a"
+  },
+  {
+   "key": "yellow",
+   "hex": "#ffd83d"
+  },
+  {
+   "key": "orange",
+   "hex": "#ff9a3c"
+  },
+  {
+   "key": "red",
+   "hex": "#ef5a52"
+  },
+  {
+   "key": "pink",
+   "hex": "#ff8fc8"
+  },
+  {
+   "key": "purple",
+   "hex": "#a57de0"
+  },
+  {
+   "key": "brown",
+   "hex": "#a8714a"
+  },
+  {
+   "key": "sand",
+   "hex": "#f3cf98"
+  },
+  {
+   "key": "grey",
+   "hex": "#a9b2bd"
+  },
+  {
+   "key": "blue",
+   "hex": "#3e7fe0"
+  }
+ ],
+ "pages": [
+  {
+   "id": "page01",
+   "n": 1,
+   "title": null,
+   "difficulty": "easy",
+   "cbn": true,
+   "regionCount": 454,
+   "numbered": 103,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1440
+   ]
+  },
+  {
+   "id": "page02",
+   "n": 2,
+   "title": null,
+   "difficulty": "easy",
+   "cbn": true,
+   "regionCount": 263,
+   "numbered": 112,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1440
+   ]
+  },
+  {
+   "id": "page03",
+   "n": 3,
+   "title": null,
+   "difficulty": "easy",
+   "cbn": true,
+   "regionCount": 394,
+   "numbered": 145,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1440
+   ]
+  },
+  {
+   "id": "page04",
+   "n": 4,
+   "title": null,
+   "difficulty": "detailed",
+   "cbn": false,
+   "regionCount": 1126,
+   "numbered": 90,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1440
+   ]
+  },
+  {
+   "id": "page05",
+   "n": 5,
+   "title": null,
+   "difficulty": "detailed",
+   "cbn": false,
+   "regionCount": 157,
+   "numbered": 21,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1440
+   ]
+  },
+  {
+   "id": "page06",
+   "n": 6,
+   "title": null,
+   "difficulty": "detailed",
+   "cbn": false,
+   "regionCount": 252,
+   "numbered": 32,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1440
+   ]
+  },
+  {
+   "id": "page07",
+   "n": 7,
+   "title": null,
+   "difficulty": "detailed",
+   "cbn": false,
+   "regionCount": 203,
+   "numbered": 89,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1440
+   ]
+  },
+  {
+   "id": "page08",
+   "n": 8,
+   "title": null,
+   "difficulty": "easy",
+   "cbn": true,
+   "regionCount": 152,
+   "numbered": 107,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1440
+   ]
+  },
+  {
+   "id": "page09",
+   "n": 9,
+   "title": null,
+   "difficulty": "easy",
+   "cbn": true,
+   "regionCount": 136,
+   "numbered": 62,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1440
+   ]
+  },
+  {
+   "id": "page10",
+   "n": 10,
+   "title": null,
+   "difficulty": "detailed",
+   "cbn": false,
+   "regionCount": 203,
+   "numbered": 32,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1440
+   ]
+  },
+  {
+   "id": "page11",
+   "n": 11,
+   "title": null,
+   "difficulty": "detailed",
+   "cbn": false,
+   "regionCount": 269,
+   "numbered": 47,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1440
+   ]
+  },
+  {
+   "id": "page12",
+   "n": 12,
+   "title": null,
+   "difficulty": "easy",
+   "cbn": true,
+   "regionCount": 512,
+   "numbered": 135,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1440
+   ]
+  },
+  {
+   "id": "page13",
+   "n": 13,
+   "title": null,
+   "difficulty": "easy",
+   "cbn": true,
+   "regionCount": 199,
+   "numbered": 97,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1440
+   ]
+  },
+  {
+   "id": "page14",
+   "n": 14,
+   "title": null,
+   "difficulty": "easy",
+   "cbn": true,
+   "regionCount": 366,
+   "numbered": 98,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1440
+   ]
+  },
+  {
+   "id": "page15",
+   "n": 15,
+   "title": null,
+   "difficulty": "easy",
+   "cbn": true,
+   "regionCount": 294,
+   "numbered": 115,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1440
+   ]
+  },
+  {
+   "id": "page16",
+   "n": 16,
+   "title": null,
+   "difficulty": "detailed",
+   "cbn": false,
+   "regionCount": 247,
+   "numbered": 58,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1440
+   ]
+  },
+  {
+   "id": "page17",
+   "n": 17,
+   "title": null,
+   "difficulty": "detailed",
+   "cbn": false,
+   "regionCount": 192,
+   "numbered": 16,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1440
+   ]
+  },
+  {
+   "id": "page18",
+   "n": 18,
+   "title": null,
+   "difficulty": "easy",
+   "cbn": true,
+   "regionCount": 312,
+   "numbered": 122,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1440
+   ]
+  },
+  {
+   "id": "page19",
+   "n": 19,
+   "title": null,
+   "difficulty": "easy",
+   "cbn": true,
+   "regionCount": 1326,
+   "numbered": 157,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1440
+   ]
+  },
+  {
+   "id": "page20",
+   "n": 20,
+   "title": null,
+   "difficulty": "easy",
+   "cbn": true,
+   "regionCount": 204,
+   "numbered": 94,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1440
+   ]
+  },
+  {
+   "id": "page21",
+   "n": 21,
+   "title": null,
+   "difficulty": "easy",
+   "cbn": true,
+   "regionCount": 295,
+   "numbered": 137,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1440
+   ]
+  },
+  {
+   "id": "page22",
+   "n": 22,
+   "title": "Cat Sofa",
+   "difficulty": "detailed",
+   "cbn": false,
+   "regionCount": 114,
+   "numbered": 64,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1440
+   ]
+  },
+  {
+   "id": "page23",
+   "n": 23,
+   "title": null,
+   "difficulty": "easy",
+   "cbn": true,
+   "regionCount": 339,
+   "numbered": 76,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1440
+   ]
+  },
+  {
+   "id": "page24",
+   "n": 24,
+   "title": null,
+   "difficulty": "easy",
+   "cbn": true,
+   "regionCount": 277,
+   "numbered": 107,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1440
+   ]
+  },
+  {
+   "id": "page25",
+   "n": 25,
+   "title": null,
+   "difficulty": "easy",
+   "cbn": true,
+   "regionCount": 231,
+   "numbered": 67,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1440
+   ]
+  },
+  {
+   "id": "page26",
+   "n": 26,
+   "title": null,
+   "difficulty": "easy",
+   "cbn": true,
+   "regionCount": 391,
+   "numbered": 152,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1440
+   ]
+  },
+  {
+   "id": "page27",
+   "n": 27,
+   "title": null,
+   "difficulty": "easy",
+   "cbn": true,
+   "regionCount": 438,
+   "numbered": 119,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1440
+   ]
+  },
+  {
+   "id": "page28",
+   "n": 28,
+   "title": "Waterfall Bridge",
+   "difficulty": "detailed",
+   "cbn": false,
+   "regionCount": 278,
+   "numbered": 68,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1440
+   ]
+  },
+  {
+   "id": "page29",
+   "n": 29,
+   "title": "Kid Architect",
+   "difficulty": "detailed",
+   "cbn": false,
+   "regionCount": 270,
+   "numbered": 56,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1440
+   ]
+  },
+  {
+   "id": "page30",
+   "n": 30,
+   "title": "Animal Train",
+   "difficulty": "detailed",
+   "cbn": false,
+   "regionCount": 222,
+   "numbered": 52,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1440
+   ]
+  }
+ ]
+}
