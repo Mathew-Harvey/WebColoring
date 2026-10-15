@@ -1220,7 +1220,6 @@ input[type='range']::-moz-range-thumb {
 
 .wheel-disc {
   position: relative;
-  touch-action: none;
 }
 
 .wheel-disc canvas {

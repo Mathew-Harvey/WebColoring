@@ -2,6 +2,57 @@ import { defineConfig, type Plugin, type ResolvedConfig } from 'vite';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
+import { copy } from './src/copy';
+
+// Text in index.html and the web app manifest comes from src/copy.ts like the rest of the copy.
+const manifest = () =>
+  JSON.stringify(
+    {
+      name: copy.appName,
+      short_name: copy.appName,
+      description: copy.metaDescription,
+      id: './',
+      start_url: './',
+      scope: './',
+      display: 'standalone',
+      orientation: 'any',
+      background_color: '#fff8ef',
+      theme_color: '#fff8ef',
+      categories: ['kids', 'education', 'entertainment'],
+      icons: [
+        { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+        { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+        { src: 'icons/icon-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+      ],
+    },
+    null,
+    2,
+  );
+
+const escapeHtml = (t: string) => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+
+function copyInHtml(): Plugin {
+  return {
+    name: 'webcoloring-copy',
+    transformIndexHtml(html) {
+      return html
+        .replace(/%APP_NAME%/g, escapeHtml(copy.appName))
+        .replace(/%APP_DESCRIPTION%/g, escapeHtml(copy.metaDescription))
+        .replace(/%APP_NOSCRIPT%/g, escapeHtml(copy.noScript));
+    },
+    configureServer(server) {
+      server.middlewares.use((req, res, next) => {
+        if (req.url?.split('?')[0].endsWith('/manifest.webmanifest')) {
+          res.setHeader('Content-Type', 'application/manifest+json');
+          res.end(manifest());
+        } else next();
+      });
+    },
+    generateBundle() {
+      this.emitFile({ type: 'asset', fileName: 'manifest.webmanifest', source: manifest() });
+    },
+  };
+}
 
 // Writes dist/sw.js from src/sw-template.js with the list of files to precache.
 // Heavy page files (line art, overlays, region maps) are cached when first opened instead.
@@ -56,5 +107,5 @@ export default defineConfig({
     assetsInlineLimit: 0,
     chunkSizeWarningLimit: 400,
   },
-  plugins: [serviceWorker()],
+  plugins: [copyInHtml(), serviceWorker()],
 });

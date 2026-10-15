@@ -6,9 +6,14 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
-    "preview": "vite preview",
+    "preview": "vite preview --port 4173",
     "typecheck": "tsc --noEmit",
-    "prepare-book": "node scripts/prepare-book.mjs"
+    "prepare-book": "node scripts/prepare-book.mjs",
+    "icons": "node scripts/make-icons.mjs",
+    "test:e2e": "node tests/e2e.mjs",
+    "test:features": "node tests/features.mjs",
+    "test:offline": "node tests/offline.mjs",
+    "test:screens": "node tests/screens.mjs"
   },
   "dependencies": {
     "fflate": "^0.8.3",
@@ -20,5 +25,7 @@
     "sharp": "^0.35.5",
     "typescript": "^7.0.2",
     "vite": "^8.3.4"
-  }
+  },
+  "description": "Free, client-side colouring website for kids.",
+  "license": "UNLICENSED"
 }

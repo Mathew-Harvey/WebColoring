@@ -4,6 +4,9 @@
 export const copy = {
   appName: 'WebColoring',
   tagline: 'Pick a book. Pick a page. Colour!',
+  // Used for the page title, search results and the installed app.
+  metaDescription: 'Free colouring pages for kids. No ads, no accounts. Works offline.',
+  noScript: 'WebColoring needs JavaScript to colour pages.',
 
   home: {
     shelfLabel: 'Your books',
@@ -148,7 +151,7 @@ export const copy = {
     backupBody: 'Keep a copy of all saved pictures in one file, or bring them back from a backup.',
     backupExport: 'Backup my art',
     backupImport: 'Restore from backup',
-    backupDone: (n: number) => `Restored ${n} pictures.`,
+    backupDone: (n: number) => (n === 1 ? 'Restored 1 picture.' : `Restored ${n} pictures.`),
     backupEmpty: 'There are no saved pictures yet.',
     backupError: 'That file did not look like a WebColoring backup.',
     clearTitle: 'Clear saved art',

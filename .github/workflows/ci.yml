@@ -1,0 +1,27 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches-ignore: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+        env:
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
+      - run: npm run build
+      - name: Content rules
+        run: |
+          ! grep -rniIw "minecraft\|lego\|cube world" src scripts public/books/index.json public/books/*/book.json README.md CREDITS.md
+          ! grep -rnI "$(printf '\xe2\x80\x94')" src scripts README.md CREDITS.md

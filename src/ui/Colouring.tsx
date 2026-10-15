@@ -169,10 +169,14 @@ export function Colouring({ bookId, pageId, done, cbn }: Props) {
       });
   }, [key, bookId, pageId]);
 
+  const dirtySince = useRef(0);
   const scheduleSave = useCallback(() => {
+    if (!dirty.current) dirtySince.current = Date.now();
     dirty.current = true;
     clearTimeout(saveTimer.current);
-    saveTimer.current = window.setTimeout(saveNow, 1500);
+    // Save a moment after the child pauses, and at least every few seconds while they keep going.
+    const wait = Math.max(0, Math.min(1200, 4000 - (Date.now() - dirtySince.current)));
+    saveTimer.current = window.setTimeout(saveNow, wait);
   }, [saveNow]);
 
   useEffect(() => {
