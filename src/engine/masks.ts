@@ -1,6 +1,13 @@
 import { makeCanvas, ctx2d } from './canvas';
 import type { PageData } from './page-data';
 
+/** Frees a canvas's pixels now rather than whenever it is garbage collected (matters on iOS). */
+export function release(c: HTMLCanvasElement | null | undefined) {
+  if (!c) return;
+  c.width = 1;
+  c.height = 1;
+}
+
 export interface Mask {
   id: number;
   canvas: HTMLCanvasElement;
@@ -14,7 +21,8 @@ export interface Mask {
 export class RegionMasks {
   private cache = new Map<number, Mask>();
   private bytes = 0;
-  private readonly limit = 96 * 1024 * 1024;
+  // iOS Safari caps the memory of all canvases together, so keep this modest.
+  private readonly limit = 40 * 1024 * 1024;
 
   constructor(private data: PageData) {}
 
@@ -69,6 +77,7 @@ export class RegionMasks {
       const [oldId, old] = this.cache.entries().next().value as [number, Mask];
       this.cache.delete(oldId);
       this.bytes -= old.w * old.h * 4;
+      release(old.canvas);
     }
     return mask;
   }
@@ -117,6 +126,7 @@ export class RegionMasks {
   }
 
   clear() {
+    for (const m of this.cache.values()) release(m.canvas);
     this.cache.clear();
     this.bytes = 0;
   }

@@ -494,7 +494,6 @@ export const BRUSHES: Record<BrushId, BrushDef> = {
         ctx.strokeStyle = style;
         ctx.stroke();
       }
-      for (const pt of pts) s.dirty.add(pt.x, pt.y, s.size * 1.5 + 2);
     },
   },
   stamp: {
@@ -544,17 +543,26 @@ export function newStroke(ctx: Ctx, hex: string, size: number, stamp: StampShape
 /** Feeds one new point into the stroke, drawing as needed. */
 export function strokeTo(brush: BrushDef, s: Stroke, pt: StrokePoint) {
   if (brush.mode === 'path') {
-    // Path brushes redraw from scratch, so wipe what they drew last time.
-    const r = s.total.rect(s.ctx.canvas.width, s.ctx.canvas.height, 4);
-    if (r) {
-      s.ctx.clearRect(r.x, r.y, r.w, r.h);
-      s.dirty.add(r.x, r.y);
-      s.dirty.add(r.x + r.w, r.y + r.h);
-    }
+    // Path brushes draw the whole stroke as one path (so see-through glows stay even),
+    // but only the area around the newest segment is cleared and repainted.
     if (s.last) s.dist += Math.hypot(pt.x - s.last.x, pt.y - s.last.y);
     s.points.push(pt);
     s.last = pt;
+    const pad = s.size * 1.6 + 4;
+    const area = new Bounds();
+    for (const q of s.points.slice(-3)) area.add(q.x, q.y, pad);
+    const r = area.rect(s.ctx.canvas.width, s.ctx.canvas.height, 2);
+    if (!r) return;
+    const ctx = s.ctx;
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(r.x, r.y, r.w, r.h);
+    ctx.clip();
+    ctx.clearRect(r.x, r.y, r.w, r.h);
     brush.path!(s);
+    ctx.restore();
+    s.dirty.add(r.x, r.y);
+    s.dirty.add(r.x + r.w, r.y + r.h);
   } else if (brush.mode === 'segment') {
     const a = s.last ?? pt;
     brush.segment!(s, a, pt);

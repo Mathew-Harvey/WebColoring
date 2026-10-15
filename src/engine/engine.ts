@@ -3,7 +3,7 @@ import { ctx2d, intersect, makeCanvas, type Ctx, type Rect } from './canvas';
 import { hexToRgb, rgbToHex, rgba, lighten, darken, luminance } from './colour';
 import { paintFill, type FillStyle } from './fills';
 import { History, type CbnChange } from './history';
-import { RegionMasks, type Mask } from './masks';
+import { RegionMasks, release, type Mask } from './masks';
 import type { PageData } from './page-data';
 import { path2d, SYMBOL_PATHS, type StampShape } from './shapes';
 import { View } from './view';
@@ -225,12 +225,8 @@ export class Engine {
     this.masks.clear();
     this.history.clear();
     // Free GPU memory promptly (iOS is strict about canvas memory).
-    for (const c of [this.paint, this.strokeCanvas, this.highlight?.canvas, this.baseCache?.canvas, this.topCache?.canvas]) {
-      if (c) {
-        c.width = 1;
-        c.height = 1;
-      }
-    }
+    for (const c of [this.paint, this.strokeCanvas, this.highlight?.canvas, this.baseCache?.canvas, this.topCache?.canvas]) release(c);
+    this.fx && release(this.fx.canvas);
     for (const img of [this.overlay, this.data.overlayHalf]) if ('close' in img && typeof img.close === 'function') img.close();
   }
 
@@ -650,7 +646,7 @@ export class Engine {
     const commit = this.history.capture(fx.rect);
     this.paintCtx.drawImage(fx.canvas, fx.rect.x, fx.rect.y);
     this.paintVersion++;
-    fx.canvas.width = 1;
+    release(fx.canvas);
     commit(fx.cbn);
     this.events.history();
     this.events.change();
@@ -799,6 +795,7 @@ export class Engine {
           t.fillStyle = this.highlightColour(R.n[id]);
           t.fillRect(0, 0, m.w, m.h);
           h.ctx.drawImage(tmp, dx, dy, dw, dh);
+          release(tmp);
         } else {
           // Grow the cut-out a touch so no half-pixel fringe is left at the edges.
           h.ctx.drawImage(m.canvas, dx - 0.5, dy - 0.5, dw + 1, dh + 1);
@@ -826,7 +823,7 @@ export class Engine {
   }
 
   private rebuildHighlight() {
-    if (this.highlight) this.highlight.canvas.width = 1;
+    release(this.highlight?.canvas);
     this.highlight = null;
     this.highlightFor = 0;
     const n = this.cbnSel;
