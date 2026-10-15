@@ -102,8 +102,13 @@ async function loadImage(url: string): Promise<CanvasImageSource> {
     }
   }
   const img = new Image();
-  img.src = URL.createObjectURL(blob);
-  await img.decode();
+  const objectUrl = URL.createObjectURL(blob);
+  img.src = objectUrl;
+  try {
+    await img.decode();
+  } finally {
+    URL.revokeObjectURL(objectUrl);
+  }
   return img;
 }
 

@@ -180,6 +180,26 @@ for (const format of ['A4', 'Letter']) {
   check(`print: fits on one ${format} page`, pages === 1, `${pages} page(s)`);
 }
 
+// Reduced motion: fills land at once, no confetti, no pulsing.
+const ctx3 = await browser.newContext({ viewport: { width: 1280, height: 800 }, reducedMotion: 'reduce', serviceWorkers: 'block' });
+const page3 = await ctx3.newPage();
+await page3.goto(`${BASE}?e2e#/book/blocky-builders/page05`);
+await page3.waitForFunction(() => window.__wc && !document.querySelector('.stage-msg'));
+await page3.click('.rail-tools button[aria-label="Fill"]');
+const big = await page3.evaluate(() => window.__wc.cbnTargets().sort((a, b) => b.r - a.r)[0]);
+const at = await page3.evaluate(([x, y]) => {
+  const [sx, sy] = window.__wc.view.toScreen(x, y);
+  const r = document.querySelector('.paper').getBoundingClientRect();
+  return [r.left + sx, r.top + sy];
+}, [big.x, big.y]);
+await page3.mouse.click(at[0], at[1]);
+const instant = await page3.evaluate((id) => window.__wc.paintCoverage(id).inside, big.id);
+check('reduced motion: fill appears at once', instant > 1000, `${instant}`);
+await page3.goto(`${BASE}?e2e#/book/blocky-builders/page05/done`);
+await page3.waitForSelector('.finished');
+check('reduced motion: no confetti', (await page3.locator('.confetti').count()) === 0);
+await ctx3.close();
+
 check('no page errors', errors.length === 0, errors.join(' | '));
 await browser.close();
 process.exit(results.every(Boolean) ? 0 : 1);

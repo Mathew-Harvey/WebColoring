@@ -3,7 +3,7 @@ import { copy } from '../copy';
 import { buzz, sound } from '../audio/sound';
 import { loadBook, pageAsset, type Book, type PageInfo } from '../data/books';
 import { getLocal, setLocal } from '../data/settings';
-import { artKey, deleteArt, getMeta, getPaint, requestPersistence, saveArt } from '../data/storage';
+import { artKey, deleteArt, getMeta, getPaint, requestPersistence, saveArt, storageWorks, trackSave } from '../data/storage';
 import type { BrushId } from '../engine/brushes';
 import { Engine, type Feedback, type ToolId } from '../engine/engine';
 import type { FillStyle } from '../engine/fills';
@@ -108,6 +108,9 @@ export function Colouring({ bookId, pageId, done, cbn }: Props) {
   const pageRef = useRef<PageInfo | null>(null);
   const completeRef = useRef(false);
   const dirty = useRef(false);
+  // Saving is only allowed once the page's saved art has been read back safely.
+  const canSave = useRef(false);
+  const doneTimer = useRef(0);
   const saveTimer = useRef(0);
   const [book, setBook] = useState<Book | null>(null);
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
@@ -142,11 +145,14 @@ export function Colouring({ bookId, pageId, done, cbn }: Props) {
   const saveNow = useCallback((): Promise<void> => {
     const e = engineRef.current;
     const page = pageRef.current;
-    if (!e || !page || !dirty.current) return Promise.resolve();
+    if (!e || !page || !canSave.current) return Promise.resolve();
+    // Commit a fill that is still animating (or a stroke in progress) so it is not lost.
+    e.flush();
+    if (!dirty.current) return Promise.resolve();
     dirty.current = false;
     clearTimeout(saveTimer.current);
     const cbnDone = e.cbnDoneList();
-    if (e.isBlank() && !cbnDone.length) return deleteArt(key).catch(() => {});
+    if (e.isBlank() && !cbnDone.length) return trackSave(deleteArt(key).catch(() => {}));
     const p = e.cbnProgress();
     const meta = {
       key,
@@ -161,12 +167,14 @@ export function Colouring({ bookId, pageId, done, cbn }: Props) {
     // Both canvases are read right now, so this is safe to call just before the engine goes away.
     const paint = e.paintBlob();
     const thumb = canvasToBlob(e.composite(480), 'image/webp', 0.8);
-    return Promise.all([paint, thumb])
-      .then(([paintBlob, thumbBlob]) => saveArt({ ...meta, thumb: thumbBlob }, paintBlob))
-      .then(() => requestPersistence())
-      .catch(() => {
-        dirty.current = true;
-      });
+    return trackSave(
+      Promise.all([paint, thumb])
+        .then(([paintBlob, thumbBlob]) => saveArt({ ...meta, thumb: thumbBlob }, paintBlob))
+        .then(() => requestPersistence())
+        .catch(() => {
+          dirty.current = true;
+        }),
+    );
   }, [key, bookId, pageId]);
 
   const dirtySince = useRef(0);
@@ -178,6 +186,13 @@ export function Colouring({ bookId, pageId, done, cbn }: Props) {
     const wait = Math.max(0, Math.min(1200, 4000 - (Date.now() - dirtySince.current)));
     saveTimer.current = window.setTimeout(saveNow, wait);
   }, [saveNow]);
+
+  // On iPhone and iPad, stop a pinch on the toolbars zooming the whole page.
+  useEffect(() => {
+    const stop = (ev: Event) => ev.preventDefault();
+    document.addEventListener('gesturestart', stop);
+    return () => document.removeEventListener('gesturestart', stop);
+  }, []);
 
   useEffect(() => {
     const onHide = () => {
@@ -199,6 +214,7 @@ export function Colouring({ bookId, pageId, done, cbn }: Props) {
     setStatus('loading');
     completeRef.current = false;
     dirty.current = false;
+    canSave.current = false;
 
     (async () => {
       const b = await loadBook(bookId);
@@ -209,7 +225,10 @@ export function Colouring({ bookId, pageId, done, cbn }: Props) {
       // Let the toolbar paint before the big page downloads start.
       await new Promise((r) => requestAnimationFrame(() => setTimeout(r, 0)));
       if (cancelled) return;
-      const [data, meta, paint] = await Promise.all([loadPageData(bookId, page), getMeta(key), getPaint(key)]);
+      // If this browser blocks storage, colouring still works; there is just nothing to save to.
+      // If storage works but reading fails, stop: saving now could overwrite the child's art.
+      const stored = (await storageWorks()) ? Promise.all([getMeta(key), getPaint(key)]) : Promise.resolve([undefined, undefined] as const);
+      const [data, [meta, paint]] = await Promise.all([loadPageData(bookId, page), stored]);
       // Short breaks between the heavy steps keep the page responsive while it opens.
       const breathe = () => new Promise((r) => setTimeout(r, 0));
       await breathe();
@@ -233,7 +252,12 @@ export function Colouring({ bookId, pageId, done, cbn }: Props) {
             completeRef.current = true;
             dirty.current = true;
             saveNow();
-            setTimeout(() => navigate(href.done(bookId, pageId)), reducedMotion ? 300 : 1100);
+            clearTimeout(doneTimer.current);
+            doneTimer.current = window.setTimeout(() => {
+              // Only celebrate if the page is still finished (no undo in the meantime).
+              const p = engineRef.current?.cbnProgress();
+              if (p && p.total > 0 && p.done === p.total) navigate(href.done(bookId, pageId));
+            }, reducedMotion ? 300 : 1100);
           },
           view: () => {
             const e = engineRef.current;
@@ -248,7 +272,7 @@ export function Colouring({ bookId, pageId, done, cbn }: Props) {
       await breathe();
       if (cancelled) return;
       if (location.search.includes('e2e')) (window as unknown as { __wc: Engine }).__wc = engine;
-      if (paint) await engine.loadPaint(paint).catch(() => {});
+      if (paint) await engine.loadPaint(paint);
       if (meta) completeRef.current = meta.complete;
       if (meta && meta.v === page.v) engine.loadCbnDone(meta.cbnDone);
       await breathe();
@@ -261,12 +285,15 @@ export function Colouring({ bookId, pageId, done, cbn }: Props) {
         updatePrefs({ tool: 'fill', fillStyle: 'solid' });
       }
       engine.start();
+      canSave.current = await storageWorks();
       if (!cancelled) setStatus('ready');
     })().catch(() => !cancelled && setStatus('error'));
 
     return () => {
       cancelled = true;
+      clearTimeout(doneTimer.current);
       saveNow();
+      canSave.current = false;
       engine?.destroy();
       engineRef.current = null;
     };
@@ -489,25 +516,27 @@ export function Colouring({ bookId, pageId, done, cbn }: Props) {
       </aside>
 
       <aside class="rail rail-colours">
-        <ToolOptions
-          tool={prefs.tool}
-          colour={selectedHex}
-          size={size}
-          opacity={prefs.opacity}
-          fillStyle={prefs.fillStyle}
-          stamp={prefs.stamp}
-          screenScale={screenScale}
-          onSize={(s) => updatePrefs({ sizes: { ...prefs.sizes, [prefs.tool]: s } })}
-          onOpacity={(o) => updatePrefs({ opacity: o })}
-          onFillStyle={(s) => {
-            sound.click();
-            updatePrefs({ fillStyle: s });
-          }}
-          onStamp={(s) => {
-            sound.click();
-            updatePrefs({ stamp: s });
-          }}
-        />
+        {!(cbnOn && prefs.tool === 'fill') && (
+          <ToolOptions
+            tool={prefs.tool}
+            colour={selectedHex}
+            size={size}
+            opacity={prefs.opacity}
+            fillStyle={prefs.fillStyle}
+            stamp={prefs.stamp}
+            screenScale={screenScale}
+            onSize={(s) => updatePrefs({ sizes: { ...prefs.sizes, [prefs.tool]: s } })}
+            onOpacity={(o) => updatePrefs({ opacity: o })}
+            onFillStyle={(s) => {
+              sound.click();
+              updatePrefs({ fillStyle: s });
+            }}
+            onStamp={(s) => {
+              sound.click();
+              updatePrefs({ stamp: s });
+            }}
+          />
+        )}
         {cbnOn && progress ? (
           <NumberStrip progress={progress} selected={e!.cbnSelected} wrongKey={wrongKey} patterns={settings.patterns} onSelect={selectNumber} onHint={hint} />
         ) : (

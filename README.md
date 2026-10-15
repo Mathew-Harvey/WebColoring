@@ -118,6 +118,7 @@ npm run test:e2e                     # Chromium desktop + Android emulation
 BROWSER=webkit npm run test:e2e      # WebKit desktop + iPhone emulation
 npm run test:features                # sound unlock, haptics, store card, backup, print, ...
 npm run test:offline                 # service worker, installability, offline use
+npm run test:regressions             # checks for bugs found in code review
 npm run test:screens                 # screenshots at five sizes into debug/screens
 ```
 

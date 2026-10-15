@@ -70,9 +70,11 @@ export class History {
   private undoStack: Entry[] = [];
   private redoStack: Entry[] = [];
   private bytes = 0;
-  readonly minSteps = 50;
   readonly maxSteps = 80;
-  readonly budget = 320 * 1024 * 1024;
+  // A memory cap for all patches. Ordinary steps are small (run-length packed), so this
+  // keeps 50+ steps in normal use while stopping huge scribbles from exhausting memory.
+  // Phones and tablets get less, because iOS closes tabs that use too much.
+  readonly budget = (typeof navigator !== 'undefined' && navigator.maxTouchPoints > 1 ? 160 : 400) * 1024 * 1024;
 
   constructor(private ctx: Ctx) {}
 
@@ -90,10 +92,7 @@ export class History {
   }
 
   private trim() {
-    while (
-      this.undoStack.length > this.maxSteps ||
-      (this.bytes > this.budget && this.undoStack.length > this.minSteps)
-    ) {
+    while (this.undoStack.length > this.maxSteps || (this.bytes > this.budget && this.undoStack.length > 1)) {
       const e = this.undoStack.shift()!;
       this.bytes -= bytesOf(e);
     }
@@ -119,6 +118,7 @@ export class History {
       e.after = pack(this.ctx.getImageData(x, y, w, h), e.rect);
       this.bytes += e.after.data.byteLength;
     }
+    this.trim();
     this.ctx.putImageData(unpack(e.before), x, y);
     this.redoStack.push(e);
     return e.cbn;

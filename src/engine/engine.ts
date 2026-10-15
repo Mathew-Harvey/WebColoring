@@ -94,6 +94,8 @@ export class Engine {
 
   // Interaction.
   private pointers = new Map<number, PointerInfo>();
+  /** Touches ignored as a resting palm while a pen is in use. */
+  private ignored = new Set<number>();
   private mode: 'idle' | 'draw' | 'tap' | 'gesture' | 'pan' | 'consumed' = 'idle';
   private drawPointer = -1;
   private drawType = 'mouse';
@@ -113,6 +115,11 @@ export class Engine {
   private smooth = { x: 0, y: 0, p: 0.7, sx: 0, sy: 0, t: 0, raw: { x: 0, y: 0 }, realPressure: false };
   private holdAt = 0;
   private stampDist = 0;
+  /** Captured when a stroke starts, so changing tools mid-stroke cannot change it. */
+  private strokeErase = false;
+  private strokeAlpha = 1;
+  /** Stay inside the lines is on, but the stroke has not reached a region yet. */
+  private clipPending = false;
   private seed = 1;
 
   // Effects.
@@ -138,6 +145,8 @@ export class Engine {
   private baseCache: { canvas: HTMLCanvasElement; ctx: Ctx; key: string } | null = null;
   private topCache: { canvas: HTMLCanvasElement; ctx: Ctx; key: string } | null = null;
   private paintVersion = 0;
+  /** Set once anything has been painted or restored on this page. */
+  private touched = false;
   private numbersVersion = 0;
   private patterns = false;
 
@@ -199,6 +208,7 @@ export class Engine {
     this.on(window, 'keyup', (e) => {
       if ((e as KeyboardEvent).code === 'Space') this.spaceDown = false;
     });
+    this.on(window, 'blur', () => (this.spaceDown = false));
     // Safari pinch gestures on trackpads.
     this.on(canvas, 'gesturestart', (e) => e.preventDefault());
 
@@ -290,9 +300,16 @@ export class Engine {
   }
 
   setTool(t: ToolId) {
+    if (t === this.tool) return;
     this.finishFx();
     this.tool = t;
     this.requestRender();
+  }
+
+  /** Commits anything still in flight (a fill animation or a stroke), e.g. before saving. */
+  flush() {
+    this.finishFx();
+    if (this.stroke) this.endStroke();
   }
 
   // ---------------------------------------------------------------- pointer input
@@ -310,7 +327,21 @@ export class Engine {
       /* ignore */
     }
     const pt = this.local(e);
-    if (e.pointerType === 'pen') this.penAt = performance.now();
+    if (e.pointerType === 'pen') {
+      this.penAt = performance.now();
+      // A pen wins over any touches already down: they are a resting hand.
+      for (const [id, p] of this.pointers) {
+        if (p.type !== 'touch') continue;
+        this.pointers.delete(id);
+        this.ignored.add(id);
+      }
+      if (this.mode === 'gesture' || this.mode === 'consumed' || this.mode === 'pan') this.mode = 'idle';
+      this.gesture = null;
+    } else if (e.pointerType === 'touch' && [...this.pointers.values()].some((p) => p.type === 'pen')) {
+      this.ignored.add(e.pointerId);
+      return;
+    }
+    // After using a pen, fingers only move and zoom the page.
     const palm = e.pointerType === 'touch' && performance.now() - this.penAt < 5000;
     this.pointers.set(e.pointerId, pt);
 
@@ -362,6 +393,7 @@ export class Engine {
   }
 
   private onMove(e: PointerEvent) {
+    if (this.ignored.has(e.pointerId)) return;
     const pt = this.local(e);
     if (!this.pointers.has(e.pointerId)) {
       if (e.pointerType === 'mouse') {
@@ -406,6 +438,7 @@ export class Engine {
   }
 
   private onUp(e: PointerEvent, cancelled = false) {
+    if (this.ignored.delete(e.pointerId)) return;
     if (!this.pointers.has(e.pointerId)) return;
     const pt = this.pointers.get(e.pointerId)!;
     this.pointers.delete(e.pointerId);
@@ -484,10 +517,14 @@ export class Engine {
     this.brush = brush;
     this.stroke = newStroke(this.strokeCtx, this.colour, this.size, this.stamp, this.tex, this.seed++);
     this.clip = null;
+    this.clipPending = false;
     if (this.stayInside) {
       const r = this.masks.nearestRegion(px, py, 10 + this.size * 0.2);
       if (r) this.clip = this.masks.get(r);
+      else this.clipPending = true;
     }
+    this.strokeErase = tool === 'eraser';
+    this.strokeAlpha = (this.strokeErase ? 1 : brush.opacity) * this.opacity;
     const real = e.pointerType === 'pen' && e.pressure > 0;
     this.smooth = { x: px, y: py, p: real ? e.pressure : 0.75, sx: e.clientX, sy: e.clientY, t: e.timeStamp, raw: { x: px, y: py }, realPressure: real };
     strokeTo(brush, this.stroke, { x: px, y: py, p: this.smooth.p });
@@ -504,6 +541,16 @@ export class Engine {
     const r = this.canvas.getBoundingClientRect();
     const [px, py] = this.view.toPage(e.clientX - r.left, e.clientY - r.top);
     s.raw = { x: px, y: py };
+    if (this.clipPending) {
+      // The stroke started off the page or on a thick line: clip to the first region it enters.
+      const r = this.masks.regionAt(px, py);
+      if (r) {
+        this.clip = this.masks.get(r);
+        this.clipPending = false;
+        const done = this.stroke.total.rect(this.W, this.H, 2);
+        if (done) clipToMask(this.strokeCtx, done, this.clip);
+      }
+    }
     const dt = Math.max(1, e.timeStamp - s.t);
     const screenDist = Math.hypot(e.clientX - s.sx, e.clientY - s.sy);
     const speed = screenDist / dt; // css px per ms
@@ -556,13 +603,15 @@ export class Engine {
       const commit = this.history.capture(rect);
       const ctx = this.paintCtx;
       ctx.save();
-      const eraser = this.tool === 'eraser';
-      ctx.globalAlpha = (eraser ? 1 : brush.opacity) * this.opacity;
-      ctx.globalCompositeOperation = eraser ? 'destination-out' : 'source-over';
+      // While no region was reached, a stay-inside stroke paints nothing.
+      if (this.clipPending) ctx.globalAlpha = 0;
+      else ctx.globalAlpha = this.strokeAlpha;
+      ctx.globalCompositeOperation = this.strokeErase ? 'destination-out' : 'source-over';
       ctx.drawImage(this.strokeCanvas, rect.x, rect.y, rect.w, rect.h, rect.x, rect.y, rect.w, rect.h);
       ctx.restore();
       this.strokeCtx.clearRect(rect.x, rect.y, rect.w, rect.h);
       this.paintVersion++;
+      this.touched = true;
       commit();
       this.events.history();
       this.events.change();
@@ -570,6 +619,7 @@ export class Engine {
     this.stroke = null;
     this.brush = null;
     this.clip = null;
+    this.clipPending = false;
     this.feedback.strokeEnd();
     this.requestRender();
   }
@@ -596,7 +646,12 @@ export class Engine {
     const n = R.n[r];
     if (this.cbnOn && n) {
       if (this.done[r]) {
-        this.feedback.pick();
+        // Already done (maybe erased since): the right number paints it again, no score change.
+        if (this.cbnSel === n) {
+          const hex = this.cbnPalette[n - 1].hex;
+          this.startFill(r, hex, 'solid', px, py, null);
+          this.feedback.fill(hex);
+        } else this.feedback.pick();
         return;
       }
       if (this.cbnSel !== n) {
@@ -646,6 +701,7 @@ export class Engine {
     const commit = this.history.capture(fx.rect);
     this.paintCtx.drawImage(fx.canvas, fx.rect.x, fx.rect.y);
     this.paintVersion++;
+    this.touched = true;
     release(fx.canvas);
     commit(fx.cbn);
     this.events.history();
@@ -678,6 +734,7 @@ export class Engine {
     const change = this.history.undo();
     if (change === undefined) return;
     this.paintVersion++;
+    this.touched = true;
     if (change) this.markDone(change.done, false);
     this.feedback.undo();
     this.events.history();
@@ -690,6 +747,7 @@ export class Engine {
     const change = this.history.redo();
     if (change === undefined) return;
     this.paintVersion++;
+    this.touched = true;
     if (change) this.markDone(change.done, true);
     this.feedback.undo();
     this.events.history();
@@ -881,11 +939,20 @@ export class Engine {
 
   /** Restores a saved paint layer. */
   async loadPaint(blob: Blob) {
-    const bmp = await createImageBitmap(blob);
+    let img: ImageBitmap | HTMLImageElement;
+    if (typeof createImageBitmap === 'function') img = await createImageBitmap(blob);
+    else {
+      img = new Image();
+      img.src = URL.createObjectURL(blob);
+      await img.decode();
+      URL.revokeObjectURL(img.src);
+    }
+    if (this.destroyed) return;
     this.paintCtx.clearRect(0, 0, this.W, this.H);
-    this.paintCtx.drawImage(bmp, 0, 0, this.W, this.H);
-    bmp.close();
+    this.paintCtx.drawImage(img, 0, 0, this.W, this.H);
+    if ('close' in img) img.close();
     this.paintVersion++;
+    this.touched = true;
     this.history.clear();
     this.events.history();
     this.requestRender();
@@ -896,6 +963,7 @@ export class Engine {
     const commit = this.history.capture({ x: 0, y: 0, w: this.W, h: this.H });
     this.paintCtx.clearRect(0, 0, this.W, this.H);
     this.paintVersion++;
+    this.touched = true;
     commit(null);
     this.events.history();
     this.events.change();
@@ -945,14 +1013,9 @@ export class Engine {
     return this.history.size;
   }
 
-  /** True when nothing has been painted. */
+  /** True when nothing has ever been painted or restored here. */
   isBlank(): boolean {
-    const small = makeCanvas(64, 36);
-    const ctx = ctx2d(small, { willReadFrequently: true });
-    ctx.drawImage(this.paint, 0, 0, 64, 36);
-    const d = ctx.getImageData(0, 0, 64, 36).data;
-    for (let i = 3; i < d.length; i += 4) if (d[i]) return false;
-    return true;
+    return !this.touched;
   }
 
   // ---------------------------------------------------------------- rendering
@@ -1043,8 +1106,8 @@ export class Engine {
     const st = this.stroke;
     if (st && this.brush) {
       const r = st.total.rect(this.W, this.H, 2);
-      if (r) {
-        ctx.globalAlpha = (this.tool === 'eraser' ? 1 : this.brush.opacity) * this.opacity;
+      if (r && !this.clipPending) {
+        ctx.globalAlpha = this.strokeAlpha;
         ctx.drawImage(this.strokeCanvas, r.x, r.y, r.w, r.h, r.x, r.y, r.w, r.h);
         ctx.globalAlpha = 1;
       }
@@ -1079,6 +1142,10 @@ export class Engine {
       again = true;
     } else this.hintRegion = 0;
 
+    if (this.wiggle && now - this.wiggle.t0 > 450) {
+      this.wiggle = null;
+      this.numbersVersion++;
+    }
     // Lines and numbers always on top, cached until the view or numbers change.
     const top = this.cache('top');
     const wiggling = this.cbnOn && this.wiggle !== null;

@@ -40,7 +40,16 @@ function open(): Promise<IDBDatabase> {
         if (!db.objectStoreNames.contains('pages')) db.createObjectStore('pages', { keyPath: 'key' });
         if (!db.objectStoreNames.contains('paint')) db.createObjectStore('paint');
       };
-      req.onsuccess = () => resolve(req.result);
+      req.onsuccess = () => {
+        const db = req.result;
+        // Safari can drop the connection when the app is in the background: reconnect next time.
+        db.onclose = () => (dbPromise = null);
+        db.onversionchange = () => {
+          db.close();
+          dbPromise = null;
+        };
+        resolve(db);
+      };
       req.onerror = () => reject(req.error);
       req.onblocked = () => reject(new Error('blocked'));
     });
@@ -49,42 +58,70 @@ function open(): Promise<IDBDatabase> {
   return dbPromise;
 }
 
-function tx<T>(stores: string[], mode: IDBTransactionMode, fn: (t: IDBTransaction) => IDBRequest<T> | void): Promise<T> {
-  return open().then(
-    (db) =>
-      new Promise<T>((resolve, reject) => {
-        const t = db.transaction(stores, mode);
-        let result: T;
-        const req = fn(t);
-        if (req) req.onsuccess = () => (result = req.result);
-        t.oncomplete = () => resolve(result);
-        t.onerror = () => reject(t.error);
-        t.onabort = () => reject(t.error);
-      }),
-  );
+function runTx<T>(db: IDBDatabase, stores: string[], mode: IDBTransactionMode, fn: (t: IDBTransaction) => IDBRequest<T> | void): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const t = db.transaction(stores, mode);
+    let result: T;
+    const req = fn(t);
+    if (req) req.onsuccess = () => (result = req.result);
+    t.oncomplete = () => resolve(result);
+    t.onerror = () => reject(t.error);
+    t.onabort = () => reject(t.error);
+  });
 }
 
-export const artKey = (bookId: string, pageId: string) => `${bookId}/${pageId}`;
-
-export async function getMeta(key: string): Promise<PageMeta | undefined> {
+async function tx<T>(stores: string[], mode: IDBTransactionMode, fn: (t: IDBTransaction) => IDBRequest<T> | void): Promise<T> {
   try {
-    const m = await tx<StoredMeta | undefined>(['pages'], 'readonly', (t) => t.objectStore('pages').get(key));
-    return m ? fromStoredMeta(m) : undefined;
-  } catch {
-    return undefined;
+    return await runTx(await open(), stores, mode, fn);
+  } catch (e) {
+    // A stale connection: open a fresh one and try once more.
+    const name = (e as DOMException)?.name;
+    if (name !== 'InvalidStateError' && name !== 'UnknownError') throw e;
+    dbPromise = null;
+    return runTx(await open(), stores, mode, fn);
   }
 }
 
+// Saves still being written. Reads wait for them so the picker never shows old pictures.
+const pending = new Set<Promise<unknown>>();
+
+export function trackSave<T>(p: Promise<T>): Promise<T> {
+  pending.add(p);
+  const done = () => pending.delete(p);
+  p.then(done, done);
+  return p;
+}
+
+const settled = () => Promise.allSettled([...pending]);
+
+export const artKey = (bookId: string, pageId: string) => `${bookId}/${pageId}`;
+
+/** Saved details for a page. Throws if storage could not be read (as opposed to "nothing saved"). */
+export async function getMeta(key: string): Promise<PageMeta | undefined> {
+  await settled();
+  const m = await tx<StoredMeta | undefined>(['pages'], 'readonly', (t) => t.objectStore('pages').get(key));
+  return m ? fromStoredMeta(m) : undefined;
+}
+
+/** Saved paint for a page. Throws if storage could not be read (as opposed to "nothing saved"). */
 export async function getPaint(key: string): Promise<Blob | undefined> {
+  await settled();
+  const s = await tx<Stored | undefined>(['paint'], 'readonly', (t) => t.objectStore('paint').get(key));
+  return fromStored(s) ?? undefined;
+}
+
+/** True when this browser lets us use IndexedDB at all. */
+export async function storageWorks(): Promise<boolean> {
   try {
-    const s = await tx<Stored | undefined>(['paint'], 'readonly', (t) => t.objectStore('paint').get(key));
-    return fromStored(s) ?? undefined;
+    await open();
+    return true;
   } catch {
-    return undefined;
+    return false;
   }
 }
 
 export async function listMeta(bookId?: string): Promise<PageMeta[]> {
+  await settled();
   try {
     const all = await tx<StoredMeta[]>(['pages'], 'readonly', (t) => t.objectStore('pages').getAll());
     return (bookId ? all.filter((m) => m.bookId === bookId) : all).map(fromStoredMeta);

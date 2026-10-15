@@ -13,7 +13,8 @@
     "test:e2e": "node tests/e2e.mjs",
     "test:features": "node tests/features.mjs",
     "test:offline": "node tests/offline.mjs",
-    "test:screens": "node tests/screens.mjs"
+    "test:screens": "node tests/screens.mjs",
+    "test:regressions": "node tests/regressions.mjs"
   },
   "dependencies": {
     "fflate": "^0.8.3",

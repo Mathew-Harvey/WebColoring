@@ -671,6 +671,7 @@ a {
   touch-action: none;
   cursor: crosshair;
   opacity: 0;
+  -webkit-touch-callout: none;
 }
 
 .paper.ready {
@@ -1034,6 +1035,10 @@ input[type='range']::-moz-range-thumb {
   display: flex;
   flex-direction: column;
   gap: 6px;
+}
+
+.layout-side .rail-colours > * {
+  flex-shrink: 0;
 }
 
 .layout-side .tool-list {

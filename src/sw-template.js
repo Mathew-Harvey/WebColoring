@@ -8,16 +8,39 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     caches
       .open(SHELL)
-      .then((cache) => cache.addAll(PRECACHE))
+      // Skip the HTTP cache so a fresh deploy never stores yesterday's files.
+      .then((cache) => cache.addAll(PRECACHE.map((url) => new Request(url, { cache: 'reload' }))))
       .then(() => self.skipWaiting()),
   );
 });
+
+/** Removes kept page art whose version is no longer in any book. */
+async function prunePages() {
+  const shell = await caches.open(SHELL);
+  const current = new Set();
+  for (const req of await shell.keys()) {
+    if (!/\/books\/[^/]+\/book\.json$/.test(new URL(req.url).pathname)) continue;
+    try {
+      const book = await (await shell.match(req)).json();
+      for (const p of book.pages || []) current.add(p.v);
+    } catch {
+      return; // If a book cannot be read, keep everything.
+    }
+  }
+  if (!current.size) return;
+  const pages = await caches.open(PAGES);
+  for (const req of await pages.keys()) {
+    const v = new URL(req.url).searchParams.get('v');
+    if (v && !current.has(v)) await pages.delete(req);
+  }
+}
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches
       .keys()
       .then((keys) => Promise.all(keys.filter((k) => k !== SHELL && k !== PAGES).map((k) => caches.delete(k))))
+      .then(() => prunePages().catch(() => {}))
       .then(() => self.clients.claim()),
   );
 });

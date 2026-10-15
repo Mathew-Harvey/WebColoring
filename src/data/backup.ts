@@ -1,7 +1,7 @@
 // "Backup my art": every saved page in one zip file, and back again.
 
 import { strToU8, strFromU8, unzipSync, zipSync, type Zippable } from 'fflate';
-import { getPaint, listMeta, saveArt, type PageMeta } from './storage';
+import { artKey, getPaint, listMeta, saveArt, type PageMeta } from './storage';
 
 interface BackupManifest {
   app: 'webcoloring';
@@ -31,6 +31,16 @@ export async function exportBackup(): Promise<Blob | null> {
   return new Blob([zip.buffer as ArrayBuffer], { type: 'application/zip' });
 }
 
+async function decodes(bytes: Uint8Array): Promise<boolean> {
+  try {
+    const bmp = await createImageBitmap(new Blob([bytes.slice().buffer], { type: 'image/png' }));
+    bmp.close();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 /** Restores pages from a backup. Returns how many were restored. */
 export async function importBackup(file: Blob): Promise<number> {
   const entries = unzipSync(await blobBytes(file));
@@ -38,12 +48,20 @@ export async function importBackup(file: Blob): Promise<number> {
   if (!raw) throw new Error('not a backup');
   const manifest = JSON.parse(strFromU8(raw)) as BackupManifest;
   if (manifest.app !== 'webcoloring' || !Array.isArray(manifest.pages)) throw new Error('not a backup');
-  let n = 0;
+  // Check every picture first, so a damaged file never replaces good art.
+  const ok: { p: BackupManifest['pages'][number]; paint?: Uint8Array; thumb?: Uint8Array }[] = [];
   for (const p of manifest.pages) {
+    if (!p || typeof p !== 'object') continue;
     if (typeof p.key !== 'string' || typeof p.bookId !== 'string' || typeof p.pageId !== 'string') continue;
+    if (p.key !== artKey(p.bookId, p.pageId)) continue;
     const base = p.key.replace(/[^a-z0-9/_-]/gi, '_');
     const paint = entries[`paint/${base}.png`];
     const thumb = entries[`thumb/${base}.img`];
+    if (paint && !(await decodes(paint))) continue;
+    ok.push({ p, paint, thumb });
+  }
+  let n = 0;
+  for (const { p, paint, thumb } of ok) {
     const meta: PageMeta = {
       key: p.key,
       bookId: p.bookId,
