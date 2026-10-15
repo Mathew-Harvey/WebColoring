@@ -8,6 +8,15 @@
    "pageCount": 30,
    "storeUrl": null,
    "order": 0
+  },
+  {
+   "id": "scaly-pals",
+   "title": "Scaly Pals",
+   "subtitle": "A Dragon Coloring Book for Kids Ages 6-11",
+   "cover": "scaly-pals/cover-small.webp",
+   "pageCount": 30,
+   "storeUrl": null,
+   "order": 1
   }
  ]
 }

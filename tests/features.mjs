@@ -3,6 +3,7 @@
 import { chromium } from 'playwright';
 import fs from 'node:fs';
 const BASE = (process.argv[2] || 'http://localhost:4173/').replace(/\/?$/, '/');
+const BOOKS = JSON.parse(fs.readFileSync(new URL('../public/books/index.json', import.meta.url), 'utf8')).books.length;
 const OUT = 'debug/features';
 fs.mkdirSync(OUT, { recursive: true });
 const results = [];
@@ -143,9 +144,9 @@ await page2.route('**/books/blocky-builders/book.json', async (route) => {
 });
 await page2.goto(`${BASE}?store#/`);
 await page2.waitForSelector('.promo');
-check('store: home shows the "Get the real book" card', (await page2.locator('.promo-home').count()) === 1);
+check('store: home shows a "Get the real book" card per book', (await page2.locator('.promo-home').count()) === BOOKS);
 await page2.screenshot({ path: `${OUT}/home-store.png` });
-const hold = await page2.locator('.promo-home .hold').boundingBox();
+const hold = await page2.locator('.promo-home .hold').first().boundingBox();
 await page2.mouse.move(hold.x + 20, hold.y + 20);
 await page2.mouse.down();
 await page2.waitForTimeout(1800);

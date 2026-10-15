@@ -7,6 +7,7 @@ import { chromium, webkit, devices } from 'playwright';
 import fs from 'node:fs';
 
 const BASE = (process.argv[2] || 'http://localhost:4173/').replace(/\/?$/, '/');
+const BOOKS = JSON.parse(fs.readFileSync(new URL('../public/books/index.json', import.meta.url), 'utf8')).books.length;
 const ENGINE = process.env.BROWSER === 'webkit' ? 'webkit' : 'chromium';
 const SHOTS = 'debug/e2e';
 fs.mkdirSync(SHOTS, { recursive: true });
@@ -22,9 +23,9 @@ const TOOL_LABELS = {
   spray: 'Spray', glitter: 'Glitter', rainbow: 'Rainbow', neon: 'Neon', stamp: 'Stamp', eraser: 'Eraser', eyedropper: 'Picker',
 };
 
-async function openPage(page, pageId, query = '') {
+async function openPage(page, pageId, query = '', book = 'blocky-builders') {
   await page.evaluate(() => (window.__wc = null)).catch(() => {});
-  await page.goto(`${BASE}?e2e#/book/blocky-builders/${pageId}${query}`);
+  await page.goto(`${BASE}?e2e#/book/${book}/${pageId}${query}`);
   await page.waitForFunction(() => window.__wc && !document.querySelector('.stage-msg'), null, { timeout: 30000 });
   await page.waitForTimeout(300);
 }
@@ -73,7 +74,7 @@ async function desktop(browser) {
 
   await page.goto(BASE);
   await page.waitForSelector('.book-tile');
-  check(`${ENGINE}: home shows the bookshelf`, (await page.locator('.book-tile').count()) === 1);
+  check(`${ENGINE}: home shows the bookshelf`, (await page.locator('.book-tile').count()) === BOOKS);
   check(`${ENGINE}: promo card hidden while storeUrl is null`, (await page.locator('.promo').count()) === 0);
 
   // Free colouring on a detailed page (colour by numbers off by default).
@@ -268,6 +269,15 @@ async function desktop(browser) {
     await completeCbn(page, pid);
   }
 
+  // Every page of the dragon book opens, and one can be finished by numbers.
+  const scaly = JSON.parse(fs.readFileSync(new URL('../public/books/scaly-pals/book.json', import.meta.url), 'utf8'));
+  const failed = [];
+  for (const p of scaly.pages) {
+    await openPage(page, p.id, '', 'scaly-pals').catch(() => failed.push(p.id));
+  }
+  check(`scaly-pals: all ${scaly.pages.length} pages open`, failed.length === 0, failed.join(' '));
+  await completeCbn(page, 'page26', 'scaly-pals');
+
   // No third-party requests.
   const origin = new URL(BASE).origin;
   const foreign = requests.filter((u) => !u.startsWith(origin) && !u.startsWith('blob:') && !u.startsWith('data:'));
@@ -276,8 +286,9 @@ async function desktop(browser) {
   await ctx.close();
 }
 
-async function completeCbn(page, pid) {
-  await openPage(page, pid, '?cbn=1');
+async function completeCbn(page, pid, book = 'blocky-builders') {
+  const label = book === 'blocky-builders' ? pid : `${book} ${pid}`;
+  await openPage(page, pid, '?cbn=1', book);
   const enabled = await page.evaluate(() => window.__wc.cbnEnabled);
   const targets = await page.evaluate(() => window.__wc.cbnTargets().filter((t) => !t.done));
   let wrong = 0;
@@ -294,7 +305,7 @@ async function completeCbn(page, pid) {
       if (!done) wrong++;
     }
   }
-  check(`cbn ${pid}: wrong colour does not fill`, wrong === 1);
+  check(`cbn ${label}: wrong colour does not fill`, wrong === 1);
   let current = 0;
   for (const t of targets.sort((a, b) => a.n - b.n)) {
     if (t.n !== current) {
@@ -316,10 +327,10 @@ async function completeCbn(page, pid) {
   }
   await page.waitForTimeout(200);
   const prog = await page.evaluate(() => window.__wc.cbnProgress());
-  check(`cbn ${pid}: every numbered region filled`, enabled && prog.done === prog.total && prog.total > 0, `${prog.done}/${prog.total}`);
+  check(`cbn ${label}: every numbered region filled`, enabled && prog.done === prog.total && prog.total > 0, `${prog.done}/${prog.total}`);
   await page.waitForSelector('.finished', { timeout: 5000 }).catch(() => {});
   const finished = await page.locator('.finished').count();
-  check(`cbn ${pid}: finished screen appears`, finished === 1);
+  check(`cbn ${label}: finished screen appears`, finished === 1);
   await page.waitForTimeout(600);
   await page.screenshot({ path: `${SHOTS}/finished-${pid}.png` });
 }
