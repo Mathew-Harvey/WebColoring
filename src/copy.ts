@@ -53,6 +53,18 @@ export const copy = {
     coverAlt: (title: string) => `Front cover of ${title}`,
   },
 
+  // The footer of the home screen: Mat's other sites, as on his other sites.
+  alsoBy: {
+    label: 'Also by Mat Harvey',
+    hint: 'Grown-ups: hold to open',
+    sites: {
+      gym: 'The Bodyweight Gym',
+      webfpv: 'WebFPV',
+      apphub: 'AppHub',
+      winmarchy: 'Winmarchy',
+    },
+  },
+
   picker: {
     back: 'Back',
     filterLabel: 'Show pages',

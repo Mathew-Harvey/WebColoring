@@ -311,8 +311,110 @@ a {
 }
 
 .home-foot {
+  width: 100%;
   margin-top: auto;
   padding-top: 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Also by Mat Harvey: his other sites in their own marks, quiet until hovered. */
+.also {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: min(680px, 100%);
+  margin-top: 30px;
+  padding-top: 18px;
+  border-top: 2px solid var(--line);
+}
+
+.also-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.also-label::before,
+.also-label::after {
+  content: '';
+  width: 22px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--line);
+}
+
+.also-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 4px 30px;
+}
+
+.also-link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-height: 48px;
+  padding: 4px 2px;
+  color: var(--ink-soft);
+  text-decoration: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* 32 px: AppHub's mark carries its name under the chevron and needs the height to stay a word. */
+.also-link img {
+  display: block;
+  height: 32px;
+  width: auto;
+  opacity: 0.8;
+  transition: opacity 0.25s ease;
+}
+
+.also-link:hover img,
+.also-link:focus-visible img {
+  opacity: 1;
+}
+
+.also-link:hover,
+.also-link:focus-visible {
+  color: var(--ink);
+}
+
+.also-mark {
+  font-size: 21px;
+  font-weight: 1000;
+  line-height: 1;
+  letter-spacing: -0.01em;
+}
+
+/* Fills while a grown-up holds the link. */
+.also-progress {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 4px;
+  height: 3px;
+  border-radius: 3px;
+  background: var(--orange);
+  transform-origin: left center;
+  transform: scaleX(0);
+}
+
+.also-hint {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink-soft);
 }
 
 /* ------------------------------------------------------------------ paper books */

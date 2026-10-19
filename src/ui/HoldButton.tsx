@@ -1,20 +1,11 @@
 import type { ComponentChildren } from 'preact';
 import { useEffect, useRef, useState } from 'preact/hooks';
 
-interface Props {
-  onDone: () => void;
-  label: string;
-  hint: string;
-  ms?: number;
-  class?: string;
-  children: ComponentChildren;
-}
-
 /**
- * A button that only acts when held down. Keeps little fingers out of
- * grown-up areas and links that leave the site.
+ * Holding down for `ms` runs `onDone`. Keeps little fingers out of grown-up areas and links
+ * that leave the site. Spread `handlers` on the element; `progress` goes from 0 to 1.
  */
-export function HoldButton({ onDone, label, hint, ms = 1500, class: cls, children }: Props) {
+export function useHold(onDone: () => void, ms = 1500) {
   const [progress, setProgress] = useState(0);
   const start = useRef(0);
   const raf = useRef(0);
@@ -45,31 +36,46 @@ export function HoldButton({ onDone, label, hint, ms = 1500, class: cls, childre
 
   useEffect(() => () => cancelAnimationFrame(raf.current), []);
 
+  const handlers = {
+    onPointerDown: (e: PointerEvent) => {
+      (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId);
+      begin();
+    },
+    onPointerUp: stop,
+    onPointerCancel: stop,
+    onPointerLeave: stop,
+    onKeyDown: (e: KeyboardEvent) => {
+      if ((e.key === 'Enter' || e.key === ' ') && !e.repeat) {
+        e.preventDefault();
+        begin();
+      }
+    },
+    onKeyUp: (e: KeyboardEvent) => {
+      if (e.key === 'Enter' || e.key === ' ') stop();
+    },
+    onContextMenu: (e: Event) => e.preventDefault(),
+    onClick: (e: Event) => e.preventDefault(),
+  };
+
+  return { progress, handlers };
+}
+
+interface Props {
+  onDone: () => void;
+  label: string;
+  hint: string;
+  ms?: number;
+  class?: string;
+  children: ComponentChildren;
+}
+
+/** A button that only acts when held down, with a ring that fills while holding. */
+export function HoldButton({ onDone, label, hint, ms = 1500, class: cls, children }: Props) {
+  const { progress, handlers } = useHold(onDone, ms);
   const r = 20;
   const c = 2 * Math.PI * r;
   return (
-    <button
-      type="button"
-      class={`hold ${cls ?? ''}`}
-      onPointerDown={(e) => {
-        (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId);
-        begin();
-      }}
-      onPointerUp={stop}
-      onPointerCancel={stop}
-      onPointerLeave={stop}
-      onKeyDown={(e) => {
-        if ((e.key === 'Enter' || e.key === ' ') && !e.repeat) {
-          e.preventDefault();
-          begin();
-        }
-      }}
-      onKeyUp={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') stop();
-      }}
-      onContextMenu={(e) => e.preventDefault()}
-      onClick={(e) => e.preventDefault()}
-    >
+    <button type="button" class={`hold ${cls ?? ''}`} {...handlers}>
       <span class="hold-ring" aria-hidden="true">
         <svg viewBox="0 0 48 48" width="44" height="44">
           <circle cx="24" cy="24" r={r} fill="none" stroke="rgba(61,53,80,0.12)" stroke-width="4" />

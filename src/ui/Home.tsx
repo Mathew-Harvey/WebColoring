@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'preact/hooks';
 import { copy } from '../copy';
+import { AlsoBy } from './AlsoBy';
 import { indexAsset, loadIndex, peekIndex, type BookIndexEntry } from '../data/books';
 import { HoldButton } from './HoldButton';
 import { Icon } from './icons';
@@ -53,6 +54,7 @@ export function Home() {
         <HoldButton label={copy.grownUps.open} hint={copy.grownUps.holdHint} onDone={() => navigate(href.grownUps())}>
           <Icon name="lock" size={20} />
         </HoldButton>
+        <AlsoBy />
       </footer>
     </div>
   );

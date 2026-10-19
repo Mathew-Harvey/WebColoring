@@ -175,6 +175,22 @@ await page2.goto(`${BASE}?store#/grown-ups`);
 await page2.waitForSelector('.gu-paper .btn-buy');
 check('store: grown-ups area links straight to the store', (await page2.locator(`.gu-paper a.btn-buy[href="${STORE}"]`).count()) === BOOKS);
 
+// Also by Mat Harvey: the other sites, behind a hold like every link that leaves the site.
+await page2.goto(`${BASE}?store#/`);
+await page2.waitForSelector('.also-link img');
+check('also by: footer shows the other sites', (await page2.locator('.also-link').count()) === 4);
+await page2.evaluate(() => (window.__opened = null));
+await page2.locator('.also-link').first().scrollIntoViewIfNeeded();
+const also = await page2.locator('.also-link').first().boundingBox();
+await page2.mouse.click(also.x + 20, also.y + 10);
+await page2.waitForTimeout(300);
+check('also by: a tap does not leave the site', (await page2.evaluate(() => window.__opened)) === null && page2.url().startsWith(BASE));
+await page2.mouse.move(also.x + 20, also.y + 10);
+await page2.mouse.down();
+await page2.waitForTimeout(1800);
+await page2.mouse.up();
+check('also by: holding opens the site', (await page2.evaluate(() => window.__opened)) === 'https://thebodyweightgym.org/');
+
 // Print layout fits one landscape A4 and US Letter page.
 await page.goto(`${BASE}?e2e#/book/blocky-builders/page05`);
 await page.waitForFunction(() => window.__wc && !document.querySelector('.stage-msg'));
