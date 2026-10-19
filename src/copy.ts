@@ -61,7 +61,6 @@ export const copy = {
       gym: 'The Bodyweight Gym',
       webfpv: 'WebFPV',
       apphub: 'AppHub',
-      winmarchy: 'Winmarchy',
     },
   },
 

@@ -178,7 +178,7 @@ check('store: grown-ups area links straight to the store', (await page2.locator(
 // Also by Mat Harvey: the other sites, behind a hold like every link that leaves the site.
 await page2.goto(`${BASE}?store#/`);
 await page2.waitForSelector('.also-link img');
-check('also by: footer shows the other sites', (await page2.locator('.also-link').count()) === 4);
+check('also by: footer shows the other sites', (await page2.locator('.also-link').count()) === 3);
 await page2.evaluate(() => (window.__opened = null));
 await page2.locator('.also-link').first().scrollIntoViewIfNeeded();
 const also = await page2.locator('.also-link').first().boundingBox();
