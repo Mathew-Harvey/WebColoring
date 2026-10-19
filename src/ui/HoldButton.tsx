@@ -66,16 +66,20 @@ interface Props {
   hint: string;
   ms?: number;
   class?: string;
+  /** Renders a link that opens in a new tab (only once held; a tap does nothing). */
+  href?: string;
   children: ComponentChildren;
 }
 
 /** A button that only acts when held down, with a ring that fills while holding. */
-export function HoldButton({ onDone, label, hint, ms = 1500, class: cls, children }: Props) {
+export function HoldButton({ onDone, label, hint, ms = 1500, class: cls, href, children }: Props) {
   const { progress, handlers } = useHold(onDone, ms);
   const r = 20;
   const c = 2 * Math.PI * r;
+  const Tag = href ? 'a' : 'button';
+  const own = href ? { href, target: '_blank', rel: 'noopener' } : { type: 'button' as const };
   return (
-    <button type="button" class={`hold ${cls ?? ''}`} {...handlers}>
+    <Tag class={`hold ${cls ?? ''}`} {...own} {...handlers}>
       <span class="hold-ring" aria-hidden="true">
         <svg viewBox="0 0 48 48" width="44" height="44">
           <circle cx="24" cy="24" r={r} fill="none" stroke="rgba(61,53,80,0.12)" stroke-width="4" />
@@ -97,6 +101,6 @@ export function HoldButton({ onDone, label, hint, ms = 1500, class: cls, childre
         <span class="hold-label">{label}</span>{' '}
         <span class="hold-hint">{hint}</span>
       </span>
-    </button>
+    </Tag>
   );
 }

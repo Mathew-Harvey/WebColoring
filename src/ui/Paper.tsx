@@ -1,7 +1,8 @@
 import type { CSSProperties } from 'preact';
 import { useEffect, useState } from 'preact/hooks';
 import { copy } from '../copy';
-import { indexAsset, loadIndex, peekIndex, safeStoreUrl, type BookIndexEntry } from '../data/books';
+import { indexAsset, loadIndex, peekIndex, type BookIndexEntry } from '../data/books';
+import { listingFor } from '../data/paperbacks';
 import { HoldButton } from './HoldButton';
 import { Icon } from './icons';
 import { href } from './router';
@@ -25,7 +26,7 @@ export function useBookEntry(bookId: string): BookIndexEntry | null {
   return entry;
 }
 
-const isSoon = (book: BookIndexEntry) => !safeStoreUrl(book.storeUrl);
+const isSoon = (book: BookIndexEntry) => !listingFor(book.id);
 
 /** A wax crayon, for decoration. */
 export function Crayon({ colour, dark, class: cls }: { colour: string; dark: string; class?: string }) {
@@ -83,8 +84,8 @@ export function PaperCover({
  * Coming soon note (with its own badge when the cover beside it has no sticker).
  */
 export function BuyAction({ book, gated = true, badge = true }: { book: BookIndexEntry; gated?: boolean; badge?: boolean }) {
-  const url = safeStoreUrl(book.storeUrl);
-  if (!url) {
+  const listing = listingFor(book.id);
+  if (!listing) {
     return (
       <p class="paper-soon">
         {badge && <span class="soon-pill">{copy.paper.comingSoon}</span>}
@@ -92,22 +93,36 @@ export function BuyAction({ book, gated = true, badge = true }: { book: BookInde
       </p>
     );
   }
+  const { url } = listing;
+  const price = listing.price && (
+    <p class="paper-price">
+      <span class="avail-pill">{copy.paper.available}</span>
+      <strong>{copy.paper.price(copy.paper.formats[listing.format ?? 'paperback'], listing.price)}</strong>
+    </p>
+  );
   if (!gated) {
     return (
-      <a class="btn btn-buy" href={url} target="_blank" rel="noopener noreferrer">
-        <Icon name="book" size={24} /> {copy.paper.buyLink} <span class="sr-only">{copy.paper.opensNewTab}</span>
-      </a>
+      <>
+        {price}
+        <a class="btn btn-buy" href={url} target="_blank" rel="noopener">
+          <Icon name="book" size={24} /> {copy.paper.buyLink} <span class="sr-only">{copy.paper.opensNewTab}</span>
+        </a>
+      </>
     );
   }
   return (
-    <HoldButton
-      label={copy.paper.buy}
-      hint={copy.paper.buyHint}
-      onDone={() => window.open(url, '_blank', 'noopener,noreferrer')}
-      class="hold-buy"
-    >
-      <Icon name="book" size={20} />
-    </HoldButton>
+    <>
+      {price}
+      <HoldButton
+        label={copy.paper.buy}
+        hint={copy.paper.buyHint}
+        href={url}
+        onDone={() => window.open(url, '_blank', 'noopener')}
+        class="hold-buy"
+      >
+        <Icon name="book" size={20} />
+      </HoldButton>
+    </>
   );
 }
 

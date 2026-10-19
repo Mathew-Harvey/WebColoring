@@ -47,7 +47,7 @@ For each page the script:
 5. Numbers regions for colour by numbers from a 12-colour kid palette using a simple, repeatable rule
    (sky blue for big regions at the top, greens low down, neighbours get different colours). Regions below
    a minimum size are "free colour".
-6. Writes WebP thumbnails and `book.json` (id, title, pages, difficulty, storeUrl and more).
+6. Writes WebP thumbnails and `book.json` (id, title, pages, difficulty and more).
 
 Options:
 
@@ -56,7 +56,6 @@ Options:
 | `--only 1,13,28` | Only redo these pages (others keep their current output). |
 | `--debug` | Also write region and colour by numbers previews to `debug/<book-id>/`. |
 | `--easy "1-3,8"` / `--detailed "4-7"` | Page difficulty, if not set in `book.config.json`. |
-| `--store-url <url>` | The paperback link. |
 
 `scripts/inspect-regions.mjs` paints the biggest regions of a prepared page in strong colours, which makes
 leaks easy to spot.
@@ -67,7 +66,6 @@ leaks easy to spot.
 {
   "title": "Blocky Builders",
   "subtitle": "A Block Town Coloring Book for Kids Ages 6-10",
-  "storeUrl": null,
   "easy": ["1-3", 8, 9],
   "detailed": ["4-7", 10]
 }
@@ -90,11 +88,11 @@ Every book is offered as a paperback on the home screen (below the shelf), under
 the finished screen, in the grown-ups area and on its own page (`#/paper`). That page has the covers,
 the details and the way to buy.
 
-- While `storeUrl` is `null` the book shows a "Coming soon" badge. Once it is set, a "Get the paperback"
-  button appears. Outside the grown-ups area it opens Amazon only after a grown-up holds it down.
-- To add the link, set `storeUrl` in `book.config.json` and run
-  `npm run prepare-book -- --src books/<id>/src --id <id> --only 0` (this rewrites the book files
-  without redoing any pages), then `npm run build`.
+- Store links, prices and formats live in one place, `src/data/paperbacks.ts`, keyed by book id. A book
+  with a link shows "Available now", its price and a "Get the paperback" button. A book with `url: null`
+  (or no entry) shows a "Coming soon" badge. Links are plain product pages with no affiliate or tracking
+  parameters, and open in a new tab. Outside the grown-ups area the button opens Amazon only after a
+  grown-up holds it down. After an edit, run `npm run build`.
 - `paperback` in `book.config.json` fills in the details list. Each key is optional:
 
 ```json
@@ -131,7 +129,7 @@ Points use 0 to 1 page coordinates (x across, y down) and snap to the nearest re
 | `src/copy.ts` | All visible text, in one place for review. |
 | `src/engine/` | Canvas engine: view and gestures, fills, brushes, undo, colour by numbers. |
 | `src/audio/sound.ts` | Procedural sounds (Web Audio) and haptics. |
-| `src/data/` | Book manifests, IndexedDB storage, settings and backups. |
+| `src/data/` | Book manifests, store links (`paperbacks.ts`), IndexedDB storage, settings and backups. |
 | `src/ui/` | Screens and controls (Preact). |
 | `src/index.html` | The page the build starts from. |
 | `src/sw-template.js` | Service worker, built into `sw.js` with the precache list. |

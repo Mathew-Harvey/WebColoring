@@ -484,6 +484,28 @@ a {
   transform: rotate(-4deg);
 }
 
+.avail-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: #e3f6df;
+  border: 2px solid rgba(47, 158, 90, 0.45);
+  color: #1f6b3b;
+  font-size: 14px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.paper-price {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 10px;
+  margin: 2px 0 0;
+  font-size: 16px;
+}
+
 .soon-pill {
   display: inline-flex;
   align-items: center;
@@ -817,7 +839,8 @@ a {
 
   .paper-banner-actions,
   .paper-picker .paper-info,
-  .paper-picker .paper-soon {
+  .paper-picker .paper-soon,
+  .paper-picker .paper-price {
     justify-content: center;
     align-items: center;
   }
@@ -835,6 +858,8 @@ a {
 /* ------------------------------------------------------------------ hold button */
 
 .hold {
+  color: inherit;
+  text-decoration: none;
   display: inline-flex;
   align-items: center;
   gap: 10px;

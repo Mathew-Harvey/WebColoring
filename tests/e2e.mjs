@@ -7,7 +7,10 @@ import { chromium, webkit, devices } from 'playwright';
 import fs from 'node:fs';
 
 const BASE = (process.argv[2] || 'http://localhost:4173/').replace(/\/?$/, '/');
-const BOOKS = JSON.parse(fs.readFileSync(new URL('../public/books/index.json', import.meta.url), 'utf8')).books.length;
+const SHELF = JSON.parse(fs.readFileSync(new URL('../public/books/index.json', import.meta.url), 'utf8')).books;
+const BOOKS = SHELF.length;
+const { listingFor } = await import(new URL('../src/data/paperbacks.ts', import.meta.url).href);
+const ON_SALE = SHELF.filter((b) => listingFor(b.id)).length;
 const ENGINE = process.env.BROWSER === 'webkit' ? 'webkit' : 'chromium';
 const SHOTS = 'debug/e2e';
 fs.mkdirSync(SHOTS, { recursive: true });
@@ -76,16 +79,17 @@ async function desktop(browser) {
   // a.book-tile skips the loading placeholder, which shares the class.
   await page.waitForSelector('a.book-tile');
   check(`${ENGINE}: home shows the bookshelf`, (await page.locator('a.book-tile').count()) === BOOKS);
-  // No store links yet: the paper books show "Coming soon" and nothing can be bought.
+  // The paper books: books with a store link can be bought, the rest say "Coming soon".
   await page.waitForSelector('.paper-banner');
-  check(`${ENGINE}: home offers the paper books, marked coming soon`, (await page.locator('.paper-banner .soon-pill').count()) === 1);
+  check(`${ENGINE}: home offers the paper books`, (await page.locator('.paper-banner .btn-paper').count()) === 1);
   await page.click('.paper-banner .btn-paper');
   await page.waitForSelector('.paper-card');
   check(
-    `${ENGINE}: paper books page shows every book as coming soon`,
+    `${ENGINE}: paper books page shows each book on sale or coming soon`,
     (await page.locator('.paper-card').count()) === BOOKS &&
-      (await page.locator('.paper-card .soon-ribbon').count()) === BOOKS &&
-      (await page.locator('.hold-buy, .btn-buy').count()) === 0,
+      (await page.locator('.paper-card a.hold-buy').count()) === ON_SALE &&
+      (await page.locator('.paper-card .soon-ribbon').count()) === BOOKS - ON_SALE,
+    `${await page.locator('.paper-card a.hold-buy').count()} on sale`,
   );
 
   // Free colouring on a detailed page (colour by numbers off by default).

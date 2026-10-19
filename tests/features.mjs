@@ -11,7 +11,6 @@ const check = (name, ok, detail = '') => {
   results.push(ok);
   console.log(`${ok ? 'PASS' : 'FAIL'}  ${name}${detail ? `  (${detail})` : ''}`);
 };
-const STORE = 'https://www.amazon.com/dp/EXAMPLE';
 const browser = await chromium.launch();
 const ctx = await browser.newContext({ viewport: { width: 1280, height: 800 }, acceptDownloads: true });
 await ctx.addInitScript(() => {
@@ -124,59 +123,71 @@ await page.mouse.up();
 await page.waitForTimeout(200);
 check('hold-to-open: holding opens the grown-ups page', page.url().includes('grown-ups'));
 
-// Store card appears only when storeUrl is set. A fresh context without the service
-// worker, so the faked book data is not served from the cache.
+// The paper books, with the store links from src/data/paperbacks.ts. A fresh context without
+// the service worker, with window.open recorded instead of opening a tab.
+const { listingFor } = await import(new URL('../src/data/paperbacks.ts', import.meta.url).href);
+const shelf = JSON.parse(fs.readFileSync(new URL('../public/books/index.json', import.meta.url), 'utf8')).books;
+const onSale = shelf.filter((b) => listingFor(b.id));
+const soon = shelf.filter((b) => !listingFor(b.id));
 const ctx2 = await browser.newContext({ viewport: { width: 1280, height: 800 }, serviceWorkers: 'block' });
 await ctx2.addInitScript(() => {
   window.open = (url) => ((window.__opened = url), null);
 });
 const page2 = await ctx2.newPage();
 page2.on('pageerror', (e) => errors.push(e.message));
-await page2.route('**/books/index.json', async (route) => {
-  const res = await route.fetch();
-  const json = await res.json();
-  json.books.forEach((b) => (b.storeUrl = STORE));
-  route.fulfill({ response: res, json });
-});
-await page2.route('**/books/blocky-builders/book.json', async (route) => {
-  const res = await route.fetch();
-  const json = await res.json();
-  json.storeUrl = STORE;
-  route.fulfill({ response: res, json });
-});
-await page2.goto(`${BASE}?store#/`);
+await page2.goto(`${BASE}#/`);
 await page2.waitForSelector('.paper-banner');
-// The shelf built into the page draws first; the (faked) index.json then brings the store links.
-const onSale = await page2.waitForFunction(() => !document.querySelector('.paper-banner .soon-pill'), null, { timeout: 5000 }).then(() => true, () => false);
-check('store: home banner drops "Coming soon" once books are on sale', onSale);
-await page2.goto(`${BASE}?store#/paper`);
-await page2.waitForSelector('.paper-card .hold-buy');
-check('store: paper books page has a buy button per book', (await page2.locator('.paper-card .hold-buy').count()) === BOOKS);
-check('store: no "Coming soon" sticker once on sale', (await page2.locator('.soon-ribbon').count()) === 0);
+check('store: home banner does not say "Coming soon" while books are on sale', (await page2.locator('.paper-banner .soon-pill').count()) === (onSale.length ? 0 : 1));
+await page2.goto(`${BASE}#/paper`);
+await page2.waitForSelector('.paper-card');
+const buy = page2.locator('.paper-card a.hold-buy');
+check('store: a buy button for each book on sale', onSale.length > 0 && (await buy.count()) === onSale.length, `${await buy.count()} of ${onSale.length}`);
+const links = await buy.evaluateAll((els) => els.map((a) => [a.getAttribute('href'), a.getAttribute('target'), a.getAttribute('rel')]));
+check(
+  'store: buy buttons link to each product page in a new tab',
+  JSON.stringify(links) === JSON.stringify(onSale.map((b) => [listingFor(b.id).url, '_blank', 'noopener'])),
+  JSON.stringify(links),
+);
+check('store: no tracking or affiliate parameters', links.every(([href]) => !new URL(href).search && !new URL(href).hash));
+const prices = await page2.locator('.paper-card .paper-price').allTextContents();
+check('store: price and format shown for each book on sale', prices.length === onSale.length && onSale.every((b, i) => prices[i].includes(listingFor(b.id).price)), prices.join(' | '));
+check('store: books not on sale still say "Coming soon"', (await page2.locator('.paper-card .soon-ribbon').count()) === soon.length && (await page2.locator('.paper-card .paper-soon').count()) === soon.length);
 await page2.screenshot({ path: `${OUT}/paper-store.png`, fullPage: true });
-const hold = await page2.locator('.paper-card .hold-buy').first().boundingBox();
+await buy.first().scrollIntoViewIfNeeded();
+const hold = await buy.first().boundingBox();
 await page2.mouse.move(hold.x + 20, hold.y + 20);
 await page2.mouse.down();
 await page2.waitForTimeout(300);
 await page2.mouse.up();
-check('store: a quick tap does not open the store', (await page2.evaluate(() => window.__opened ?? null)) === null);
+await page2.waitForTimeout(300);
+check('store: a quick tap does not open the store', (await page2.evaluate(() => window.__opened ?? null)) === null && ctx2.pages().length === 1);
 await page2.mouse.down();
 await page2.waitForTimeout(1800);
 await page2.mouse.up();
-check('store: holding the button opens the store link', (await page2.evaluate(() => window.__opened)) === STORE);
-await page2.goto(`${BASE}?store#/book/blocky-builders`);
-await page2.waitForSelector('.paper-picker .hold-buy');
-check('store: picker shows the paperback card with a buy button', true);
-await page2.goto(`${BASE}?store&e2e#/book/blocky-builders/page05/done`);
+check('store: holding the button opens the product page', (await page2.evaluate(() => window.__opened)) === listingFor(onSale[0].id).url);
+await page2.goto(`${BASE}#/book/${onSale[0].id}`);
+await page2.waitForSelector('.paper-picker a.hold-buy');
+check('store: picker card links to the product page', (await page2.getAttribute('.paper-picker a.hold-buy', 'href')) === listingFor(onSale[0].id).url);
+if (soon.length) {
+  await page2.goto(`${BASE}#/book/${soon[0].id}`);
+  await page2.waitForSelector('.paper-picker .paper-soon');
+  check('store: a book not on sale has no buy button in the picker', (await page2.locator('.paper-picker .hold-buy').count()) === 0);
+}
+await page2.goto(`${BASE}?e2e#/book/${onSale[0].id}/page05/done`);
 await page2.waitForSelector('.finished .paper-finished');
-check('store: finished screen links to the paper book', (await page2.getAttribute('.paper-finished', 'href')) === '#/paper/blocky-builders');
+check('store: finished screen links to the paper book', (await page2.getAttribute('.paper-finished', 'href')) === `#/paper/${onSale[0].id}`);
 await page2.screenshot({ path: `${OUT}/finished-store.png` });
-await page2.goto(`${BASE}?store#/grown-ups`);
-await page2.waitForSelector('.gu-paper .btn-buy');
-check('store: grown-ups area links straight to the store', (await page2.locator(`.gu-paper a.btn-buy[href="${STORE}"]`).count()) === BOOKS);
+await page2.goto(`${BASE}#/grown-ups`);
+await page2.waitForSelector('.gu-paper .paper-card');
+const direct = await page2.locator('.gu-paper a.btn-buy').evaluateAll((els) => els.map((a) => [a.getAttribute('href'), a.getAttribute('target'), a.getAttribute('rel')]));
+check(
+  'store: grown-ups area links straight to each product page',
+  JSON.stringify(direct) === JSON.stringify(onSale.map((b) => [listingFor(b.id).url, '_blank', 'noopener'])),
+  JSON.stringify(direct),
+);
 
 // Also by Mat Harvey: the other sites, behind a hold like every link that leaves the site.
-await page2.goto(`${BASE}?store#/`);
+await page2.goto(`${BASE}#/`);
 await page2.waitForSelector('.also-link img');
 check('also by: footer shows the other sites', (await page2.locator('.also-link').count()) === 3);
 await page2.evaluate(() => (window.__opened = null));

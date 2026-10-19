@@ -18,7 +18,6 @@ export interface BookIndexEntry {
   front?: string | null;
   paperback?: Paperback | null;
   pageCount: number;
-  storeUrl: string | null;
   order: number;
 }
 
@@ -43,7 +42,6 @@ export interface Book {
   id: string;
   title: string;
   subtitle: string | null;
-  storeUrl: string | null;
   cover: string | null;
   coverSmall: string | null;
   front?: string | null;
@@ -105,14 +103,3 @@ export const indexAsset = (path: string) => `${BASE}${path}`;
 
 export const pageAsset = (bookId: string, page: PageInfo, file: string) =>
   `${BASE}${bookId}/pages/${page.id}/${file}?v=${page.v}`;
-
-/** Only http(s) links are ever shown as store links. */
-export function safeStoreUrl(url: string | null | undefined): string | null {
-  if (!url) return null;
-  try {
-    const u = new URL(url);
-    return u.protocol === 'https:' || u.protocol === 'http:' ? u.href : null;
-  } catch {
-    return null;
-  }
-}

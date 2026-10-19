@@ -14,7 +14,7 @@
 // plus public/books/<id>/book.json and an updated public/books/index.json.
 //
 // Optional inputs in books/<id>/:
-//   book.config.json   { subtitle, storeUrl, easy: [...], detailed: [...], cbnPalette,
+//   book.config.json   { subtitle, easy: [...], detailed: [...], cbnPalette,
 //                        canvas: [width, height], closeRadius, speckArea,
 //                        paperback: { ages, forGrownUps, size, singleSided } }
 // and in the source folder, cover.jpg (16:9, for the shelf) and front.jpg (the real front cover).
@@ -791,7 +791,6 @@ async function main() {
     id: bookId,
     title,
     subtitle: config.subtitle ?? prevBook?.subtitle ?? null,
-    storeUrl: args['store-url'] ? String(args['store-url']) : config.storeUrl ?? null,
     cover: coverFile ? 'cover.webp' : null,
     coverSmall: coverFile ? 'cover-small.webp' : null,
     front: frontFile ? 'front.webp' : null,
@@ -823,7 +822,6 @@ async function main() {
     front: book.front ? `${bookId}/${book.front}` : null,
     paperback: book.paperback,
     pageCount: pages.length,
-    storeUrl: book.storeUrl,
     order: config.order ?? index.books.find((b) => b.id === bookId)?.order ?? index.books.length,
   };
   index.books = index.books.filter((b) => b.id !== bookId).concat(entry).sort((a, b) => a.order - b.order);
