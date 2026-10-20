@@ -1,7 +1,7 @@
 {
   "name": "WebColoring",
   "short_name": "WebColoring",
-  "description": "Free colouring pages for kids. No ads, no accounts. Works offline.",
+  "description": "Free colouring pages for kids and grown-ups. No ads, no accounts. Works offline.",
   "id": "./",
   "start_url": "./",
   "scope": "./",

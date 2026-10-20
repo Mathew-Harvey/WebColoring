@@ -52,7 +52,7 @@ async function backControl(p) {
     '.finished button:has-text("Keep colouring")',
     'header.topbar a[aria-label="Back to pages"]',
     '.picker-head .round-btn',
-    'a.btn:has-text("Go home")',
+    'a.btn:has-text("Back to the bookshelf")',
   ]) {
     const el = p.locator(sel).first();
     if ((await el.count()) && (await el.isVisible())) return el;

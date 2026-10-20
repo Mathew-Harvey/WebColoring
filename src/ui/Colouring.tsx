@@ -83,6 +83,40 @@ const feedback: Feedback = {
   undo: () => sound.undo(),
 };
 
+/**
+ * On a phone held upright, a wide page is small: a tip to turn the phone. Shown a few times at
+ * most, and it goes once the phone is turned or the tip is tapped.
+ */
+function RotateTip({ wide }: { wide: boolean }) {
+  const query = '(orientation: portrait) and (max-width: 600px)';
+  const [upright, setUpright] = useState(() => matchMedia(query).matches);
+  const [gone, setGone] = useState(() => getLocal<number>('tip.rotate', 0) >= 3);
+  useEffect(() => {
+    const mq = matchMedia(query);
+    const on = () => setUpright(mq.matches);
+    mq.addEventListener('change', on);
+    return () => mq.removeEventListener('change', on);
+  }, []);
+  useEffect(() => {
+    if (!wide || !upright || gone) return;
+    setLocal('tip.rotate', getLocal<number>('tip.rotate', 0) + 1);
+    const t = setTimeout(() => setGone(true), 7000);
+    return () => clearTimeout(t);
+  }, [wide, upright, gone]);
+  if (!wide || !upright || gone) return null;
+  return (
+    <button type="button" class="rotate-tip" onClick={() => setGone(true)}>
+      <svg viewBox="0 0 48 48" width="28" height="28" aria-hidden="true">
+        <rect x="15" y="6" width="18" height="30" rx="4" fill="#fff" stroke="#3d3550" stroke-width="3" />
+        <path d="M10 38c4 5 12 6 18 3" fill="none" stroke="#ff9a3c" stroke-width="3.5" stroke-linecap="round" />
+        <path d="M27 36l2 5-5 2" fill="none" stroke="#ff9a3c" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+      <span>{copy.misc.rotateTip}</span>
+      <span class="rotate-ok">{copy.misc.gotIt}</span>
+    </button>
+  );
+}
+
 /** A soft stand-in for the page while it loads. */
 function Preview({ src }: { src: string }) {
   const ref = useRef<HTMLCanvasElement>(null);
@@ -496,6 +530,7 @@ export function Colouring({ bookId, pageId, done, cbn }: Props) {
         {status !== 'ready' && page && (
           <Preview src={pageAsset(bookId, page, 'thumb-sm.webp')} />
         )}
+        {status === 'ready' && e && <RotateTip wide={e.W > e.H * 1.2} />}
         {status === 'loading' && (
           <div class="stage-msg">
             <span class="spinner" aria-hidden="true" />

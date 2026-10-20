@@ -292,6 +292,81 @@ await page3.waitForSelector('.finished');
 check('reduced motion: no confetti', (await page3.locator('.confetti').count()) === 0);
 await ctx3.close();
 
+// ------------------------------------------------------------------ the UX review
+{
+  const ux = await browser.newContext({ viewport: { width: 1280, height: 800 }, serviceWorkers: 'block' });
+  const p = await ux.newPage();
+  p.on('pageerror', (e) => errors.push(e.message));
+  const books = JSON.parse(fs.readFileSync(new URL('../public/books/index.json', import.meta.url), 'utf8')).books;
+  const adult = books.filter((b) => b.paperback?.forGrownUps).map((b) => b.id);
+
+  // Two shelves, kids then grown-ups, each with its own books.
+  await p.goto(`${BASE}#/`);
+  await p.waitForSelector('a.book-tile');
+  const shelves = await p.locator('.shelf-group').evaluateAll((els) =>
+    els.map((g) => [g.querySelector('.shelf-title')?.textContent, [...g.querySelectorAll('a.book-tile')].map((a) => a.getAttribute('href').split('/').pop())]),
+  );
+  check(
+    'home: a shelf for kids and one for grown-ups',
+    shelves.length === 2 && shelves[0][0] === 'For kids' && shelves[1][0] === 'For grown-ups' && JSON.stringify(shelves[1][1]) === JSON.stringify(adult),
+    JSON.stringify(shelves),
+  );
+  check('home: each book says who it is for', (await p.locator('a.book-tile .book-tag').count()) === books.length);
+  check('home: no "Keep colouring" before anything is coloured', (await p.locator('.keep-going').count()) === 0);
+
+  // Colour a little, and it comes back on the home screen and in the book's progress.
+  await p.goto(`${BASE}?e2e#/book/scaly-pals/page06`);
+  await p.waitForFunction(() => window.__wc && !document.querySelector('.stage-msg'), null, { timeout: 30000 });
+  await p.click('button[aria-label="Fill"]');
+  const t = await p.evaluate(() => window.__wc.cbnTargets().sort((a, b) => b.r - a.r)[0]);
+  const [tx, ty] = await p.evaluate(([x, y]) => {
+    const [a, b2] = window.__wc.view.toScreen(x, y);
+    const r = document.querySelector('.paper').getBoundingClientRect();
+    return [r.left + a, r.top + b2];
+  }, [t.x, t.y]);
+  await p.mouse.click(tx, ty);
+  await p.waitForTimeout(2600);
+  await p.goto(`${BASE}#/`);
+  await p.waitForSelector('.keep-tile img');
+  check('home: "Keep colouring" offers the page just coloured', (await p.getAttribute('.keep-tile', 'href')).startsWith('#/book/scaly-pals/page06'));
+  check('home: the book shows it has a page started', (await p.locator('a.book-tile[href="#/book/scaly-pals"] .book-started').count()) === 1);
+  await p.goto(`${BASE}#/book/scaly-pals`);
+  await p.waitForSelector('.picker-sub');
+  check('picker: shows pages and progress', /30 pages · 1 started/.test(await p.textContent('.picker-sub')));
+
+  // Filters only where they narrow things down, each with its count.
+  const chips = await p.locator('.filters .chip').allTextContents();
+  check('picker: filters show their counts', chips.length === 4 && /All 30/.test(chips[0]) && /Easy 12/.test(chips[1]), chips.join(' | '));
+  await p.goto(`${BASE}#/book/still-water-mandalas`);
+  await p.waitForSelector('.page-tile');
+  check('picker: switching books never shows the last book\'s pages', (await p.textContent('.picker-title')) === 'Still Water Mandalas' && (await p.locator('.page-tile[href*="scaly-pals"]').count()) === 0);
+  check('picker: no filters when none would narrow the pages', (await p.locator('.filters').count()) === 0 && (await p.locator('.page-tile').count()) === 30);
+
+  // A friendly not-found screen that leads back to the bookshelf.
+  await p.goto(`${BASE}#/no-such-thing`);
+  await p.waitForSelector('.not-found-card');
+  check('not found: says so, and leads back to the bookshelf', (await p.getAttribute('.not-found-card a.btn', 'href')) === '#/');
+  await ux.close();
+
+  // On a phone held upright, a wide page offers the tip to turn the phone.
+  const phone = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, serviceWorkers: 'block' });
+  const q = await phone.newPage();
+  await q.goto(`${BASE}?e2e#/book/scaly-pals/page02`);
+  await q.waitForFunction(() => window.__wc && !document.querySelector('.stage-msg'), null, { timeout: 30000 });
+  check('phone: tip to turn the phone for a wide page', (await q.locator('.rotate-tip').count()) === 1);
+  await q.tap('.rotate-tip');
+  check('phone: the tip goes when tapped', (await q.locator('.rotate-tip').count()) === 0);
+  await q.goto(`${BASE}?e2e#/book/still-water-mandalas/page02`);
+  await q.waitForFunction(() => window.__wc && !document.querySelector('.stage-msg'), null, { timeout: 30000 });
+  check('phone: no tip for a square page', (await q.locator('.rotate-tip').count()) === 0);
+  await q.goto(`${BASE}?e2e#/book/still-water-mandalas/page02/done`);
+  await q.waitForSelector('.finished canvas');
+  await q.waitForTimeout(600);
+  const fits = await q.evaluate(() => [...document.querySelectorAll('.finished button, .finished a')].every((e) => e.getBoundingClientRect().bottom <= innerHeight));
+  check('phone: finished picture and all its buttons fit on screen', fits);
+  await phone.close();
+}
+
 check('no page errors', errors.length === 0, errors.join(' | '));
 await browser.close();
 process.exit(results.every(Boolean) ? 0 : 1);

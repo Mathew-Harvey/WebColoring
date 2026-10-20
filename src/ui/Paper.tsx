@@ -224,7 +224,9 @@ export function PaperBookCard({
         {book.author && <p class="paper-by">{copy.paper.by(book.author)}</p>}
         {book.blurb && <p class="paper-blurb">{book.blurb}</p>}
         <Details book={book} />
-        <BuyAction book={book} gated={gated} badge={compact} />
+        <div class="paper-buy">
+          <BuyAction book={book} gated={gated} badge={compact} />
+        </div>
       </div>
     </article>
   );
@@ -319,6 +321,16 @@ export function PaperPage({ bookId }: { bookId: string | null }) {
   const [shelf, setShelf] = useState<BookIndexEntry[] | null>(peekIndex);
   const [error, setError] = useState(false);
   const books = shelf && withPaperOnly(shelf);
+  // Grouped like the bookshelf: kids first, then grown-ups.
+  const kids = (books ?? []).filter((b) => !b.paperback?.forGrownUps);
+  const adults = (books ?? []).filter((b) => b.paperback?.forGrownUps);
+  const grouped = kids.length > 0 && adults.length > 0;
+  const groups: [string, string | null, PaperBook[]][] = grouped
+    ? [
+        ['kids', copy.home.kidsShelf, kids],
+        ['grown-ups', copy.home.grownUpsShelf, adults],
+      ]
+    : [['all', null, books ?? []]];
 
   useEffect(() => {
     loadIndex().then(setShelf, () => !peekIndex() && setError(true));
@@ -354,11 +366,22 @@ export function PaperPage({ bookId }: { bookId: string | null }) {
           </div>
         </section>
         {error && <p class="notice">{copy.colouring.loadError}</p>}
-        <div class="paper-list">
-          {(books ?? []).map((b) => (
-            <PaperBookCard key={b.id} book={b} highlight={b.id === bookId} />
-          ))}
-        </div>
+        {groups.map(([key, title, list]) =>
+          list.length ? (
+            <section class="paper-group" key={key} aria-labelledby={title ? `paper-group-${key}` : undefined}>
+              {title && (
+                <h2 class="shelf-title" id={`paper-group-${key}`}>
+                  {title}
+                </h2>
+              )}
+              <div class="paper-list">
+                {list.map((b) => (
+                  <PaperBookCard key={b.id} book={b} highlight={b.id === bookId} />
+                ))}
+              </div>
+            </section>
+          ) : null,
+        )}
       </main>
     </div>
   );

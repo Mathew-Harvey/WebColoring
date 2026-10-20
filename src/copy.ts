@@ -5,23 +5,32 @@ export const copy = {
   appName: 'WebColoring',
   tagline: 'Pick a book. Pick a page. Colour!',
   // Used for the page title, search results and the installed app.
-  metaDescription: 'Free colouring pages for kids. No ads, no accounts. Works offline.',
+  metaDescription: 'Free colouring pages for kids and grown-ups. No ads, no accounts. Works offline.',
   noScript: 'WebColoring needs JavaScript to colour pages.',
 
   // The preview card shown when the site is shared on Facebook, WhatsApp, X and others.
   share: {
-    title: 'WebColoring: free colouring pages for kids',
-    description: 'Fill, paint and colour by numbers on any phone, tablet or computer. No ads, no accounts. Works offline.',
+    title: 'WebColoring: free colouring pages for kids and grown-ups',
+    description: 'Dragons, block towns, mandalas and machines to fill, paint and colour by numbers on any phone, tablet or computer. No ads, no accounts. Works offline.',
     imageAlt: 'A treehouse colouring page, half coloured in, next to the WebColoring name.',
     // Text drawn on the card image itself (npm run social).
-    headline: 'Free colouring pages for kids',
+    headline: 'Free colouring pages for kids and grown-ups',
     points: ['No ads', 'No accounts', 'Works offline'],
   },
 
   home: {
     shelfLabel: 'Your books',
+    // Shown under the tagline, mostly for the grown-ups.
+    promises: ['Free', 'No ads or accounts', 'Works offline'],
+    kidsShelf: 'For kids',
+    grownUpsShelf: 'For grown-ups',
     openBook: (title: string) => `Open ${title}`,
     pages: (n: number) => `${n} pages`,
+    ages: (a: string) => `Ages ${a}`,
+    forGrownUps: 'Grown-ups',
+    started: (n: number) => (n === 1 ? '1 started' : `${n} started`),
+    keepGoingTitle: 'Keep colouring',
+    keepGoingPage: (book: string, n: number) => `${book}, page ${n}`,
   },
 
   // The real paperbacks. Gentle, never pushy: the site stays free either way.
@@ -81,6 +90,8 @@ export const copy = {
     started: 'Started',
     done: 'Done',
     empty: 'No pages here yet.',
+    progress: (started: number, done: number) =>
+      done ? `${started} started, ${done} finished` : started === 1 ? '1 started' : `${started} started`,
   },
 
   tools: {
@@ -165,9 +176,10 @@ export const copy = {
     holdHint: 'Hold to open',
     title: 'For grown-ups',
     back: 'Back',
+    contents: 'On this page',
     aboutTitle: 'About',
     about: [
-      'WebColoring is a free colouring site for kids aged 6 to 10. It works on phones, tablets and computers.',
+      'WebColoring is a free colouring site for kids and grown-ups. It works on phones, tablets and computers.',
       'Every page comes from a real colouring book by Mat Harvey. You can colour them here for free.',
       'The illustrations were made with the help of AI tools.',
     ],
@@ -266,6 +278,9 @@ export const copy = {
     updateReady: 'A new version is ready.',
     reload: 'Update',
     notFound: 'We could not find that page.',
-    goHome: 'Go home',
+    notFoundBody: 'It may have moved, or the link was not quite right.',
+    goHome: 'Back to the bookshelf',
+    rotateTip: 'Turn your phone sideways for a bigger page',
+    gotIt: 'Got it',
   },
 };

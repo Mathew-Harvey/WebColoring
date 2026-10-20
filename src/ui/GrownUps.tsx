@@ -74,6 +74,15 @@ function OfflineButton({ book }: { book: BookIndexEntry }) {
   );
 }
 
+const SECTIONS = [
+  ['gu-about', 'aboutTitle'],
+  ['gu-books', 'booksTitle'],
+  ['gu-settings', 'settingsTitle'],
+  ['gu-offline', 'offlineTitle'],
+  ['gu-backup', 'backupTitle'],
+  ['gu-privacy', 'privacyTitle'],
+] as const;
+
 export function GrownUps() {
   const settings = useSettings();
   const [books, setBooks] = useState<BookIndexEntry[]>([]);
@@ -117,22 +126,30 @@ export function GrownUps() {
         <h1 class="picker-title">{copy.grownUps.title}</h1>
       </header>
       <main class="gu-body">
-        <section class="card">
-          <h2>{copy.grownUps.aboutTitle}</h2>
+        {/* Buttons, not #anchors: the hash is the app's route. */}
+        <nav class="gu-contents" aria-label={copy.grownUps.contents}>
+          {SECTIONS.map(([id, key]) => (
+            <button key={id} type="button" class="gu-jump" onClick={() => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })}>
+              {copy.grownUps[key]}
+            </button>
+          ))}
+        </nav>
+        <section class="card" id="gu-about" aria-labelledby="gu-about-title">
+          <h2 id="gu-about-title">{copy.grownUps.aboutTitle}</h2>
           {copy.grownUps.about.map((p) => (
             <p key={p}>{p}</p>
           ))}
         </section>
 
-        <section class="card">
-          <h2>{copy.grownUps.privacyTitle}</h2>
+        <section class="card" id="gu-privacy" aria-labelledby="gu-privacy-title">
+          <h2 id="gu-privacy-title">{copy.grownUps.privacyTitle}</h2>
           {copy.grownUps.privacy.map((p) => (
             <p key={p}>{p}</p>
           ))}
         </section>
 
-        <section class="card">
-          <h2>{copy.grownUps.booksTitle}</h2>
+        <section class="card" id="gu-books" aria-labelledby="gu-books-title">
+          <h2 id="gu-books-title">{copy.grownUps.booksTitle}</h2>
           <div class="gu-paper">
             {withPaperOnly(books).map((b) => (
               <PaperBookCard key={b.id} book={b} gated={false} compact />
@@ -140,8 +157,8 @@ export function GrownUps() {
           </div>
         </section>
 
-        <section class="card">
-          <h2>{copy.grownUps.settingsTitle}</h2>
+        <section class="card" id="gu-settings" aria-labelledby="gu-settings-title">
+          <h2 id="gu-settings-title">{copy.grownUps.settingsTitle}</h2>
           <Toggle label={copy.grownUps.sound} value={settings.sound} onChange={(v) => updateSettings({ sound: v })} />
           <label class="slider-row gu-volume">
             <span>{copy.grownUps.volume}</span>
@@ -159,16 +176,16 @@ export function GrownUps() {
           <Toggle label={copy.grownUps.patterns} value={settings.patterns} onChange={(v) => updateSettings({ patterns: v })} />
         </section>
 
-        <section class="card">
-          <h2>{copy.grownUps.offlineTitle}</h2>
+        <section class="card" id="gu-offline" aria-labelledby="gu-offline-title">
+          <h2 id="gu-offline-title">{copy.grownUps.offlineTitle}</h2>
           <p>{copy.grownUps.offlineBody}</p>
           {books.map((b) => (
             <OfflineButton key={b.id} book={b} />
           ))}
         </section>
 
-        <section class="card">
-          <h2>{copy.grownUps.backupTitle}</h2>
+        <section class="card" id="gu-backup" aria-labelledby="gu-backup-title">
+          <h2 id="gu-backup-title">{copy.grownUps.backupTitle}</h2>
           <p>{copy.grownUps.backupBody}</p>
           <div class="btn-row">
             <button type="button" class="btn" onClick={backup}>
@@ -193,8 +210,8 @@ export function GrownUps() {
           </div>
         </section>
 
-        <section class="card">
-          <h2>{copy.grownUps.clearTitle}</h2>
+        <section class="card" id="gu-clear" aria-labelledby="gu-clear-title">
+          <h2 id="gu-clear-title">{copy.grownUps.clearTitle}</h2>
           <p>{copy.grownUps.clearBody}</p>
           <button type="button" class="btn btn-danger" onClick={clear}>
             <Icon name="trash" size={26} /> {copy.grownUps.clearButton}
@@ -205,8 +222,8 @@ export function GrownUps() {
           {msg}
         </p>
 
-        <section class="card">
-          <h2>{copy.grownUps.creditsTitle}</h2>
+        <section class="card" id="gu-credits" aria-labelledby="gu-credits-title">
+          <h2 id="gu-credits-title">{copy.grownUps.creditsTitle}</h2>
           {copy.grownUps.credits.map((p) => (
             <p key={p} class="small">
               {p}

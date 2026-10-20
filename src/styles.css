@@ -226,39 +226,144 @@ a {
 
 .shelf-wrap {
   width: 100%;
-  max-width: 1100px;
-  margin-top: 4vh;
+  max-width: 1280px;
+  margin-top: 3vh;
   position: relative;
 }
 
-.shelf {
+/* Promises for the grown-ups, quiet under the tagline. */
+.promises {
+  list-style: none;
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 28px;
+  gap: 6px 16px;
+  margin: 12px 0 0;
+  padding: 0;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--ink-soft);
+}
+
+.promises li {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Shelves: one for kids, one for grown-ups. Side by side on wide screens. */
+.shelves {
+  display: grid;
+  gap: 34px 40px;
+}
+
+@media (min-width: 1100px) {
+  .shelves.is-grouped {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.shelf-group {
+  position: relative;
+  min-width: 0;
+}
+
+.shelf-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 8px 14px;
+  font-size: clamp(20px, 4vw, 26px);
+  font-weight: 1000;
+}
+
+.shelf {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 150px), 1fr));
+  gap: 22px 18px;
   padding: 0 8px 28px;
   position: relative;
   z-index: 1;
 }
 
+@media (min-width: 560px) {
+  .shelf {
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 28px 24px;
+  }
+}
+
 .shelf-board {
-  height: 26px;
-  margin: -34px 4px 0;
-  border-radius: 14px;
+  height: 22px;
+  margin: -34px 0 0;
+  border-radius: 12px;
   background: linear-gradient(#e7b98a, #c98f5c);
-  box-shadow: 0 10px 0 #a8714a, 0 18px 30px rgba(90, 60, 30, 0.2);
+  box-shadow: 0 8px 0 #a8714a, 0 16px 26px rgba(90, 60, 30, 0.2);
 }
 
 .shelf-item {
-  width: min(420px, 100%);
+  min-width: 0;
   display: flex;
   flex-direction: column;
+}
+
+/* Keep colouring: the pages coloured most recently. */
+.keep-going {
+  margin: 0 0 34px;
+}
+
+.keep-row {
+  list-style: none;
+  margin: 0;
+  padding: 2px 8px 8px;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(150px, 220px);
   gap: 14px;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+}
+
+.keep-tile {
+  display: flex;
+  flex-direction: column;
+  border-radius: 18px;
+  overflow: hidden;
+  background: var(--card);
+  box-shadow: var(--shadow);
+  color: inherit;
+  text-decoration: none;
+  scroll-snap-align: start;
+  transition: transform 0.2s ease;
+}
+
+.keep-tile:hover,
+.keep-tile:focus-visible {
+  transform: translateY(-3px);
+}
+
+.keep-tile img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: contain;
+  background: #fff;
+}
+
+.keep-label {
+  padding: 8px 12px 10px;
+  font-size: 14px;
+  font-weight: 800;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .book-tile {
+  flex: 1;
   display: flex;
   flex-direction: column;
+  color: inherit;
   border-radius: 26px;
   overflow: hidden;
   background: var(--card);
@@ -283,18 +388,43 @@ a {
 }
 
 .book-title {
-  font-size: 24px;
+  font-size: clamp(17px, 2.2vw, 22px);
   font-weight: 900;
-  padding: 14px 18px 0;
+  line-height: 1.15;
+  padding: 12px 14px 0;
 }
 
 .book-meta {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 6px;
-  padding: 2px 18px 16px;
+  gap: 4px 8px;
+  padding: 4px 14px 14px;
   color: var(--ink-soft);
-  font-size: 15px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.book-tag {
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: #eef6ff;
+  color: #2b5c9e;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.book-started {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  color: var(--orange-ink);
+}
+
+@media (max-width: 559px) {
+  .book-tile {
+    border-radius: 20px;
+  }
 }
 
 .skeleton {
@@ -743,8 +873,30 @@ a {
 
 .paper-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
   gap: 24px;
+}
+
+.paper-group + .paper-group {
+  margin-top: 10px;
+}
+
+/* The way to buy sits at the foot of each card, so the buttons line up across a row. */
+.paper-card .paper-info {
+  flex: 1;
+}
+
+.paper-buy {
+  margin-top: auto;
+  padding-top: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.paper-buy .hold-buy .hold-hint {
+  white-space: nowrap;
 }
 
 .paper-card {
@@ -986,6 +1138,30 @@ a {
   flex: none;
 }
 
+.chip-count {
+  color: var(--ink-soft);
+  font-weight: 800;
+}
+
+.chip.on .chip-count {
+  color: var(--ink);
+}
+
+.picker-heading {
+  min-width: 0;
+}
+
+.picker-sub {
+  margin: 2px 0 0;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--ink-soft);
+}
+
+.picker-progress {
+  color: var(--orange-ink);
+}
+
 .chip .tiny {
   white-space: normal;
   text-align: center;
@@ -1213,6 +1389,102 @@ a {
 }
 
 /* The page thumbnail stands in while the full page loads. */
+.rotate-tip {
+  position: absolute;
+  left: 50%;
+  top: 14px;
+  z-index: 5;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: max-content;
+  max-width: calc(100% - 24px);
+  padding: 8px 10px 8px 12px;
+  border-radius: 18px;
+  background: var(--card);
+  box-shadow: var(--shadow);
+  font-size: 15px;
+  font-weight: 800;
+  text-align: left;
+  animation: pop-in 0.4s cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+
+.rotate-tip svg {
+  flex: none;
+  animation: tilt 2.4s ease-in-out infinite;
+}
+
+.rotate-ok {
+  flex: none;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--yellow);
+  font-size: 14px;
+}
+
+@keyframes tilt {
+  0%,
+  35% {
+    transform: rotate(0);
+  }
+  60%,
+  100% {
+    transform: rotate(-90deg);
+  }
+}
+
+.not-found {
+  display: grid;
+  place-items: center;
+}
+
+.not-found-card {
+  width: min(460px, 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 30px 26px 32px;
+  border-radius: 28px;
+  background: var(--card);
+  box-shadow: var(--shadow);
+  text-align: center;
+}
+
+.not-found-card h1 {
+  margin: 4px 0 0;
+  font-size: clamp(22px, 5vw, 28px);
+  font-weight: 1000;
+}
+
+.not-found-card p {
+  margin: 0 0 10px;
+  font-weight: 700;
+  color: var(--ink-soft);
+}
+
+.not-found-art {
+  position: relative;
+  width: 200px;
+  height: 92px;
+}
+
+.not-found-art .crayon {
+  width: 180px;
+  left: 10px;
+}
+
+.not-found-art .crayon-1 {
+  top: 8px;
+  transform: rotate(-12deg);
+}
+
+.not-found-art .crayon-2 {
+  top: 44px;
+  transform: rotate(8deg);
+}
+
 .stage-preview {
   position: absolute;
   inset: 12px;
@@ -1827,7 +2099,8 @@ input[type='range']::-moz-range-thumb {
 }
 
 .finished-pic {
-  width: 100%;
+  /* As wide as fits, and never so tall that the buttons go off screen. */
+  width: min(100%, calc(60vh * var(--r, 1.7778)));
   aspect-ratio: 16 / 9;
   border-radius: 22px;
   background: #fff;
@@ -1950,6 +2223,25 @@ input[type='range']::-moz-range-thumb {
   margin: 6px 0;
   font-weight: 600;
   line-height: 1.45;
+}
+
+.gu-contents {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.gu-jump {
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: var(--card);
+  box-shadow: var(--shadow);
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.gu-body .card {
+  scroll-margin-top: 16px;
 }
 
 .gu-paper .paper-card {
@@ -2117,5 +2409,98 @@ input[type='range']::-moz-range-thumb {
   }
   .book-tile {
     transform: none;
+  }
+}
+
+/* Short landscape screens (a phone on its side): the finished picture beside its buttons, so
+   they all fit. After the finished rules above, which it changes. */
+@media (max-height: 520px) and (orientation: landscape) {
+  .finished-card {
+    width: min(980px, 100%);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-areas: 'title title' 'pic actions' 'pic nav' 'pic paper';
+    align-items: center;
+    column-gap: 22px;
+    row-gap: 10px;
+  }
+  .finished-card h2 {
+    grid-area: title;
+    justify-self: center;
+    font-size: 28px;
+  }
+  .finished-pic {
+    grid-area: pic;
+    width: min(100%, calc((100vh - 110px) * var(--r, 1.7778)));
+    justify-self: center;
+  }
+  .finished-actions {
+    grid-area: actions;
+  }
+  .finished-nav {
+    grid-area: nav;
+  }
+  .finished-card .paper-finished {
+    grid-area: paper;
+    margin: 0;
+    padding: 6px 12px 6px 8px;
+  }
+  .finished-actions,
+  .finished-nav {
+    gap: 8px;
+  }
+  .finished-card .big-btn {
+    min-height: 50px;
+    padding: 6px 16px;
+    font-size: 17px;
+  }
+  .finished-card .big-btn svg {
+    width: 26px;
+    height: 26px;
+  }
+  .finished-nav .btn {
+    min-height: 44px;
+    padding: 6px 12px;
+    font-size: 15px;
+  }
+  .finished-card .paper-finished .small {
+    display: none;
+  }
+  .finished-card .paper-finished .paper-finished-text strong {
+    font-size: 14px;
+  }
+}
+
+/* Phones held upright: a smaller picture and side-by-side buttons, so everything fits. */
+@media (max-width: 600px) and (orientation: portrait) {
+  .finished-pic {
+    width: min(100%, calc(48vh * var(--r, 1.7778)));
+  }
+  .finished-card {
+    gap: 12px;
+  }
+  .finished-actions,
+  .finished-nav {
+    flex-wrap: nowrap;
+    gap: 10px;
+  }
+  .finished-card .big-btn {
+    min-height: 56px;
+    padding: 8px 16px;
+    font-size: 18px;
+    gap: 8px;
+  }
+  .finished-card .big-btn svg {
+    width: 28px;
+    height: 28px;
+  }
+  .finished-nav .btn {
+    padding: 8px 12px;
+    font-size: 16px;
+    white-space: nowrap;
+  }
+  .finished-nav .btn svg {
+    width: 22px;
+    height: 22px;
   }
 }

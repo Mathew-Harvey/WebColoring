@@ -4,6 +4,7 @@ import { getLocal, setLocal } from '../data/settings';
 import { loadBook, pageAsset, type Book, type PageInfo } from '../data/books';
 import { listMeta, type PageMeta } from '../data/storage';
 import { Icon, type IconName } from './icons';
+import { NotFound } from './NotFound';
 import { PaperPickerCard } from './Paper';
 import { href } from './router';
 import { BackLink } from './BackLink';
@@ -44,23 +45,24 @@ export function Picker({ bookId }: { bookId: string }) {
   // Tiles take the shape of the book's pages (most are 16:9, round designs are square).
   const pageW = book?.width ?? 2560;
   const pageH = book?.height ?? 1440;
-  const pages = (book?.pages ?? []).filter((p) => {
-    if (filter === 'easy') return p.difficulty === 'easy';
-    if (filter === 'detailed') return p.difficulty === 'detailed';
-    if (filter === 'cbn') return p.numbered > 0 && (p.cbn || metas.get(p.id)?.cbnOn);
+  const all = book?.pages ?? [];
+  const matches = (f: Filter, p: PageInfo) => {
+    if (f === 'easy') return p.difficulty === 'easy';
+    if (f === 'detailed') return p.difficulty === 'detailed';
+    if (f === 'cbn') return p.numbered > 0 && !!(p.cbn || metas.get(p.id)?.cbnOn);
     return true;
-  });
+  };
+  // Only filters that narrow the pages down are offered (a book where every page is detailed
+  // has no Easy or Detailed). With none left, there is no filter bar at all.
+  const counts = new Map(FILTERS.map((f) => [f.id, all.filter((p) => matches(f.id, p)).length]));
+  const useful = FILTERS.filter((f) => f.id === 'all' || ((counts.get(f.id) ?? 0) > 0 && (counts.get(f.id) ?? 0) < all.length));
+  const shown = useful.length > 1 ? useful : [];
+  const active: Filter = shown.some((f) => f.id === filter) ? filter : 'all';
+  const pages = all.filter((p) => matches(active, p));
+  const started = metas.size;
+  const finished = [...metas.values()].filter((m) => m.complete).length;
 
-  if (error) {
-    return (
-      <div class="screen picker">
-        <p class="notice">{copy.misc.notFound}</p>
-        <BackLink class="btn" to={href.home()}>
-          {copy.misc.goHome}
-        </BackLink>
-      </div>
-    );
-  }
+  if (error) return <NotFound />;
 
   return (
     <div class="screen picker">
@@ -68,23 +70,35 @@ export function Picker({ bookId }: { bookId: string }) {
         <BackLink class="round-btn" to={href.home()} label={copy.picker.back}>
           <Icon name="back" size={30} />
         </BackLink>
-        <h1 class="picker-title">{book?.title ?? ''}</h1>
+        <div class="picker-heading">
+          <h1 class="picker-title">{book?.title ?? ''}</h1>
+          {book && (
+            <p class="picker-sub">
+              {copy.home.pages(all.length)}
+              {started > 0 && <span class="picker-progress"> · {copy.picker.progress(started, finished)}</span>}
+            </p>
+          )}
+        </div>
       </header>
 
-      <nav class="filters" aria-label={copy.picker.filterLabel}>
-        {FILTERS.map((f) => (
-          <button
-            key={f.id}
-            type="button"
-            class={`chip ${filter === f.id ? 'on' : ''}`}
-            aria-pressed={filter === f.id}
-            onClick={() => pick(f.id)}
-          >
-            <Icon name={f.icon} size={30} />
-            <span class="tiny">{copy.picker.filters[f.id]}</span>
-          </button>
-        ))}
-      </nav>
+      {shown.length > 0 && (
+        <nav class="filters" aria-label={copy.picker.filterLabel}>
+          {shown.map((f) => (
+            <button
+              key={f.id}
+              type="button"
+              class={`chip ${active === f.id ? 'on' : ''}`}
+              aria-pressed={active === f.id}
+              onClick={() => pick(f.id)}
+            >
+              <Icon name={f.icon} size={30} />
+              <span class="tiny">
+                {copy.picker.filters[f.id]} <span class="chip-count">{counts.get(f.id)}</span>
+              </span>
+            </button>
+          ))}
+        </nav>
+      )}
 
       <main>
         <ul class="page-grid">
@@ -96,7 +110,7 @@ export function Picker({ bookId }: { bookId: string }) {
               <li key={p.id}>
                 <a
                   class="page-tile"
-                  href={href.page(bookId, p.id, filter === 'cbn')}
+                  href={href.page(bookId, p.id, active === 'cbn')}
                   aria-label={`${copy.picker.page(p.n)}${done ? `, ${copy.picker.done}` : meta ? `, ${copy.picker.started}` : ''}`}
                 >
                   <img

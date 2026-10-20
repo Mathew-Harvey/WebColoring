@@ -194,6 +194,17 @@ after changing that text, run `npm run social` (Node 22.6 or newer, with a Playw
 Sites keep their own copy of a preview for a while. After a change, paste the link into the
 [Facebook Sharing Debugger](https://developers.facebook.com/tools/debug/) and press "Scrape Again".
 
+## The bookshelf
+
+Books for grown-ups (`"paperback": { "forGrownUps": true }` in `book.config.json`) sit on their own
+shelf, "For grown-ups", after the kids' shelf; with only one kind of book there is a single shelf with
+no heading. Each book shows its pages and who it is for (`ages`, or grown-ups), and how many pages have
+been started. Pages coloured recently come back at the top under "Keep colouring". The paper books page
+is grouped the same way.
+
+In a book's page picker, a filter (Easy, Detailed, Colour by numbers) is only offered when it narrows
+the pages down, each with its count; a book where every page is detailed has no filter bar.
+
 ## Going back
 
 Back always leads towards the bookshelf: a page goes back to its book's pages, they go back to the

@@ -89,7 +89,7 @@ export function Finished({ image, bookId, reducedMotion, onSave, onPrint, onKeep
         <h2 id="finished-title">
           <Icon name="star" size={34} /> {copy.finished.title} <Icon name="star" size={34} />
         </h2>
-        <div class="finished-pic">
+        <div class="finished-pic" style={image ? { aspectRatio: `${image.width} / ${image.height}`, '--r': image.width / image.height } : undefined}>
           {!image && <span class="spinner" />}
           <div class="finished-canvas" ref={pic} />
         </div>

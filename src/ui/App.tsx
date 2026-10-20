@@ -3,10 +3,10 @@ import { copy } from '../copy';
 import { Colouring } from './Colouring';
 import { GrownUps } from './GrownUps';
 import { Home } from './Home';
+import { NotFound } from './NotFound';
 import { PaperPage } from './Paper';
 import { Picker } from './Picker';
-import { href, useRoute } from './router';
-import { BackLink } from './BackLink';
+import { useRoute } from './router';
 
 function useOnline() {
   const [online, setOnline] = useState(navigator.onLine);
@@ -36,7 +36,7 @@ export function App() {
       screen = <Home />;
       break;
     case 'picker':
-      screen = <Picker bookId={route.bookId} />;
+      screen = <Picker key={route.bookId} bookId={route.bookId} />;
       break;
     case 'colour':
       screen = <Colouring bookId={route.bookId} pageId={route.pageId} done={route.done} cbn={route.cbn} />;
@@ -48,14 +48,7 @@ export function App() {
       screen = <PaperPage bookId={route.bookId} />;
       break;
     default:
-      screen = (
-        <div class="screen">
-          <p class="notice">{copy.misc.notFound}</p>
-          <BackLink class="btn" to={href.home()}>
-            {copy.misc.goHome}
-          </BackLink>
-        </div>
-      );
+      screen = <NotFound />;
   }
 
   return (
