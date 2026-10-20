@@ -46,6 +46,8 @@ self.addEventListener('activate', (event) => {
 });
 
 const isPageAsset = (url) => /\/books\/[^/]+\/pages\/[^/]+\/(line\.png|overlay\.png|overlay-half\.png|regions\.bin|regions\.json)$/.test(url.pathname);
+// The bookshelf and each book's details: small, and they change when a book is added.
+const isBookData = (url) => /\/books\/(index\.json|[^/]+\/book\.json)$/.test(url.pathname);
 
 self.addEventListener('fetch', (event) => {
   const req = event.request;
@@ -63,6 +65,21 @@ self.addEventListener('fetch', (event) => {
         if (res.ok) cache.put(req, res.clone());
         return res;
       }),
+    );
+    return;
+  }
+
+  // Book data: network first, so new books show at once; the kept copy when offline.
+  if (isBookData(url)) {
+    event.respondWith(
+      fetch(req)
+        .then((res) => {
+          if (!res.ok) return caches.match(req, { ignoreSearch: true }).then((r) => r || res);
+          const copy = res.clone();
+          caches.open(SHELL).then((cache) => cache.put(url.pathname, copy));
+          return res;
+        })
+        .catch(() => caches.match(req, { ignoreSearch: true }).then((r) => r || Response.error())),
     );
     return;
   }

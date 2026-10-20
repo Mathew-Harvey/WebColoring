@@ -75,10 +75,17 @@ const inlineIndex: BookIndexEntry[] | null = (() => {
   }
 })();
 
-/** The bookshelf as built into the page, so screens can draw it before index.json arrives. */
+/** The bookshelf as built into the page, so screens can draw it straight away. */
 export const peekIndex = () => inlineIndex;
 
+/**
+ * The bookshelf. The copy built into the page wins: the page always comes from the network
+ * first, so it is the newest, while index.json can come from an older offline copy of the site
+ * (a returning visitor's browser keeps one until it has updated). index.json is only read when
+ * the page has no copy built in (the dev server, say).
+ */
 export function loadIndex(): Promise<BookIndexEntry[]> {
+  if (inlineIndex) return Promise.resolve(inlineIndex);
   if (!indexPromise) {
     indexPromise = getJson<{ books: BookIndexEntry[] }>(`${BASE}index.json`).then((d) => d.books);
     indexPromise.catch(() => (indexPromise = null));

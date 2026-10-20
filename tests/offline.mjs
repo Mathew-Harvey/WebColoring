@@ -35,6 +35,37 @@ check('PWA is installable', installabilityErrors.length === 0, JSON.stringify(in
 const manifest = await cdp.send('Page.getAppManifest');
 check('manifest is valid', !manifest.errors.length, JSON.stringify(manifest.errors));
 
+// A returning visitor whose offline copy is older than the site still sees new books, and new
+// pages: make the kept bookshelf and one book's details out of date, then visit again.
+{
+  const fs = await import('node:fs');
+  const shelf = JSON.parse(fs.readFileSync(new URL('../public/books/index.json', import.meta.url), 'utf8')).books;
+  await page.evaluate(async () => {
+    for (const k of await caches.keys()) {
+      if (!k.startsWith('shell-')) continue;
+      const c = await caches.open(k);
+      for (const req of await c.keys()) {
+        const path = new URL(req.url).pathname;
+        if (!path.endsWith('/books/index.json') && !path.endsWith('/books/blocky-builders/book.json')) continue;
+        const j = await (await c.match(req)).json();
+        if (j.books) j.books = j.books.slice(0, 1);
+        if (j.pages) j.pages = j.pages.slice(0, 5);
+        await c.put(req, new Response(JSON.stringify(j), { headers: { 'content-type': 'application/json' } }));
+      }
+    }
+  });
+  await page.goto(BASE);
+  await page.waitForSelector('a.book-tile');
+  await page.waitForTimeout(800);
+  const tiles = await page.locator('a.book-tile').count();
+  check('returning visitor with an old offline copy: every book shows', tiles === shelf.length, `${tiles} of ${shelf.length}`);
+  await page.goto(`${BASE}#/book/blocky-builders`);
+  await page.waitForSelector('.page-tile');
+  await page.waitForTimeout(500);
+  const pages = await page.locator('.page-tile').count();
+  check('returning visitor with an old offline copy: a book shows all its pages', pages === 30, `${pages}/30`);
+}
+
 // Open one page while online so it is kept for later.
 await page.goto(`${BASE}?e2e#/book/blocky-builders/page01`);
 await page.waitForFunction(() => window.__wc && !document.querySelector('.stage-msg'), null, { timeout: 30000 });

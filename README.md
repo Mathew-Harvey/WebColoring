@@ -176,6 +176,11 @@ The built site reads book data, icons and other public files from `public/`, so 
 without being copied. `.nojekyll` tells Pages to serve the files as they are. CI fails if the committed
 build is out of date, so a forgotten `npm run build` is caught.
 
+New books show to returning visitors at once. Their browser keeps an offline copy of the site that
+updates in the background, so the app takes the bookshelf from the page itself (which always comes
+from the network first) rather than from that copy, and the service worker fetches book data from the
+network first. Each visit also asks the browser to look for a newer offline copy.
+
 The site is fully relative, so the same files also work at any path on any static host. The one
 exception is the social preview tags, which need absolute links and use `homepage` in `package.json`.
 
