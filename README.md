@@ -93,12 +93,12 @@ the details and the way to buy.
   (or no entry) shows a "Coming soon" badge, its price if set, and a disabled button. Links are plain
   product pages with no affiliate or tracking parameters, and open in a new tab. Outside the grown-ups
   area the button opens Amazon only after a grown-up holds it down. After an edit, run `npm run build`.
-- A book that is only on paper (no pages to colour here yet, such as Taken Apart) also lives in
-  `src/data/paperbacks.ts`, with its title, subtitle, author, blurb and cover in a `book` block. It shows
-  on the paper books page and in the grown-ups area, not on the shelf. Put its cover in
-  `public/books/<id>/`: the original as `<id>-cover.jpg` and a web copy (at most 1200 px wide, under
-  300 KB) as `<id>-cover-1200.jpg`, which is the one the page uses. Covers are shown whole, so a
-  landscape cover is fine.
+- `details` on a book's entry adds an author, a blurb and a cover for its paper cards (Taken Apart uses
+  this). A book with no pages to colour here yet can still be offered: give its entry a `book` block
+  with its title, subtitle, number of pictures, order and cover, and it shows on the paper books page
+  and in the grown-ups area but not on the shelf. Covers go in `public/books/<id>/`: the original as
+  `<id>-cover.jpg` and a web copy (at most 1200 px wide, under 300 KB) as `<id>-cover-1200.jpg`, which
+  is the one the page uses. Covers are shown whole, so a landscape cover is fine.
 - `paperback` in `book.config.json` fills in the details list. Each key is optional:
 
 ```json
@@ -127,6 +127,9 @@ Points use 0 to 1 page coordinates (x across, y down) and snap to the nearest re
 - `free` makes a region free colour.
 - `seal` draws an invisible line that stops fills leaking through a gap in the art.
 - `minArea` changes the smallest numbered region for that page (px at 2560x1440).
+- `freeBackground: true` (in `defaults` for the whole book, or per page) leaves the biggest region free
+  colour when it covers most of the page, so drawings that float on white (exploded views) keep a white
+  background in colour by numbers.
 
 ## Where things are
 

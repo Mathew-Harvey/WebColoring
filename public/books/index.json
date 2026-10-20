@@ -39,6 +39,18 @@
    },
    "pageCount": 30,
    "order": 2
+  },
+  {
+   "id": "taken-apart",
+   "title": "Taken Apart",
+   "subtitle": "Exploded View Coloring Book for Adults: 30 Machines and Gadgets Through Time",
+   "cover": "taken-apart/cover-small.webp",
+   "front": null,
+   "paperback": {
+    "forGrownUps": true
+   },
+   "pageCount": 30,
+   "order": 3
   }
  ]
 }

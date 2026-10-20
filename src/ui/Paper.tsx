@@ -10,13 +10,17 @@ import { href } from './router';
 // Everything that offers the printed books: the home banner, the picker card, the line on the
 // finished screen, the grown-ups list and the "paper books" page where they can be bought.
 
-/** The shelf entry for one book. index.json carries the paperback details. */
-export function useBookEntry(bookId: string): BookIndexEntry | null {
-  const [entry, setEntry] = useState<BookIndexEntry | null>(() => peekIndex()?.find((b) => b.id === bookId) ?? null);
+/** The shelf entry for one book, with its paper details. index.json carries the paperback details. */
+export function useBookEntry(bookId: string): PaperBook | null {
+  const find = (books: BookIndexEntry[] | null) => {
+    const b = books?.find((x) => x.id === bookId);
+    return b ? withDetails(b) : null;
+  };
+  const [entry, setEntry] = useState<PaperBook | null>(() => find(peekIndex()));
   useEffect(() => {
     let live = true;
     loadIndex().then(
-      (books) => live && setEntry(books.find((b) => b.id === bookId) ?? null),
+      (books) => live && setEntry(find(books)),
       () => {},
     );
     return () => {
@@ -33,6 +37,12 @@ export type PaperBook = BookIndexEntry & {
   /** A paper-only book's own cover, shown whole. */
   image?: { src: string; width: number; height: number; alt: string };
 };
+
+/** A shelf book with the author, blurb and cover from src/data/paperbacks.ts, when it has them. */
+function withDetails(book: BookIndexEntry): PaperBook {
+  const d = PAPERBACKS[book.id]?.details;
+  return d ? { ...book, author: d.author, blurb: d.blurb, image: d.cover } : book;
+}
 
 /** The shelf books plus the books that are only on paper, in order. */
 export function withPaperOnly(shelf: BookIndexEntry[]): PaperBook[] {
@@ -51,7 +61,7 @@ export function withPaperOnly(shelf: BookIndexEntry[]): PaperBook[] {
       blurb: b.blurb,
       image: b.cover,
     }));
-  return [...shelf, ...extra].sort((a, b) => a.order - b.order);
+  return [...shelf.map(withDetails), ...extra].sort((a, b) => a.order - b.order);
 }
 
 const isSoon = (book: BookIndexEntry) => !listingFor(book.id);

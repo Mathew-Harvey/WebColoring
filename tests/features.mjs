@@ -162,8 +162,15 @@ check(
 // Taken Apart: only on paper, coming soon, with its own landscape cover shown whole.
 const ta = PAPERBACKS['taken-apart'];
 const taCard = page2.locator('#paper-taken-apart');
-check('taken apart: card on the paper books page', (await taCard.count()) === 1 && (await taCard.locator('.paper-title').textContent()) === ta.book.title);
-check('taken apart: subtitle, author and blurb', (await taCard.locator('.paper-sub').textContent()) === ta.book.subtitle && (await taCard.locator('.paper-by').textContent()) === 'By Mat Harvey' && (await taCard.locator('.paper-blurb').textContent()) === ta.book.blurb);
+const taShelf = shelf.find((b) => b.id === 'taken-apart');
+check('taken apart: card on the paper books page', (await taCard.count()) === 1 && (await taCard.locator('.paper-title').textContent()) === 'Taken Apart');
+check(
+  'taken apart: subtitle, author and blurb',
+  (await taCard.locator('.paper-sub').textContent()) === 'Exploded View Coloring Book for Adults: 30 Machines and Gadgets Through Time' &&
+    taShelf.subtitle === (await taCard.locator('.paper-sub').textContent()) &&
+    (await taCard.locator('.paper-by').textContent()) === 'By Mat Harvey' &&
+    (await taCard.locator('.paper-blurb').textContent()) === ta.details.blurb,
+);
 check('taken apart: price shown as coming soon', (await taCard.locator('.paper-soon').textContent()).includes('Paperback, US$8.99') && (await taCard.locator('.soon-ribbon').count()) === 1);
 check('taken apart: buy button disabled and no store link', (await taCard.locator('button.btn-buy').isDisabled()) && (await taCard.locator('a').count()) === 0);
 await taCard.locator('img').scrollIntoViewIfNeeded();
@@ -172,17 +179,24 @@ const cover = await taCard.locator('img').evaluate((img) => {
   const r = img.getBoundingClientRect();
   return { alt: img.alt, fit: getComputedStyle(img).objectFit, nw: img.naturalWidth, nh: img.naturalHeight, w: r.width, h: r.height, src: img.getAttribute('src') };
 });
-check('taken apart: cover alt text', cover.alt === ta.book.cover.alt);
+check('taken apart: cover alt text', cover.alt === ta.details.cover.alt);
 check('taken apart: cover shown whole (contain, not cropped)', cover.fit === 'contain' && Math.abs(cover.w / cover.h - cover.nw / cover.nh) < 0.02, `${Math.round(cover.w)}x${Math.round(cover.h)} of ${cover.nw}x${cover.nh}`);
 const webCopy = fs.statSync(new URL('../public/books/taken-apart/taken-apart-cover-1200.jpg', import.meta.url)).size;
 check('taken apart: page uses the web copy (max 1200 px wide, under 300 KB)', cover.src.endsWith('taken-apart-cover-1200.jpg') && cover.nw <= 1200 && webCopy < 300 * 1024, `${cover.nw} px, ${Math.round(webCopy / 1024)} KB`);
 check('taken apart: original kept as taken-apart-cover.jpg', fs.existsSync(new URL('../public/books/taken-apart/taken-apart-cover.jpg', import.meta.url)));
 await page2.goto(`${BASE}#/paper/taken-apart`);
 await page2.waitForSelector('#paper-taken-apart.is-highlight');
-check('taken apart: back from its card goes home (no pages to colour)', (await page2.getAttribute('.paper-page .round-btn', 'href')) === '#/');
+check('taken apart: back from its card goes to its pages', (await page2.getAttribute('.paper-page .round-btn', 'href')) === '#/book/taken-apart');
 await page2.goto(`${BASE}#/`);
 await page2.waitForSelector('a.book-tile');
-check('taken apart: not on the colouring shelf', (await page2.locator('a.book-tile[href*="taken-apart"]').count()) === 0);
+const tiles = await page2.locator('a.book-tile').evaluateAll((els) => els.map((a) => a.getAttribute('href')));
+check('taken apart: on the shelf, beside Still Water Mandalas', tiles.indexOf('#/book/taken-apart') === tiles.indexOf('#/book/still-water-mandalas') + 1, tiles.join(' '));
+const pair = await page2.evaluate(() => ['still-water-mandalas', 'taken-apart'].map((id) => Math.round(document.querySelector(`a.book-tile[href="#/book/${id}"]`).getBoundingClientRect().top)));
+check('taken apart: same row as Still Water Mandalas on a wide screen', pair[0] === pair[1], pair.join(' '));
+await page2.goto(`${BASE}#/book/taken-apart`);
+await page2.waitForSelector('.page-tile img');
+check('taken apart: picker lists 30 pages', (await page2.locator('.page-tile').count()) === 30);
+check('taken apart: picker card offers the paperback as coming soon', (await page2.locator('.paper-picker button.btn-buy:disabled').count()) === 1 && (await page2.getAttribute('.paper-picker img', 'alt')) === ta.details.cover.alt);
 await page2.goto(`${BASE}#/paper`);
 await page2.waitForSelector('.paper-card a.hold-buy');
 await page2.screenshot({ path: `${OUT}/paper-store.png`, fullPage: true });

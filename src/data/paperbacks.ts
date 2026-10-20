@@ -2,9 +2,9 @@
 // only on paper.
 //
 // Keyed by book id. For a book on the colouring shelf the id is its folder under books/, and its
-// title, cover and details come from that book's data. A book that is only on paper (no pages to
-// colour here yet) carries its own details in `book`, and shows on the paper books page and in
-// the grown-ups area.
+// title, cover and details come from that book's data; `details` can add an author, a blurb and
+// a cover for the paper cards. A book that is only on paper (no pages to colour here yet) carries
+// all of its details in `book`, and shows on the paper books page and in the grown-ups area.
 //
 // A book with a `url` shows "Available now", its price and a "Get the paperback" button. A book
 // with `url: null` shows "Coming soon" with its price (if set) and a disabled button. Links are
@@ -13,16 +13,28 @@
 
 export type PaperFormat = 'paperback';
 
-/** Details for a book that is only on paper. */
-export interface PaperOnlyBook {
-  title: string;
-  subtitle?: string;
+/** A cover for the paper cards, a path under public/books/. Shown whole, never cropped. */
+export interface PaperCoverImage {
+  src: string;
+  width: number;
+  height: number;
+  alt: string;
+}
+
+/** Extra details shown on a book's paper cards. */
+export interface PaperDetails {
   author?: string;
   blurb?: string;
+  cover?: PaperCoverImage;
+}
+
+/** Details for a book that is only on paper. */
+export interface PaperOnlyBook extends PaperDetails {
+  title: string;
+  subtitle?: string;
   pictures: number;
   forGrownUps?: boolean;
-  /** Its cover, a path under public/books/. Shown whole, never cropped. */
-  cover: { src: string; width: number; height: number; alt: string };
+  cover: PaperCoverImage;
   /** Where it sits among the paper books. */
   order: number;
 }
@@ -31,6 +43,7 @@ export interface Listing {
   url: string | null;
   price?: string;
   format?: PaperFormat;
+  details?: PaperDetails;
   book?: PaperOnlyBook;
 }
 
@@ -44,21 +57,16 @@ export const PAPERBACKS: Record<string, Listing> = {
     url: null,
     price: 'US$8.99',
     format: 'paperback',
-    book: {
-      title: 'Taken Apart',
-      subtitle: 'Exploded View Coloring Book for Adults: 30 Machines and Gadgets Through Time',
+    details: {
       author: 'Mat Harvey',
       blurb:
         'Thirty machines pulled apart piece by piece, from a 1910s car engine and a wind-up gramophone to cassette players, brick phones, drones and electric cars. Every page is a detailed exploded-view drawing to colour, made for adults who like a slow, fiddly page.',
-      pictures: 30,
-      forGrownUps: true,
       cover: {
         src: 'taken-apart/taken-apart-cover-1200.jpg',
         width: 1200,
         height: 675,
         alt: 'Taken Apart cover showing a gramophone, rotary phone, cassette player and smartphone in exploded view',
       },
-      order: 3,
     },
   },
 };

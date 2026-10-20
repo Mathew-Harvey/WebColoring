@@ -557,9 +557,16 @@ async function processPage(file, pageNo, difficulty) {
   const defaults = overrides.defaults || {};
   const minArea = ov.minArea ?? (difficulty === 'detailed' ? defaults.minAreaDetailed ?? 7000 : defaults.minAreaEasy ?? 2600);
   const numberOf = new Uint8Array(count + 1);
+  // freeBackground: the biggest region, when it is most of the page around separate drawings
+  // (exploded views, say), is left for free colour, so the page stays white behind them.
+  let background = 0;
+  if (ov.freeBackground ?? defaults.freeBackground) {
+    for (let r = 1; r <= count; r++) if (!background || area[r] > area[background]) background = r;
+    if (area[background] < W * H * 0.3) background = 0;
+  }
   const eligible = [];
   for (let r = 1; r <= count; r++) {
-    if (area[r] >= minArea && best[r] / 3 >= LABEL_MIN_RADIUS) eligible.push(r);
+    if (r !== background && area[r] >= minArea && best[r] / 3 >= LABEL_MIN_RADIUS) eligible.push(r);
   }
   // Big regions first, so backgrounds claim their colours before details.
   eligible.sort((a, b) => area[b] - area[a]);
