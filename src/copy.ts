@@ -40,6 +40,7 @@ export const copy = {
     available: 'Available now',
     formats: { paperback: 'Paperback' } as Record<string, string>,
     price: (format: string, price: string) => `${format}, ${price}`,
+    by: (author: string) => `By ${author}`,
     buy: 'Get the paperback',
     buyHint: 'Grown-ups: hold to open Amazon',
     buyLink: 'Get the paperback on Amazon',

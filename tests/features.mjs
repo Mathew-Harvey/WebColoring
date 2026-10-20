@@ -125,10 +125,12 @@ check('hold-to-open: holding opens the grown-ups page', page.url().includes('gro
 
 // The paper books, with the store links from src/data/paperbacks.ts. A fresh context without
 // the service worker, with window.open recorded instead of opening a tab.
-const { listingFor } = await import(new URL('../src/data/paperbacks.ts', import.meta.url).href);
+const { listingFor, paperOnlyBooks, PAPERBACKS } = await import(new URL('../src/data/paperbacks.ts', import.meta.url).href);
 const shelf = JSON.parse(fs.readFileSync(new URL('../public/books/index.json', import.meta.url), 'utf8')).books;
-const onSale = shelf.filter((b) => listingFor(b.id));
-const soon = shelf.filter((b) => !listingFor(b.id));
+const paperOnly = paperOnlyBooks().filter((b) => !shelf.some((s) => s.id === b.id));
+const paperBooks = [...shelf, ...paperOnly].sort((x, y) => x.order - y.order);
+const onSale = paperBooks.filter((b) => listingFor(b.id));
+const soon = paperBooks.filter((b) => !listingFor(b.id));
 const ctx2 = await browser.newContext({ viewport: { width: 1280, height: 800 }, serviceWorkers: 'block' });
 await ctx2.addInitScript(() => {
   window.open = (url) => ((window.__opened = url), null);
@@ -151,7 +153,38 @@ check(
 check('store: no tracking or affiliate parameters', links.every(([href]) => !new URL(href).search && !new URL(href).hash));
 const prices = await page2.locator('.paper-card .paper-price').allTextContents();
 check('store: price and format shown for each book on sale', prices.length === onSale.length && onSale.every((b, i) => prices[i].includes(listingFor(b.id).price)), prices.join(' | '));
-check('store: books not on sale still say "Coming soon"', (await page2.locator('.paper-card .soon-ribbon').count()) === soon.length && (await page2.locator('.paper-card .paper-soon').count()) === soon.length);
+check(
+  'store: books not on sale say "Coming soon", with the buy button disabled',
+  (await page2.locator('.paper-card .soon-ribbon').count()) === soon.length &&
+    (await page2.locator('.paper-card button.btn-buy:disabled').count()) === soon.length,
+);
+
+// Taken Apart: only on paper, coming soon, with its own landscape cover shown whole.
+const ta = PAPERBACKS['taken-apart'];
+const taCard = page2.locator('#paper-taken-apart');
+check('taken apart: card on the paper books page', (await taCard.count()) === 1 && (await taCard.locator('.paper-title').textContent()) === ta.book.title);
+check('taken apart: subtitle, author and blurb', (await taCard.locator('.paper-sub').textContent()) === ta.book.subtitle && (await taCard.locator('.paper-by').textContent()) === 'By Mat Harvey' && (await taCard.locator('.paper-blurb').textContent()) === ta.book.blurb);
+check('taken apart: price shown as coming soon', (await taCard.locator('.paper-soon').textContent()).includes('Paperback, US$8.99') && (await taCard.locator('.soon-ribbon').count()) === 1);
+check('taken apart: buy button disabled and no store link', (await taCard.locator('button.btn-buy').isDisabled()) && (await taCard.locator('a').count()) === 0);
+await taCard.locator('img').scrollIntoViewIfNeeded();
+await page2.waitForFunction(() => document.querySelector('#paper-taken-apart img').complete && document.querySelector('#paper-taken-apart img').naturalWidth > 0);
+const cover = await taCard.locator('img').evaluate((img) => {
+  const r = img.getBoundingClientRect();
+  return { alt: img.alt, fit: getComputedStyle(img).objectFit, nw: img.naturalWidth, nh: img.naturalHeight, w: r.width, h: r.height, src: img.getAttribute('src') };
+});
+check('taken apart: cover alt text', cover.alt === ta.book.cover.alt);
+check('taken apart: cover shown whole (contain, not cropped)', cover.fit === 'contain' && Math.abs(cover.w / cover.h - cover.nw / cover.nh) < 0.02, `${Math.round(cover.w)}x${Math.round(cover.h)} of ${cover.nw}x${cover.nh}`);
+const webCopy = fs.statSync(new URL('../public/books/taken-apart/taken-apart-cover-1200.jpg', import.meta.url)).size;
+check('taken apart: page uses the web copy (max 1200 px wide, under 300 KB)', cover.src.endsWith('taken-apart-cover-1200.jpg') && cover.nw <= 1200 && webCopy < 300 * 1024, `${cover.nw} px, ${Math.round(webCopy / 1024)} KB`);
+check('taken apart: original kept as taken-apart-cover.jpg', fs.existsSync(new URL('../public/books/taken-apart/taken-apart-cover.jpg', import.meta.url)));
+await page2.goto(`${BASE}#/paper/taken-apart`);
+await page2.waitForSelector('#paper-taken-apart.is-highlight');
+check('taken apart: back from its card goes home (no pages to colour)', (await page2.getAttribute('.paper-page .round-btn', 'href')) === '#/');
+await page2.goto(`${BASE}#/`);
+await page2.waitForSelector('a.book-tile');
+check('taken apart: not on the colouring shelf', (await page2.locator('a.book-tile[href*="taken-apart"]').count()) === 0);
+await page2.goto(`${BASE}#/paper`);
+await page2.waitForSelector('.paper-card a.hold-buy');
 await page2.screenshot({ path: `${OUT}/paper-store.png`, fullPage: true });
 await buy.first().scrollIntoViewIfNeeded();
 const hold = await buy.first().boundingBox();
@@ -168,10 +201,11 @@ check('store: holding the button opens the product page', (await page2.evaluate(
 await page2.goto(`${BASE}#/book/${onSale[0].id}`);
 await page2.waitForSelector('.paper-picker a.hold-buy');
 check('store: picker card links to the product page', (await page2.getAttribute('.paper-picker a.hold-buy', 'href')) === listingFor(onSale[0].id).url);
-if (soon.length) {
-  await page2.goto(`${BASE}#/book/${soon[0].id}`);
-  await page2.waitForSelector('.paper-picker .paper-soon');
-  check('store: a book not on sale has no buy button in the picker', (await page2.locator('.paper-picker .hold-buy').count()) === 0);
+const soonOnShelf = soon.find((b) => shelf.some((s) => s.id === b.id));
+if (soonOnShelf) {
+  await page2.goto(`${BASE}#/book/${soonOnShelf.id}`);
+  await page2.waitForSelector('.paper-picker button.btn-buy:disabled');
+  check('store: a book not on sale has a disabled buy button in the picker', (await page2.locator('.paper-picker .hold-buy, .paper-picker a.btn-buy').count()) === 0);
 }
 await page2.goto(`${BASE}?e2e#/book/${onSale[0].id}/page05/done`);
 await page2.waitForSelector('.finished .paper-finished');
@@ -180,6 +214,7 @@ await page2.screenshot({ path: `${OUT}/finished-store.png` });
 await page2.goto(`${BASE}#/grown-ups`);
 await page2.waitForSelector('.gu-paper .paper-card');
 const direct = await page2.locator('.gu-paper a.btn-buy').evaluateAll((els) => els.map((a) => [a.getAttribute('href'), a.getAttribute('target'), a.getAttribute('rel')]));
+check('taken apart: listed in the grown-ups area, buy button disabled', (await page2.locator('.gu-paper #paper-taken-apart button.btn-buy:disabled').count()) === 1);
 check(
   'store: grown-ups area links straight to each product page',
   JSON.stringify(direct) === JSON.stringify(onSale.map((b) => [listingFor(b.id).url, '_blank', 'noopener'])),

@@ -7,7 +7,7 @@ import { updateSettings } from '../data/settings';
 import { clearAll } from '../data/storage';
 import { useSettings } from './hooks';
 import { Icon } from './icons';
-import { PaperBookCard } from './Paper';
+import { PaperBookCard, withPaperOnly } from './Paper';
 import { href } from './router';
 import { downloadBlob } from './share';
 
@@ -133,7 +133,7 @@ export function GrownUps() {
         <section class="card">
           <h2>{copy.grownUps.booksTitle}</h2>
           <div class="gu-paper">
-            {books.map((b) => (
+            {withPaperOnly(books).map((b) => (
               <PaperBookCard key={b.id} book={b} gated={false} compact />
             ))}
           </div>

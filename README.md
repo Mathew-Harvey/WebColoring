@@ -90,9 +90,15 @@ the details and the way to buy.
 
 - Store links, prices and formats live in one place, `src/data/paperbacks.ts`, keyed by book id. A book
   with a link shows "Available now", its price and a "Get the paperback" button. A book with `url: null`
-  (or no entry) shows a "Coming soon" badge. Links are plain product pages with no affiliate or tracking
-  parameters, and open in a new tab. Outside the grown-ups area the button opens Amazon only after a
-  grown-up holds it down. After an edit, run `npm run build`.
+  (or no entry) shows a "Coming soon" badge, its price if set, and a disabled button. Links are plain
+  product pages with no affiliate or tracking parameters, and open in a new tab. Outside the grown-ups
+  area the button opens Amazon only after a grown-up holds it down. After an edit, run `npm run build`.
+- A book that is only on paper (no pages to colour here yet, such as Taken Apart) also lives in
+  `src/data/paperbacks.ts`, with its title, subtitle, author, blurb and cover in a `book` block. It shows
+  on the paper books page and in the grown-ups area, not on the shelf. Put its cover in
+  `public/books/<id>/`: the original as `<id>-cover.jpg` and a web copy (at most 1200 px wide, under
+  300 KB) as `<id>-cover-1200.jpg`, which is the one the page uses. Covers are shown whole, so a
+  landscape cover is fine.
 - `paperback` in `book.config.json` fills in the details list. Each key is optional:
 
 ```json

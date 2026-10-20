@@ -9,8 +9,10 @@ import fs from 'node:fs';
 const BASE = (process.argv[2] || 'http://localhost:4173/').replace(/\/?$/, '/');
 const SHELF = JSON.parse(fs.readFileSync(new URL('../public/books/index.json', import.meta.url), 'utf8')).books;
 const BOOKS = SHELF.length;
-const { listingFor } = await import(new URL('../src/data/paperbacks.ts', import.meta.url).href);
-const ON_SALE = SHELF.filter((b) => listingFor(b.id)).length;
+const { listingFor, paperOnlyBooks } = await import(new URL('../src/data/paperbacks.ts', import.meta.url).href);
+// Every paper book: the shelf books plus the books that are only on paper.
+const PAPER = [...SHELF.map((b) => b.id), ...paperOnlyBooks().map((b) => b.id).filter((id) => !SHELF.some((b) => b.id === id))];
+const ON_SALE = PAPER.filter((id) => listingFor(id)).length;
 const ENGINE = process.env.BROWSER === 'webkit' ? 'webkit' : 'chromium';
 const SHOTS = 'debug/e2e';
 fs.mkdirSync(SHOTS, { recursive: true });
@@ -86,9 +88,9 @@ async function desktop(browser) {
   await page.waitForSelector('.paper-card');
   check(
     `${ENGINE}: paper books page shows each book on sale or coming soon`,
-    (await page.locator('.paper-card').count()) === BOOKS &&
+    (await page.locator('.paper-card').count()) === PAPER.length &&
       (await page.locator('.paper-card a.hold-buy').count()) === ON_SALE &&
-      (await page.locator('.paper-card .soon-ribbon').count()) === BOOKS - ON_SALE,
+      (await page.locator('.paper-card .soon-ribbon').count()) === PAPER.length - ON_SALE,
     `${await page.locator('.paper-card a.hold-buy').count()} on sale`,
   );
 

@@ -447,6 +447,8 @@ a {
   display: block;
   width: 100%;
   height: auto;
+  /* Covers are shown whole, never cropped (landscape ones too). */
+  object-fit: contain;
   border-radius: inherit;
 }
 
@@ -462,6 +464,11 @@ a {
 
 .paperback-art {
   border-radius: 12px;
+}
+
+.paperback-art .soon-ribbon {
+  /* On wide covers the corner holds the title text, so the sticker hangs off the bottom edge. */
+  bottom: -14px;
 }
 
 .paperback-art::after {
@@ -783,6 +790,31 @@ a {
   font-size: 24px;
   font-weight: 1000;
   line-height: 1.15;
+}
+
+.paper-info .paper-by {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.paper-info .paper-blurb {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.btn-buy:disabled {
+  background: #eee8de;
+  box-shadow: none;
+  color: var(--ink-soft);
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-buy:disabled svg {
+  opacity: 0.55;
 }
 
 .paper-sub {

@@ -2,7 +2,7 @@ import type { CSSProperties } from 'preact';
 import { useEffect, useState } from 'preact/hooks';
 import { copy } from '../copy';
 import { indexAsset, loadIndex, peekIndex, type BookIndexEntry } from '../data/books';
-import { listingFor } from '../data/paperbacks';
+import { listingFor, paperOnlyBooks, PAPERBACKS } from '../data/paperbacks';
 import { HoldButton } from './HoldButton';
 import { Icon } from './icons';
 import { href } from './router';
@@ -26,7 +26,40 @@ export function useBookEntry(bookId: string): BookIndexEntry | null {
   return entry;
 }
 
+/** A book as the paper pages show it: a shelf book, or one that is only on paper. */
+export type PaperBook = BookIndexEntry & {
+  author?: string;
+  blurb?: string;
+  /** A paper-only book's own cover, shown whole. */
+  image?: { src: string; width: number; height: number; alt: string };
+};
+
+/** The shelf books plus the books that are only on paper, in order. */
+export function withPaperOnly(shelf: BookIndexEntry[]): PaperBook[] {
+  const extra: PaperBook[] = paperOnlyBooks()
+    .filter((b) => !shelf.some((s) => s.id === b.id))
+    .map((b) => ({
+      id: b.id,
+      title: b.title,
+      subtitle: b.subtitle ?? null,
+      cover: null,
+      front: null,
+      paperback: { forGrownUps: b.forGrownUps },
+      pageCount: b.pictures,
+      order: b.order,
+      author: b.author,
+      blurb: b.blurb,
+      image: b.cover,
+    }));
+  return [...shelf, ...extra].sort((a, b) => a.order - b.order);
+}
+
 const isSoon = (book: BookIndexEntry) => !listingFor(book.id);
+
+const priceText = (bookId: string) => {
+  const l = PAPERBACKS[bookId];
+  return l?.price ? copy.paper.price(copy.paper.formats[l.format ?? 'paperback'], l.price) : null;
+};
 
 /** A wax crayon, for decoration. */
 export function Crayon({ colour, dark, class: cls }: { colour: string; dark: string; class?: string }) {
@@ -51,21 +84,22 @@ export function PaperCover({
   lazy = true,
   style,
 }: {
-  book: BookIndexEntry;
+  book: PaperBook;
   alt?: string;
   ribbon?: boolean;
   lazy?: boolean;
   style?: CSSProperties;
 }) {
-  const src = book.front ? indexAsset(book.front) : book.cover ? indexAsset(book.cover) : null;
+  const image = book.image;
+  const src = image ? indexAsset(image.src) : book.front ? indexAsset(book.front) : book.cover ? indexAsset(book.cover) : null;
   return (
     <span class={`paperback${book.front ? '' : ' paperback-art'}`} style={style}>
       {src && (
         <img
           src={src}
-          alt={alt}
-          width={480}
-          height={book.front ? 621 : 270}
+          alt={image ? image.alt : alt}
+          width={image ? image.width : 480}
+          height={image ? image.height : book.front ? 621 : 270}
           loading={lazy ? 'lazy' : undefined}
           decoding="async"
         />
@@ -80,24 +114,34 @@ export function PaperCover({
 }
 
 /**
- * The way to buy: a hold button for grown-ups, a plain link inside the grown-ups area, or a
- * Coming soon note (with its own badge when the cover beside it has no sticker).
+ * The way to buy: a hold button for grown-ups, a plain link inside the grown-ups area, or, while
+ * the book is not on sale, a Coming soon note and a disabled button (with its own badge when the
+ * cover beside it has no sticker).
  */
 export function BuyAction({ book, gated = true, badge = true }: { book: BookIndexEntry; gated?: boolean; badge?: boolean }) {
   const listing = listingFor(book.id);
+  const cost = priceText(book.id);
   if (!listing) {
     return (
-      <p class="paper-soon">
-        {badge && <span class="soon-pill">{copy.paper.comingSoon}</span>}
+      <>
+        {(badge || cost) && (
+          <p class="paper-soon">
+            {badge && <span class="soon-pill">{copy.paper.comingSoon}</span>}
+            {cost && <strong>{cost}</strong>}
+          </p>
+        )}
+        <button type="button" class="btn btn-buy" disabled>
+          <Icon name="book" size={24} /> {copy.paper.buy}
+        </button>
         <span class="small">{copy.paper.comingSoonBody}</span>
-      </p>
+      </>
     );
   }
   const { url } = listing;
-  const price = listing.price && (
+  const price = cost && (
     <p class="paper-price">
       <span class="avail-pill">{copy.paper.available}</span>
-      <strong>{copy.paper.price(copy.paper.formats[listing.format ?? 'paperback'], listing.price)}</strong>
+      <strong>{cost}</strong>
     </p>
   );
   if (!gated) {
@@ -152,7 +196,7 @@ export function PaperBookCard({
   highlight = false,
   compact = false,
 }: {
-  book: BookIndexEntry;
+  book: PaperBook;
   gated?: boolean;
   highlight?: boolean;
   compact?: boolean;
@@ -166,6 +210,8 @@ export function PaperBookCard({
           {book.title}
         </H>
         {book.subtitle && <p class="paper-sub">{book.subtitle}</p>}
+        {book.author && <p class="paper-by">{copy.paper.by(book.author)}</p>}
+        {book.blurb && <p class="paper-blurb">{book.blurb}</p>}
         <Details book={book} />
         <BuyAction book={book} gated={gated} badge={compact} />
       </div>
@@ -259,21 +305,25 @@ export function PaperFinished({ bookId }: { bookId: string }) {
 
 /** The paper books page: every book, all its details and the way to buy it. */
 export function PaperPage({ bookId }: { bookId: string | null }) {
-  const [books, setBooks] = useState<BookIndexEntry[] | null>(peekIndex);
+  const [shelf, setShelf] = useState<BookIndexEntry[] | null>(peekIndex);
   const [error, setError] = useState(false);
+  const books = shelf && withPaperOnly(shelf);
 
   useEffect(() => {
-    loadIndex().then(setBooks, () => !peekIndex() && setError(true));
+    loadIndex().then(setShelf, () => !peekIndex() && setError(true));
   }, []);
 
   useEffect(() => {
-    if (books && bookId) document.getElementById(`paper-${bookId}`)?.scrollIntoView({ block: 'center' });
-  }, [books, bookId]);
+    if (shelf && bookId) document.getElementById(`paper-${bookId}`)?.scrollIntoView({ block: 'center' });
+  }, [shelf, bookId]);
+
+  // Back to the book's pages, or home for a book that is only on paper.
+  const onShelf = !!bookId && !!shelf?.some((b) => b.id === bookId);
 
   return (
     <div class="screen paper-page">
       <header class="picker-head">
-        <a class="round-btn" href={bookId ? href.book(bookId) : href.home()} aria-label={copy.picker.back}>
+        <a class="round-btn" href={onShelf && bookId ? href.book(bookId) : href.home()} aria-label={copy.picker.back}>
           <Icon name="back" size={30} />
         </a>
         <h1 class="picker-title">{copy.paper.pageTitle}</h1>

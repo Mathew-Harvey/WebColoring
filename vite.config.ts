@@ -15,6 +15,9 @@ const pub = path.join(repo, 'public');
 const PAGE_ASSET = /books\/[^/]+\/pages\/[^/]+\/(line\.png|overlay\.png|overlay-half\.png|regions\.bin|regions\.json)$/;
 // The social preview card is only fetched by other sites, so it is not precached either.
 const SHARE_CARD = 'public/share.jpg';
+// Full-size cover originals (books/<id>/<name>-cover.jpg) are kept for reference; the pages use
+// their web copies (<name>-cover-1200.jpg), so the originals are not precached.
+const COVER_ORIGINAL = /^public\/books\/[^/]+\/[^/]+-cover\.jpg$/;
 
 // Social previews need absolute links, so they point at the live site (package.json "homepage").
 const pkg = JSON.parse(fs.readFileSync(path.join(repo, 'package.json'), 'utf8'));
@@ -113,7 +116,7 @@ function siteBuild(): Plugin {
     },
     closeBundle() {
       const built = ['index.html', 'manifest.webmanifest', ...walk(path.join(repo, 'assets'), repo)];
-      const publicFiles = walk(pub, repo).filter((f) => !PAGE_ASSET.test(f) && f !== SHARE_CARD && !f.endsWith('.txt'));
+      const publicFiles = walk(pub, repo).filter((f) => !PAGE_ASSET.test(f) && f !== SHARE_CARD && !COVER_ORIGINAL.test(f) && !f.endsWith('.txt'));
       const precache = [...built, ...publicFiles].sort();
       const hash = crypto.createHash('sha256');
       for (const f of precache) hash.update(f).update(fs.readFileSync(path.join(repo, f)));
