@@ -15,6 +15,9 @@
 //   --filter 16        highpass radius in source px: evens out faint lines (0 turns it off)
 //   --threshold 0.45   0..1, higher keeps fainter lines but thickens all of them
 //   --speck 12         specks smaller than this (px at 4x) are dropped
+//   --fills            for art with flat grey shading (a kids' book, say): grey areas are left
+//                      open to colour, outlined, instead of turning black. Uses a dark-line
+//                      pass plus a fine-line pass that ignores large flat areas.
 //   --only 1,13        just these pages
 
 import fs from 'node:fs';
@@ -47,12 +50,42 @@ const filter = Number(args.filter ?? 16);
 const threshold = Number(args.threshold ?? 0.45);
 const speck = Number(args.speck ?? 12);
 const only = args.only ? new Set(String(args.only).split(',').map((n) => parseInt(n, 10))) : null;
+const fills = !!args.fills;
 
 for (const tool of ['mkbitmap', 'potrace']) {
   if (spawnSync(tool, ['--version']).error) {
     console.error(`${tool} is not installed. Install potrace (apt install potrace, or brew install potrace).`);
     process.exit(1);
   }
+}
+
+/** Reads a binary PBM (P4) file into its header numbers and packed pixel bits. */
+function readPbm(file) {
+  const d = fs.readFileSync(file);
+  const nums = [];
+  let i = 2;
+  while (nums.length < 2) {
+    while (/\s/.test(String.fromCharCode(d[i]))) i++;
+    if (d[i] === 0x23) {
+      while (d[i] !== 0x0a) i++;
+      continue;
+    }
+    let j = i;
+    while (!/\s/.test(String.fromCharCode(d[j]))) j++;
+    nums.push(Number(d.subarray(i, j).toString()));
+    i = j;
+  }
+  return { w: nums[0], h: nums[1], bits: d.subarray(i + 1) };
+}
+
+/** Writes the black pixels of either PBM into `out`. */
+function unionPbm(a, b, out) {
+  const A = readPbm(a);
+  const B = readPbm(b);
+  if (A.w !== B.w || A.h !== B.h || A.bits.length !== B.bits.length) throw new Error('PBM sizes differ');
+  const bits = Buffer.alloc(A.bits.length);
+  for (let k = 0; k < bits.length; k++) bits[k] = A.bits[k] | B.bits[k];
+  fs.writeFileSync(out, Buffer.concat([Buffer.from(`P4\n${A.w} ${A.h}\n`), bits]));
 }
 
 function run(cmd, argv) {
@@ -81,7 +114,17 @@ try {
     fs.writeFileSync(pgm, Buffer.concat([Buffer.from(`P5\n${info.width} ${info.height}\n255\n`), data]));
     // Even out faint lines (highpass), enlarge 4x with cubic interpolation, and threshold.
     const pbm = path.join(tmp, `${id}.pbm`);
-    run('mkbitmap', [...(filter > 0 ? ['-f', String(filter)] : ['-n']), '-s', '4', '-3', '-t', String(threshold), pgm, '-o', pbm]);
+    if (fills) {
+      // Dark lines only (grey shading stays white), plus thin lines found with a small highpass
+      // radius, which leaves the inside of a flat grey area white too.
+      const dark = path.join(tmp, `${id}-dark.pbm`);
+      const fine = path.join(tmp, `${id}-fine.pbm`);
+      run('mkbitmap', ['-n', '-s', '4', '-3', '-t', '0.42', pgm, '-o', dark]);
+      run('mkbitmap', ['-f', '3', '-s', '4', '-3', '-t', '0.40', pgm, '-o', fine]);
+      unionPbm(dark, fine, pbm);
+    } else {
+      run('mkbitmap', [...(filter > 0 ? ['-f', String(filter)] : ['-n']), '-s', '4', '-3', '-t', String(threshold), pgm, '-o', pbm]);
+    }
     // Trace into smooth curves; keep corners fairly sharp, since these are drawn machines.
     const svg = path.join(tmp, `${id}.svg`);
     run('potrace', ['-s', '-t', String(speck), '-a', '0.9', '-O', '0.3', '-u', '10', pbm, '-o', svg]);

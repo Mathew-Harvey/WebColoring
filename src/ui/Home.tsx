@@ -40,7 +40,7 @@ function BookTile({ book, started }: { book: BookIndexEntry; started: number }) 
 function Shelf({ id, title, books, started }: { id: string; title: string | null; books: BookIndexEntry[]; started: Map<string, number> }) {
   if (!books.length) return null;
   return (
-    <section class="shelf-group" aria-labelledby={title ? `shelf-${id}` : undefined}>
+    <section class="shelf-group" aria-labelledby={title ? `shelf-${id}` : undefined} style={{ '--cols': Math.min(books.length, 3) }}>
       {title && (
         <h2 class="shelf-title" id={`shelf-${id}`}>
           {title}

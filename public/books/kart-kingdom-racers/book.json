@@ -1,0 +1,545 @@
+{
+ "id": "kart-kingdom-racers",
+ "title": "Kart Kingdom Racers",
+ "subtitle": "Coloring Book for Kids Ages 6-10",
+ "cover": "cover.webp",
+ "coverSmall": "cover-small.webp",
+ "front": null,
+ "paperback": {
+  "ages": "6 to 10"
+ },
+ "width": 2560,
+ "height": 1440,
+ "cbnPalette": [
+  {
+   "key": "sky",
+   "hex": "#7cc8f8"
+  },
+  {
+   "key": "grass",
+   "hex": "#7ccf5e"
+  },
+  {
+   "key": "leaf",
+   "hex": "#2f9e5a"
+  },
+  {
+   "key": "yellow",
+   "hex": "#ffd83d"
+  },
+  {
+   "key": "orange",
+   "hex": "#ff9a3c"
+  },
+  {
+   "key": "red",
+   "hex": "#ef5a52"
+  },
+  {
+   "key": "pink",
+   "hex": "#ff8fc8"
+  },
+  {
+   "key": "purple",
+   "hex": "#a57de0"
+  },
+  {
+   "key": "brown",
+   "hex": "#a8714a"
+  },
+  {
+   "key": "sand",
+   "hex": "#f3cf98"
+  },
+  {
+   "key": "grey",
+   "hex": "#a9b2bd"
+  },
+  {
+   "key": "blue",
+   "hex": "#3e7fe0"
+  }
+ ],
+ "pages": [
+  {
+   "id": "page01",
+   "n": 1,
+   "title": null,
+   "difficulty": "easy",
+   "cbn": true,
+   "regionCount": 623,
+   "numbered": 128,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1440
+   ],
+   "v": "cd5ed46e49"
+  },
+  {
+   "id": "page02",
+   "n": 2,
+   "title": null,
+   "difficulty": "easy",
+   "cbn": true,
+   "regionCount": 458,
+   "numbered": 104,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1440
+   ],
+   "v": "de3494884c"
+  },
+  {
+   "id": "page03",
+   "n": 3,
+   "title": null,
+   "difficulty": "easy",
+   "cbn": true,
+   "regionCount": 621,
+   "numbered": 111,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1440
+   ],
+   "v": "a5f668a4e8"
+  },
+  {
+   "id": "page04",
+   "n": 4,
+   "title": null,
+   "difficulty": "easy",
+   "cbn": true,
+   "regionCount": 806,
+   "numbered": 88,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1440
+   ],
+   "v": "7d4be2bed1"
+  },
+  {
+   "id": "page05",
+   "n": 5,
+   "title": null,
+   "difficulty": "easy",
+   "cbn": true,
+   "regionCount": 331,
+   "numbered": 70,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1440
+   ],
+   "v": "2d901f2e52"
+  },
+  {
+   "id": "page06",
+   "n": 6,
+   "title": null,
+   "difficulty": "easy",
+   "cbn": true,
+   "regionCount": 106,
+   "numbered": 54,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1440
+   ],
+   "v": "a5e67aab98"
+  },
+  {
+   "id": "page07",
+   "n": 7,
+   "title": null,
+   "difficulty": "easy",
+   "cbn": true,
+   "regionCount": 482,
+   "numbered": 97,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1440
+   ],
+   "v": "5764841149"
+  },
+  {
+   "id": "page08",
+   "n": 8,
+   "title": null,
+   "difficulty": "detailed",
+   "cbn": false,
+   "regionCount": 1426,
+   "numbered": 60,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1440
+   ],
+   "v": "b6233d04dc"
+  },
+  {
+   "id": "page09",
+   "n": 9,
+   "title": null,
+   "difficulty": "easy",
+   "cbn": true,
+   "regionCount": 711,
+   "numbered": 143,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1440
+   ],
+   "v": "2d0994cf20"
+  },
+  {
+   "id": "page10",
+   "n": 10,
+   "title": null,
+   "difficulty": "easy",
+   "cbn": true,
+   "regionCount": 116,
+   "numbered": 33,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1440
+   ],
+   "v": "6a1d71e832"
+  },
+  {
+   "id": "page11",
+   "n": 11,
+   "title": null,
+   "difficulty": "easy",
+   "cbn": true,
+   "regionCount": 583,
+   "numbered": 105,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1440
+   ],
+   "v": "b4d2886264"
+  },
+  {
+   "id": "page12",
+   "n": 12,
+   "title": null,
+   "difficulty": "easy",
+   "cbn": true,
+   "regionCount": 759,
+   "numbered": 106,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1440
+   ],
+   "v": "c09c7fa101"
+  },
+  {
+   "id": "page13",
+   "n": 13,
+   "title": null,
+   "difficulty": "easy",
+   "cbn": true,
+   "regionCount": 785,
+   "numbered": 86,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1440
+   ],
+   "v": "ccb19f2162"
+  },
+  {
+   "id": "page14",
+   "n": 14,
+   "title": null,
+   "difficulty": "easy",
+   "cbn": true,
+   "regionCount": 843,
+   "numbered": 156,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1440
+   ],
+   "v": "32d0267f9e"
+  },
+  {
+   "id": "page15",
+   "n": 15,
+   "title": null,
+   "difficulty": "easy",
+   "cbn": true,
+   "regionCount": 375,
+   "numbered": 80,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1440
+   ],
+   "v": "517391d90e"
+  },
+  {
+   "id": "page16",
+   "n": 16,
+   "title": null,
+   "difficulty": "easy",
+   "cbn": true,
+   "regionCount": 394,
+   "numbered": 190,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1440
+   ],
+   "v": "b2651f2d4b"
+  },
+  {
+   "id": "page17",
+   "n": 17,
+   "title": null,
+   "difficulty": "detailed",
+   "cbn": false,
+   "regionCount": 1134,
+   "numbered": 51,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1440
+   ],
+   "v": "e373e0ff55"
+  },
+  {
+   "id": "page18",
+   "n": 18,
+   "title": null,
+   "difficulty": "easy",
+   "cbn": true,
+   "regionCount": 751,
+   "numbered": 110,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1440
+   ],
+   "v": "523624caa9"
+  },
+  {
+   "id": "page19",
+   "n": 19,
+   "title": null,
+   "difficulty": "easy",
+   "cbn": true,
+   "regionCount": 582,
+   "numbered": 150,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1440
+   ],
+   "v": "1b62660da4"
+  },
+  {
+   "id": "page20",
+   "n": 20,
+   "title": null,
+   "difficulty": "easy",
+   "cbn": true,
+   "regionCount": 172,
+   "numbered": 79,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1440
+   ],
+   "v": "d4ae10fceb"
+  },
+  {
+   "id": "page21",
+   "n": 21,
+   "title": null,
+   "difficulty": "easy",
+   "cbn": true,
+   "regionCount": 626,
+   "numbered": 106,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1440
+   ],
+   "v": "7fd02c2524"
+  },
+  {
+   "id": "page22",
+   "n": 22,
+   "title": null,
+   "difficulty": "detailed",
+   "cbn": false,
+   "regionCount": 1251,
+   "numbered": 37,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1440
+   ],
+   "v": "4965001c5c"
+  },
+  {
+   "id": "page23",
+   "n": 23,
+   "title": null,
+   "difficulty": "easy",
+   "cbn": true,
+   "regionCount": 537,
+   "numbered": 128,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1440
+   ],
+   "v": "0f7d9c5635"
+  },
+  {
+   "id": "page24",
+   "n": 24,
+   "title": null,
+   "difficulty": "easy",
+   "cbn": true,
+   "regionCount": 437,
+   "numbered": 104,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1440
+   ],
+   "v": "93d241e187"
+  },
+  {
+   "id": "page25",
+   "n": 25,
+   "title": null,
+   "difficulty": "easy",
+   "cbn": true,
+   "regionCount": 708,
+   "numbered": 140,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1440
+   ],
+   "v": "40e5d6b6aa"
+  },
+  {
+   "id": "page26",
+   "n": 26,
+   "title": null,
+   "difficulty": "easy",
+   "cbn": true,
+   "regionCount": 634,
+   "numbered": 111,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1440
+   ],
+   "v": "4317639b99"
+  },
+  {
+   "id": "page27",
+   "n": 27,
+   "title": null,
+   "difficulty": "easy",
+   "cbn": true,
+   "regionCount": 397,
+   "numbered": 83,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1440
+   ],
+   "v": "da36033514"
+  },
+  {
+   "id": "page28",
+   "n": 28,
+   "title": null,
+   "difficulty": "easy",
+   "cbn": true,
+   "regionCount": 716,
+   "numbered": 143,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1440
+   ],
+   "v": "856d8cbe59"
+  },
+  {
+   "id": "page29",
+   "n": 29,
+   "title": null,
+   "difficulty": "easy",
+   "cbn": true,
+   "regionCount": 527,
+   "numbered": 110,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1440
+   ],
+   "v": "7c7dca0c0c"
+  },
+  {
+   "id": "page30",
+   "n": 30,
+   "title": null,
+   "difficulty": "easy",
+   "cbn": true,
+   "regionCount": 695,
+   "numbered": 141,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1440
+   ],
+   "v": "6980bd4d57"
+  }
+ ]
+}

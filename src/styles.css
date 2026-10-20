@@ -257,9 +257,17 @@ a {
   gap: 34px 40px;
 }
 
+/* Side by side on wide screens, each shelf as wide as its books need, so they share a row. */
 @media (min-width: 1100px) {
   .shelves.is-grouped {
-    grid-template-columns: 1fr 1fr;
+    display: flex;
+    align-items: flex-start;
+  }
+  .shelves.is-grouped .shelf-group {
+    flex: var(--cols, 1) 1 0;
+  }
+  .shelves.is-grouped .shelf {
+    grid-template-columns: repeat(var(--cols, 1), minmax(0, 1fr));
   }
 }
 

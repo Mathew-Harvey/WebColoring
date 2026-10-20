@@ -76,6 +76,9 @@ Needs potrace (`apt install potrace`, or `brew install potrace`). Taken Apart is
 stops invisible bridges joining short dashes (the leader lines in exploded views), which would
 otherwise cut the white background into boxes.
 
+Add `--fills` for art with flat grey shading (Kart Kingdom Racers): the grey areas are left open to
+colour, with their outlines, instead of turning black.
+
 ### Per-book settings: `books/<book-id>/book.config.json`
 
 ```json
