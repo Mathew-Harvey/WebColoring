@@ -6,6 +6,7 @@ import { listMeta, type PageMeta } from '../data/storage';
 import { Icon, type IconName } from './icons';
 import { PaperPickerCard } from './Paper';
 import { href } from './router';
+import { BackLink } from './BackLink';
 
 type Filter = 'all' | 'easy' | 'detailed' | 'cbn';
 
@@ -54,9 +55,9 @@ export function Picker({ bookId }: { bookId: string }) {
     return (
       <div class="screen picker">
         <p class="notice">{copy.misc.notFound}</p>
-        <a class="btn" href={href.home()}>
+        <BackLink class="btn" to={href.home()}>
           {copy.misc.goHome}
-        </a>
+        </BackLink>
       </div>
     );
   }
@@ -64,9 +65,9 @@ export function Picker({ bookId }: { bookId: string }) {
   return (
     <div class="screen picker">
       <header class="picker-head">
-        <a class="round-btn" href={href.home()} aria-label={copy.picker.back}>
+        <BackLink class="round-btn" to={href.home()} label={copy.picker.back}>
           <Icon name="back" size={30} />
-        </a>
+        </BackLink>
         <h1 class="picker-title">{book?.title ?? ''}</h1>
       </header>
 

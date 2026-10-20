@@ -155,6 +155,7 @@ BROWSER=webkit npm run test:e2e      # WebKit desktop + iPhone emulation
 npm run test:features                # sound unlock, haptics, store card, backup, print, ...
 npm run test:offline                 # service worker, installability, offline use
 npm run test:regressions             # checks for bugs found in code review
+npm run test:navigation              # back from every screen leads to the bookshelf
 npm run test:screens                 # screenshots at five sizes into debug/screens
 ```
 
@@ -187,6 +188,21 @@ after changing that text, run `npm run social` (Node 22.6 or newer, with a Playw
 
 Sites keep their own copy of a preview for a while. After a change, paste the link into the
 [Facebook Sharing Debugger](https://developers.facebook.com/tools/debug/) and press "Scrape Again".
+
+## Going back
+
+Back always leads towards the bookshelf: a page goes back to its book's pages, they go back to the
+bookshelf, and so does every other screen (the paper books page goes back to wherever it was opened
+from). This holds for the in-app back buttons and the browser or phone back button alike
+(`src/ui/router.ts`):
+
+- Every back button is a `BackLink`. When the screen it leads to is one the visitor came through, it
+  steps back through history to it instead of adding a new entry, so the phone's back gesture never
+  jumps forward into the screen just left.
+- A link opened straight to an inner screen (a shared page, say) gets the screens above it added to
+  history at the first tap, click or key press, so back goes through its book's pages and the
+  bookshelf before leaving the site. Browsers ignore entries a page adds before anyone touches it, so
+  a visitor who presses back straight away leaves at once.
 
 ## Privacy
 

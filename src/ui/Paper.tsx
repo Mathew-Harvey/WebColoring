@@ -6,6 +6,7 @@ import { listingFor, paperOnlyBooks, PAPERBACKS } from '../data/paperbacks';
 import { HoldButton } from './HoldButton';
 import { Icon } from './icons';
 import { href } from './router';
+import { BackLink } from './BackLink';
 
 // Everything that offers the printed books: the home banner, the picker card, the line on the
 // finished screen, the grown-ups list and the "paper books" page where they can be bought.
@@ -327,15 +328,16 @@ export function PaperPage({ bookId }: { bookId: string | null }) {
     if (shelf && bookId) document.getElementById(`paper-${bookId}`)?.scrollIntoView({ block: 'center' });
   }, [shelf, bookId]);
 
-  // Back to the book's pages, or home for a book that is only on paper.
+  // Back to wherever we came from; opened straight, back to the book's pages, or home for a
+  // book that is only on paper.
   const onShelf = !!bookId && !!shelf?.some((b) => b.id === bookId);
 
   return (
     <div class="screen paper-page">
       <header class="picker-head">
-        <a class="round-btn" href={onShelf && bookId ? href.book(bookId) : href.home()} aria-label={copy.picker.back}>
+        <BackLink class="round-btn" to={onShelf && bookId ? href.book(bookId) : href.home()} previous label={copy.picker.back}>
           <Icon name="back" size={30} />
-        </a>
+        </BackLink>
         <h1 class="picker-title">{copy.paper.pageTitle}</h1>
       </header>
       <main class="paper-body">

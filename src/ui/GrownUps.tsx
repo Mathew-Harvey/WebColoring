@@ -9,6 +9,7 @@ import { useSettings } from './hooks';
 import { Icon } from './icons';
 import { PaperBookCard, withPaperOnly } from './Paper';
 import { href } from './router';
+import { BackLink } from './BackLink';
 import { downloadBlob } from './share';
 
 declare const __APP_VERSION__: string;
@@ -110,9 +111,9 @@ export function GrownUps() {
   return (
     <div class="screen grownups">
       <header class="picker-head">
-        <a class="round-btn" href={href.home()} aria-label={copy.grownUps.back}>
+        <BackLink class="round-btn" to={href.home()} label={copy.grownUps.back}>
           <Icon name="back" size={30} />
-        </a>
+        </BackLink>
         <h1 class="picker-title">{copy.grownUps.title}</h1>
       </header>
       <main class="gu-body">

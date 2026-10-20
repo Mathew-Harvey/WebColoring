@@ -16,7 +16,8 @@
     "test:features": "node tests/features.mjs",
     "test:offline": "node tests/offline.mjs",
     "test:screens": "node tests/screens.mjs",
-    "test:regressions": "node tests/regressions.mjs"
+    "test:regressions": "node tests/regressions.mjs",
+    "test:navigation": "node tests/navigation.mjs"
   },
   "dependencies": {
     "fflate": "^0.8.3",

@@ -52,7 +52,7 @@ export const PAPERBACKS: Record<string, Listing> = {
   'scaly-pals': { url: 'https://www.amazon.com/dp/B0HNHSR2T9', price: 'US$9.99', format: 'paperback' },
   // On Amazon from 26 October 2026.
   'still-water-mandalas': { url: null },
-  // Coming soon: not on Amazon yet.
+  // Coming soon: on Amazon from about 27 October 2026.
   'taken-apart': {
     url: null,
     price: 'US$8.99',

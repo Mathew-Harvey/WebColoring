@@ -13,7 +13,8 @@ import { Finished } from './Finished';
 import { prefersReducedMotion, useMedia, useSettings } from './hooks';
 import { Icon } from './icons';
 import { getRecent, pushRecent } from './palette';
-import { href, navigate } from './router';
+import { BackLink } from './BackLink';
+import { goBackTo, href, navigate } from './router';
 import { canvasToBlob, printPicture, savePicture } from './share';
 import { ColourSheet, ColourStrip, NumberStrip, ToolButtons, ToolOptions } from './ToolPanel';
 
@@ -417,9 +418,9 @@ export function Colouring({ bookId, pageId, done, cbn }: Props) {
   return (
     <div class={`screen colouring ${side ? 'layout-side' : 'layout-bottom'}`}>
       <header class="topbar">
-        <a class="icon-btn" href={href.book(bookId)} aria-label={copy.colouring.back}>
+        <BackLink class="icon-btn" to={href.book(bookId)} label={copy.colouring.back}>
           <Icon name="back" size={30} />
-        </a>
+        </BackLink>
         <button type="button" class="icon-btn" aria-label={copy.colouring.undo} disabled={!e?.canUndo} onClick={() => e?.undo()}>
           <Icon name="undo" size={30} />
         </button>
@@ -567,8 +568,8 @@ export function Colouring({ bookId, pageId, done, cbn }: Props) {
           onPrint={async () => {
             await printPicture(await fullPicture());
           }}
-          onKeepGoing={() => navigate(href.page(bookId, pageId), true)}
-          onMorePages={() => navigate(href.book(bookId))}
+          onKeepGoing={() => goBackTo(href.page(bookId, pageId))}
+          onMorePages={() => goBackTo(href.book(bookId))}
         />
       )}
     </div>

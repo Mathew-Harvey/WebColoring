@@ -6,6 +6,7 @@ import { Home } from './Home';
 import { PaperPage } from './Paper';
 import { Picker } from './Picker';
 import { href, useRoute } from './router';
+import { BackLink } from './BackLink';
 
 function useOnline() {
   const [online, setOnline] = useState(navigator.onLine);
@@ -50,9 +51,9 @@ export function App() {
       screen = (
         <div class="screen">
           <p class="notice">{copy.misc.notFound}</p>
-          <a class="btn" href={href.home()}>
+          <BackLink class="btn" to={href.home()}>
             {copy.misc.goHome}
-          </a>
+          </BackLink>
         </div>
       );
   }
