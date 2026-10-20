@@ -60,6 +60,22 @@ Options:
 `scripts/inspect-regions.mjs` paints the biggest regions of a prepared page in strong colours, which makes
 leaks easy to spot.
 
+### Soft or low-resolution line art: `npm run clean-art`
+
+Line art that is small, blurry or grey (a 1280x720 PDF export, say) can be cleaned before
+`prepare-book`, so the lines come out crisp and solid black:
+
+```sh
+npm run clean-art -- --src books/<book-id>/original --out books/<book-id>/src --width 3200 --height 1800
+```
+
+It evens out faint and strong lines, enlarges 4x, traces the lines into smooth curves (potrace) and
+renders them back as sharp black on white at the given size. Keep the untouched art in `original/`.
+Needs potrace (`apt install potrace`, or `brew install potrace`). Taken Apart is made this way, with
+`"canvas": [3200, 1800]` and `"bridge": { "minPart": 300 }` in its `book.config.json`: `minPart`
+stops invisible bridges joining short dashes (the leader lines in exploded views), which would
+otherwise cut the white background into boxes.
+
 ### Per-book settings: `books/<book-id>/book.config.json`
 
 ```json

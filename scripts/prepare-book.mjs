@@ -266,6 +266,10 @@ const N8 = [[-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [0, 1], [1, 1]
 // Returns a mask of thin "bridge" pixels. Bridges stop fills but are not drawn.
 function findBridges(line, w, h, opts) {
   const skel = thin(line, w, h);
+  // minPart: bridges only join pieces of line at least this big (px), so short dashes (leader
+  // lines in exploded views, say) are never joined into walls that cut the background up.
+  const parts = opts.minPart ? labelComponents(line, w, h, 1) : null;
+  const bigEnough = (i) => !parts || parts.areas[parts.labels[i]] >= opts.minPart;
   const lineDist = distanceTransform(line, w, h);
   const seal = new Uint8Array(w * h);
   const neighbours = (i) => {
@@ -299,7 +303,7 @@ function findBridges(line, w, h, opts) {
   };
 
   for (let e = 0; e < skel.length; e++) {
-    if (!skel[e]) continue;
+    if (!skel[e] || !bigEnough(e)) continue;
     const nb = neighbours(e);
     if (!(nb.length === 1 || (nb.length === 2 && adjacent(nb[0], nb[1])))) continue;
     // Walk back along the stroke to find its direction.
@@ -348,7 +352,7 @@ function findBridges(line, w, h, opts) {
           continue;
         }
         if (ink) {
-          if (s <= opts.line + radius && (!best || s * penalty < best.score)) best = { score: s * penalty, x: px, y: py };
+          if (s <= opts.line + radius && bigEnough(py * w + px) && (!best || s * penalty < best.score)) best = { score: s * penalty, x: px, y: py };
           break;
         }
       }

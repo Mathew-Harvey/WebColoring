@@ -2,9 +2,18 @@
   "title": "Taken Apart",
   "subtitle": "Exploded View Coloring Book for Adults: 30 Machines and Gadgets Through Time",
   "order": 3,
+  "canvas": [
+    3200,
+    1800
+  ],
   "closeRadius": 1,
   "speckArea": 20,
-  "detailed": ["1-30"],
+  "bridge": {
+    "minPart": 300
+  },
+  "detailed": [
+    "1-30"
+  ],
   "paperback": {
     "forGrownUps": true
   }

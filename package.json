@@ -10,6 +10,7 @@
     "preview": "vite preview --port 4173",
     "typecheck": "tsc --noEmit",
     "prepare-book": "node scripts/prepare-book.mjs",
+    "clean-art": "node scripts/clean-line-art.mjs",
     "icons": "node scripts/make-icons.mjs",
     "social": "node scripts/make-social.mjs",
     "test:e2e": "node tests/e2e.mjs",

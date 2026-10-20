@@ -8,8 +8,8 @@
  "paperback": {
   "forGrownUps": true
  },
- "width": 2560,
- "height": 1440,
+ "width": 3200,
+ "height": 1800,
  "cbnPalette": [
   {
    "key": "sky",
@@ -67,15 +67,15 @@
    "title": null,
    "difficulty": "detailed",
    "cbn": false,
-   "regionCount": 1968,
-   "numbered": 7,
+   "regionCount": 2023,
+   "numbered": 11,
    "artRect": [
     0,
     0,
-    2560,
-    1440
+    3200,
+    1800
    ],
-   "v": "6d2f0ed440"
+   "v": "e6fdf648fc"
   },
   {
    "id": "page02",
@@ -83,15 +83,15 @@
    "title": null,
    "difficulty": "detailed",
    "cbn": false,
-   "regionCount": 1280,
-   "numbered": 18,
+   "regionCount": 1310,
+   "numbered": 28,
    "artRect": [
     0,
     0,
-    2560,
-    1440
+    3200,
+    1800
    ],
-   "v": "bbef188b9c"
+   "v": "c1cb39e136"
   },
   {
    "id": "page03",
@@ -99,15 +99,15 @@
    "title": null,
    "difficulty": "detailed",
    "cbn": false,
-   "regionCount": 2062,
-   "numbered": 9,
+   "regionCount": 2433,
+   "numbered": 16,
    "artRect": [
     0,
     0,
-    2560,
-    1440
+    3200,
+    1800
    ],
-   "v": "bf4a319207"
+   "v": "b121d92e4d"
   },
   {
    "id": "page04",
@@ -115,15 +115,15 @@
    "title": null,
    "difficulty": "detailed",
    "cbn": false,
-   "regionCount": 1021,
-   "numbered": 18,
+   "regionCount": 1004,
+   "numbered": 25,
    "artRect": [
     0,
     0,
-    2560,
-    1440
+    3200,
+    1800
    ],
-   "v": "2f071a0d68"
+   "v": "99e6329730"
   },
   {
    "id": "page05",
@@ -131,15 +131,15 @@
    "title": null,
    "difficulty": "detailed",
    "cbn": false,
-   "regionCount": 1843,
-   "numbered": 16,
+   "regionCount": 1992,
+   "numbered": 28,
    "artRect": [
     0,
     0,
-    2560,
-    1440
+    3200,
+    1800
    ],
-   "v": "a02e169631"
+   "v": "1382d3a28f"
   },
   {
    "id": "page06",
@@ -147,15 +147,15 @@
    "title": null,
    "difficulty": "detailed",
    "cbn": false,
-   "regionCount": 1178,
-   "numbered": 18,
+   "regionCount": 1201,
+   "numbered": 27,
    "artRect": [
     0,
     0,
-    2560,
-    1440
+    3200,
+    1800
    ],
-   "v": "0f04db40cb"
+   "v": "fde1d50838"
   },
   {
    "id": "page07",
@@ -163,15 +163,15 @@
    "title": null,
    "difficulty": "detailed",
    "cbn": false,
-   "regionCount": 1586,
-   "numbered": 29,
+   "regionCount": 1742,
+   "numbered": 41,
    "artRect": [
     0,
     0,
-    2560,
-    1440
+    3200,
+    1800
    ],
-   "v": "e2d48d954b"
+   "v": "f27f70844b"
   },
   {
    "id": "page08",
@@ -179,15 +179,15 @@
    "title": null,
    "difficulty": "detailed",
    "cbn": false,
-   "regionCount": 1168,
-   "numbered": 16,
+   "regionCount": 1129,
+   "numbered": 22,
    "artRect": [
     0,
     0,
-    2560,
-    1440
+    3200,
+    1800
    ],
-   "v": "df6d077643"
+   "v": "59cc913f2b"
   },
   {
    "id": "page09",
@@ -195,15 +195,15 @@
    "title": null,
    "difficulty": "detailed",
    "cbn": false,
-   "regionCount": 1204,
-   "numbered": 18,
+   "regionCount": 1344,
+   "numbered": 19,
    "artRect": [
     0,
     0,
-    2560,
-    1440
+    3200,
+    1800
    ],
-   "v": "db2d8363aa"
+   "v": "3efcee7e13"
   },
   {
    "id": "page10",
@@ -211,15 +211,15 @@
    "title": null,
    "difficulty": "detailed",
    "cbn": false,
-   "regionCount": 1296,
-   "numbered": 17,
+   "regionCount": 1348,
+   "numbered": 27,
    "artRect": [
     0,
     0,
-    2560,
-    1440
+    3200,
+    1800
    ],
-   "v": "6fcbcdf1a7"
+   "v": "9893277242"
   },
   {
    "id": "page11",
@@ -227,15 +227,15 @@
    "title": null,
    "difficulty": "detailed",
    "cbn": false,
-   "regionCount": 1985,
-   "numbered": 12,
+   "regionCount": 2253,
+   "numbered": 17,
    "artRect": [
     0,
     0,
-    2560,
-    1440
+    3200,
+    1800
    ],
-   "v": "d2d9993a65"
+   "v": "51b1ac2073"
   },
   {
    "id": "page12",
@@ -243,15 +243,15 @@
    "title": null,
    "difficulty": "detailed",
    "cbn": false,
-   "regionCount": 1187,
-   "numbered": 21,
+   "regionCount": 1356,
+   "numbered": 24,
    "artRect": [
     0,
     0,
-    2560,
-    1440
+    3200,
+    1800
    ],
-   "v": "cfe608d59b"
+   "v": "1cb3b162c2"
   },
   {
    "id": "page13",
@@ -259,15 +259,15 @@
    "title": null,
    "difficulty": "detailed",
    "cbn": false,
-   "regionCount": 1625,
-   "numbered": 26,
+   "regionCount": 1734,
+   "numbered": 33,
    "artRect": [
     0,
     0,
-    2560,
-    1440
+    3200,
+    1800
    ],
-   "v": "1161d6bd8a"
+   "v": "afd962c335"
   },
   {
    "id": "page14",
@@ -275,15 +275,15 @@
    "title": null,
    "difficulty": "detailed",
    "cbn": false,
-   "regionCount": 966,
+   "regionCount": 1064,
    "numbered": 15,
    "artRect": [
     0,
     0,
-    2560,
-    1440
+    3200,
+    1800
    ],
-   "v": "831a7ac1a8"
+   "v": "00629d3e0f"
   },
   {
    "id": "page15",
@@ -291,15 +291,15 @@
    "title": null,
    "difficulty": "detailed",
    "cbn": false,
-   "regionCount": 1048,
-   "numbered": 8,
+   "regionCount": 1193,
+   "numbered": 13,
    "artRect": [
     0,
     0,
-    2560,
-    1440
+    3200,
+    1800
    ],
-   "v": "590d771428"
+   "v": "a6f992d485"
   },
   {
    "id": "page16",
@@ -307,15 +307,15 @@
    "title": null,
    "difficulty": "detailed",
    "cbn": false,
-   "regionCount": 1034,
-   "numbered": 15,
+   "regionCount": 1113,
+   "numbered": 25,
    "artRect": [
     0,
     0,
-    2560,
-    1440
+    3200,
+    1800
    ],
-   "v": "712056e3e7"
+   "v": "3016cad075"
   },
   {
    "id": "page17",
@@ -323,15 +323,15 @@
    "title": null,
    "difficulty": "detailed",
    "cbn": false,
-   "regionCount": 1607,
-   "numbered": 9,
+   "regionCount": 1854,
+   "numbered": 15,
    "artRect": [
     0,
     0,
-    2560,
-    1440
+    3200,
+    1800
    ],
-   "v": "83cd82d7e7"
+   "v": "8af96f5ba2"
   },
   {
    "id": "page18",
@@ -339,15 +339,15 @@
    "title": null,
    "difficulty": "detailed",
    "cbn": false,
-   "regionCount": 1075,
-   "numbered": 15,
+   "regionCount": 1422,
+   "numbered": 20,
    "artRect": [
     0,
     0,
-    2560,
-    1440
+    3200,
+    1800
    ],
-   "v": "7af66399b1"
+   "v": "325eb17cdc"
   },
   {
    "id": "page19",
@@ -355,15 +355,15 @@
    "title": null,
    "difficulty": "detailed",
    "cbn": false,
-   "regionCount": 683,
-   "numbered": 10,
+   "regionCount": 786,
+   "numbered": 13,
    "artRect": [
     0,
     0,
-    2560,
-    1440
+    3200,
+    1800
    ],
-   "v": "db6924ea96"
+   "v": "3a2b1b5f84"
   },
   {
    "id": "page20",
@@ -371,15 +371,15 @@
    "title": null,
    "difficulty": "detailed",
    "cbn": false,
-   "regionCount": 1290,
-   "numbered": 17,
+   "regionCount": 1588,
+   "numbered": 20,
    "artRect": [
     0,
     0,
-    2560,
-    1440
+    3200,
+    1800
    ],
-   "v": "627f306190"
+   "v": "56ccf69591"
   },
   {
    "id": "page21",
@@ -387,15 +387,15 @@
    "title": null,
    "difficulty": "detailed",
    "cbn": false,
-   "regionCount": 652,
-   "numbered": 11,
+   "regionCount": 703,
+   "numbered": 20,
    "artRect": [
     0,
     0,
-    2560,
-    1440
+    3200,
+    1800
    ],
-   "v": "e9c3d3e2ef"
+   "v": "465d74a476"
   },
   {
    "id": "page22",
@@ -403,15 +403,15 @@
    "title": null,
    "difficulty": "detailed",
    "cbn": false,
-   "regionCount": 769,
-   "numbered": 12,
+   "regionCount": 777,
+   "numbered": 16,
    "artRect": [
     0,
     0,
-    2560,
-    1440
+    3200,
+    1800
    ],
-   "v": "f9c2acd670"
+   "v": "e470ffbdac"
   },
   {
    "id": "page23",
@@ -419,15 +419,15 @@
    "title": null,
    "difficulty": "detailed",
    "cbn": false,
-   "regionCount": 1347,
-   "numbered": 12,
+   "regionCount": 1556,
+   "numbered": 14,
    "artRect": [
     0,
     0,
-    2560,
-    1440
+    3200,
+    1800
    ],
-   "v": "f4c603cf7e"
+   "v": "4ccf4ddeb4"
   },
   {
    "id": "page24",
@@ -435,15 +435,15 @@
    "title": null,
    "difficulty": "detailed",
    "cbn": false,
-   "regionCount": 1213,
-   "numbered": 13,
+   "regionCount": 1301,
+   "numbered": 16,
    "artRect": [
     0,
     0,
-    2560,
-    1440
+    3200,
+    1800
    ],
-   "v": "3abda87d99"
+   "v": "62f21c872b"
   },
   {
    "id": "page25",
@@ -451,15 +451,15 @@
    "title": null,
    "difficulty": "detailed",
    "cbn": false,
-   "regionCount": 975,
+   "regionCount": 1151,
    "numbered": 7,
    "artRect": [
     0,
     0,
-    2560,
-    1440
+    3200,
+    1800
    ],
-   "v": "5361055e46"
+   "v": "9829060b09"
   },
   {
    "id": "page26",
@@ -467,15 +467,15 @@
    "title": null,
    "difficulty": "detailed",
    "cbn": false,
-   "regionCount": 846,
-   "numbered": 10,
+   "regionCount": 1045,
+   "numbered": 16,
    "artRect": [
     0,
     0,
-    2560,
-    1440
+    3200,
+    1800
    ],
-   "v": "2c496c72e1"
+   "v": "00e87b3deb"
   },
   {
    "id": "page27",
@@ -483,15 +483,15 @@
    "title": null,
    "difficulty": "detailed",
    "cbn": false,
-   "regionCount": 447,
-   "numbered": 7,
+   "regionCount": 688,
+   "numbered": 9,
    "artRect": [
     0,
     0,
-    2560,
-    1440
+    3200,
+    1800
    ],
-   "v": "beb25ebfc5"
+   "v": "63799f82e5"
   },
   {
    "id": "page28",
@@ -499,15 +499,15 @@
    "title": null,
    "difficulty": "detailed",
    "cbn": false,
-   "regionCount": 1088,
-   "numbered": 26,
+   "regionCount": 1305,
+   "numbered": 27,
    "artRect": [
     0,
     0,
-    2560,
-    1440
+    3200,
+    1800
    ],
-   "v": "51009c9f9d"
+   "v": "cd000e44ed"
   },
   {
    "id": "page29",
@@ -515,15 +515,15 @@
    "title": null,
    "difficulty": "detailed",
    "cbn": false,
-   "regionCount": 1183,
-   "numbered": 19,
+   "regionCount": 1411,
+   "numbered": 21,
    "artRect": [
     0,
     0,
-    2560,
-    1440
+    3200,
+    1800
    ],
-   "v": "3f5d4046a9"
+   "v": "2914dfaa1c"
   },
   {
    "id": "page30",
@@ -531,15 +531,15 @@
    "title": null,
    "difficulty": "detailed",
    "cbn": false,
-   "regionCount": 1741,
-   "numbered": 14,
+   "regionCount": 2073,
+   "numbered": 23,
    "artRect": [
     0,
     0,
-    2560,
-    1440
+    3200,
+    1800
    ],
-   "v": "056f955965"
+   "v": "66799015c6"
   }
  ]
 }
