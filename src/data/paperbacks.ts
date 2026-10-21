@@ -54,6 +54,8 @@ export const PAPERBACKS: Record<string, Listing> = {
   'still-water-mandalas': { url: null },
   // Coming soon: not on Amazon yet.
   'kart-kingdom-racers': { url: null },
+  // Coming soon: not on Amazon yet.
+  'doodles-through-the-decades': { url: null },
   // Coming soon: on Amazon from about 27 October 2026.
   'taken-apart': {
     url: null,

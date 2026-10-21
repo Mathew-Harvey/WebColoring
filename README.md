@@ -79,6 +79,11 @@ otherwise cut the white background into boxes.
 Add `--fills` for art with flat grey shading (Kart Kingdom Racers): the grey areas are left open to
 colour, with their outlines, instead of turning black.
 
+For art that is already pure black and white but jagged (pages pulled from a print PDF with
+`pdfimages -png`), use `--filter 0 --threshold 0.5`: the lines keep their weight and only the
+stair-step edges are smoothed. Doodles Through the Decades is made this way, on a 4:3
+`"canvas": [2560, 1920]`.
+
 ### Per-book settings: `books/<book-id>/book.config.json`
 
 ```json

@@ -63,6 +63,18 @@
    },
    "pageCount": 30,
    "order": 4
+  },
+  {
+   "id": "doodles-through-the-decades",
+   "title": "Doodles Through the Decades",
+   "subtitle": "A Retro Doodle Coloring Book",
+   "cover": "doodles-through-the-decades/cover-small.webp",
+   "front": null,
+   "paperback": {
+    "forGrownUps": true
+   },
+   "pageCount": 30,
+   "order": 5
   }
  ]
 }

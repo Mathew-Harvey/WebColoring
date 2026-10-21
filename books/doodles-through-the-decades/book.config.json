@@ -1,0 +1,12 @@
+{
+  "title": "Doodles Through the Decades",
+  "subtitle": "A Retro Doodle Coloring Book",
+  "order": 5,
+  "canvas": [
+    2560,
+    1920
+  ],
+  "paperback": {
+    "forGrownUps": true
+  }
+}
