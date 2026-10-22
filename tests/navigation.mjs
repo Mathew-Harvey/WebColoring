@@ -14,8 +14,15 @@ const check = (name, ok, detail = '') => {
 const browser = await (ENGINE === 'webkit' ? webkit : chromium).launch();
 const errors = [];
 
-/** The screen a page is on, as its hash, or "left" once back has left the site. */
-const where = (p) => (p.url().startsWith(BASE) ? new URL(p.url()).hash || '#/' : 'left');
+/** The screen a page is on, as its hash route (a book's pages are at /book/<id>), or "left"
+ * once back has left the site. */
+const where = (p) => {
+  if (!p.url().startsWith(BASE)) return 'left';
+  const url = new URL(p.url());
+  if (url.hash && url.hash !== '#') return url.hash;
+  const book = url.pathname.match(/^\/book\/([^/]+)$/);
+  return book ? `#/book/${book[1]}` : '#/';
+};
 
 async function settle(p) {
   await p.waitForTimeout(350);
@@ -120,7 +127,7 @@ for (const [name, route, chain] of straight) {
 
 {
   const p = await openStraight(ctx, '#/');
-  await p.click('a.book-tile[href="#/book/scaly-pals"]');
+  await p.click('a.book-tile[href="/book/scaly-pals"]');
   await settle(p);
   await p.click('.page-tile >> nth=0');
   await p.waitForSelector('.paper');
@@ -133,7 +140,7 @@ for (const [name, route, chain] of straight) {
 
 {
   const p = await openStraight(ctx, '?e2e#/');
-  await p.click('a.book-tile[href="#/book/scaly-pals"]');
+  await p.click('a.book-tile[href="/book/scaly-pals"]');
   await settle(p);
   await p.click('.page-tile >> nth=4');
   await p.waitForSelector('.paper');
@@ -184,6 +191,43 @@ for (const [name, route, chain] of straight) {
   await p.reload();
   await settle(p);
   check('after a reload, back still goes to the pages and the bookshelf', (await systemBack(p)) === '#/book/still-water-mandalas' && (await systemBack(p)) === '#/');
+  await p.close();
+}
+
+// ------------------------------------------------------------------ addresses
+
+// A book's pages are at /book/<id>, its pictures at /#/book/<id>/<page>, and moving between
+// them, either way, never reloads the page.
+{
+  const address = (p) => new URL(p.url()).pathname + new URL(p.url()).hash;
+  const p = await openStraight(ctx, '');
+  await p.evaluate(() => (window.__same = 1));
+  await p.click('a.book-tile[href="/book/scaly-pals"]');
+  await settle(p);
+  const seen = [address(p)];
+  await p.click('.page-tile >> nth=2');
+  await p.waitForSelector('.paper');
+  seen.push(address(p));
+  await p.click('header.topbar a[aria-label="Back to pages"]');
+  await settle(p);
+  seen.push(address(p));
+  await p.goForward();
+  await p.waitForSelector('.paper');
+  seen.push(address(p));
+  seen.push((await systemBack(p), address(p)));
+  seen.push((await systemBack(p), address(p)));
+  const want = ['/book/scaly-pals', '/#/book/scaly-pals/page03', '/book/scaly-pals', '/#/book/scaly-pals/page03', '/book/scaly-pals', '/'];
+  check('addresses: bookshelf, book, picture, and back and forth', JSON.stringify(seen) === JSON.stringify(want), seen.join(' > '));
+  check('addresses: all in one page load', await p.evaluate(() => window.__same === 1));
+  await p.close();
+}
+
+{
+  // Opened straight at a book's own page, then touched: back goes to the bookshelf, then leaves.
+  const p = await openStraight(ctx, 'book/kart-kingdom-racers');
+  await touch(p);
+  const seen = [await systemBack(p), new URL(p.url()).pathname, await systemBack(p)];
+  check('opened at /book/<id>: back goes to the bookshelf (/), then leaves', JSON.stringify(seen) === JSON.stringify(['#/', '/', 'left']), seen.join(' > '));
   await p.close();
 }
 

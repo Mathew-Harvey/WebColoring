@@ -1170,6 +1170,16 @@ a {
   color: var(--ink-soft);
 }
 
+/* A few lines about the book, lined up with the heading (and on its prerendered page). */
+.picker-intro {
+  max-width: 68ch;
+  margin: 10px 0 16px max(0px, calc((100% - 1200px) / 2));
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.45;
+  color: var(--ink-soft);
+}
+
 .picker-progress {
   color: var(--orange-ink);
 }

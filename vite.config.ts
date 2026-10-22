@@ -6,15 +6,17 @@ import { fileURLToPath } from 'node:url';
 import { copy } from './src/copy';
 
 // The site is published straight from the main branch, so `npm run build` writes the
-// finished app to the repository root (index.html, assets/, sw.js, manifest.webmanifest).
+// finished app to the repository root (index.html, assets/, sw.js, manifest.webmanifest), with
+// a page for each book (book/<id>.html, served at /book/<id>), sitemap.xml and robots.txt.
 // Book data, icons and other public files stay in public/ and are read from there.
 const repo = path.dirname(fileURLToPath(import.meta.url));
 const pub = path.join(repo, 'public');
 
 // Files that are only fetched when a page is opened, so they are not precached.
 const PAGE_ASSET = /books\/[^/]+\/pages\/[^/]+\/(line\.png|overlay\.png|overlay-half\.png|regions\.bin|regions\.json)$/;
-// The social preview card is only fetched by other sites, so it is not precached either.
+// The social preview cards are only fetched by other sites, so they are not precached either.
 const SHARE_CARD = 'public/share.jpg';
+const BOOK_CARD = /^public\/books\/[^/]+\/share\.jpg$/;
 // Full-size cover originals (books/<id>/<name>-cover.jpg) are kept for reference; the pages use
 // their web copies (<name>-cover-1200.jpg), so the originals are not precached.
 const COVER_ORIGINAL = /^public\/books\/[^/]+\/[^/]+-cover\.jpg$/;
@@ -77,7 +79,7 @@ function copyInHtml(build: boolean): Plugin {
           .replace(/%SHARE_IMAGE%/g, escapeHtml(shareImage()))
           .replace('%BOOK_INDEX%', () => bookIndex());
         // In the built site, icons are read from public/.
-        return build ? html.replace(/"\.\/icons\//g, '"./public/icons/') : html;
+        return build ? html.replace(/"\/icons\//g, '"/public/icons/') : html;
       },
     },
     configureServer(server) {
@@ -94,6 +96,87 @@ function copyInHtml(build: boolean): Plugin {
   };
 }
 
+// ------------------------------------------------------------------ a page for each book
+//
+// /book/<id> is a real page: the built index.html with the book's own title, description,
+// canonical address and link preview (copy.bookPages in src/copy.ts), and the top of its pages
+// (back button, heading, intro) already drawn, so search engines, link previews and visitors
+// without JavaScript all see the book. The app then draws the same screen in its place.
+
+const BOOK_PAGES = 'book';
+
+/** Sets the content of one <meta> tag in the built page (it must be there). */
+function setMeta(html: string, attr: 'name' | 'property', key: string, value: string): string {
+  const tag = new RegExp(`(<meta ${attr}="${key.replace(/[.:]/g, '\\$&')}" content=")[^"]*(")`);
+  if (!tag.test(html)) throw new Error(`index.html has no <meta ${attr}="${key}">`);
+  return html.replace(tag, (_, a, b) => a + escapeHtml(value) + b);
+}
+
+/** The book's link preview card (npm run book-cards), or null to keep the site's card. */
+function shareCard(id: string): string | null {
+  const file = `public/books/${id}/share.jpg`;
+  if (!fs.existsSync(path.join(repo, file))) return null;
+  const v = crypto.createHash('sha256').update(fs.readFileSync(path.join(repo, file))).digest('hex').slice(0, 8);
+  return `${siteUrl}${file}?v=${v}`;
+}
+
+/** The top of a book's pages, as the app's Picker draws it. */
+function bookHeading(id: string, title: string, pageCount: number, intro: string): string {
+  const back =
+    '<svg class="icon" width="30" height="30" viewBox="0 0 48 48" aria-hidden="true" focusable="false">' +
+    '<path stroke="#3d3550" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" fill="none" d="M28 12 16 24l12 12"></path></svg>';
+  return (
+    `<div class="screen picker">` +
+    `<header class="picker-head"><a class="round-btn" href="/" aria-label="${escapeHtml(copy.picker.back)}">${back}</a>` +
+    `<div class="picker-heading"><h1 class="picker-title">${escapeHtml(title)}</h1>` +
+    `<p class="picker-sub">${escapeHtml(copy.home.pages(pageCount))}</p></div></header>` +
+    `<p class="picker-intro">${escapeHtml(intro)}</p>` +
+    `<noscript><p class="notice">${escapeHtml(copy.noScript)}</p></noscript></div>`
+  );
+}
+
+/** Writes book/<id>.html (and its card) for every book on the shelf. Returns the book ids. */
+function writeBookPages(): string[] {
+  const shell = fs.readFileSync(path.join(repo, 'index.html'), 'utf8');
+  const { books } = JSON.parse(fs.readFileSync(path.join(pub, 'books/index.json'), 'utf8')) as {
+    books: { id: string; title: string; pageCount: number }[];
+  };
+  fs.mkdirSync(path.join(repo, BOOK_PAGES), { recursive: true });
+  for (const book of books) {
+    const page = copy.bookPages[book.id] ?? copy.bookPageFallback(book.title, book.pageCount);
+    if (!copy.bookPages[book.id]) console.warn(`\n/book/${book.id} uses the fallback copy: add its own to bookPages in src/copy.ts`);
+    const url = `${siteUrl}${BOOK_PAGES}/${book.id}`;
+    const image = shareCard(book.id);
+    let html = shell
+      .replace(/<title>[^<]*<\/title>/, `<title>${escapeHtml(page.title)}</title>`)
+      .replace(/(<link rel="canonical" href=")[^"]*(")/, (_, a, b) => a + escapeHtml(url) + b);
+    html = setMeta(html, 'name', 'description', page.description);
+    html = setMeta(html, 'property', 'og:url', url);
+    for (const [attr, key] of [['property', 'og:title'], ['name', 'twitter:title']] as const) html = setMeta(html, attr, key, page.title);
+    for (const [attr, key] of [['property', 'og:description'], ['name', 'twitter:description']] as const) html = setMeta(html, attr, key, page.description);
+    if (image) {
+      for (const [attr, key] of [['property', 'og:image'], ['name', 'twitter:image']] as const) html = setMeta(html, attr, key, image);
+      for (const [attr, key] of [['property', 'og:image:alt'], ['name', 'twitter:image:alt']] as const) html = setMeta(html, attr, key, copy.bookShareAlt(book.title));
+    }
+    if (!html.includes('<div id="app"></div>')) throw new Error('index.html has no <div id="app"></div>');
+    html = html.replace('<div id="app"></div>', `<div id="app">${bookHeading(book.id, page.h1 ?? book.title, book.pageCount, page.intro)}</div>`);
+    // The "needs JavaScript" note is in the heading, where it can be seen.
+    html = html.replace(/\s*<noscript>[^<]*<\/noscript>/, '');
+    fs.writeFileSync(path.join(repo, BOOK_PAGES, `${book.id}.html`), html);
+  }
+  return books.map((b) => b.id);
+}
+
+/** sitemap.xml (the bookshelf and every book's page) and robots.txt, at the site root. */
+function writeSitemap(bookIds: string[]) {
+  const urls = [siteUrl, ...bookIds.map((id) => `${siteUrl}${BOOK_PAGES}/${id}`)];
+  fs.writeFileSync(
+    path.join(repo, 'sitemap.xml'),
+    `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map((u) => `  <url><loc>${escapeHtml(u)}</loc></url>`).join('\n')}\n</urlset>\n`,
+  );
+  fs.writeFileSync(path.join(repo, 'robots.txt'), `User-agent: *\nAllow: /\n\nSitemap: ${siteUrl}sitemap.xml\n`);
+}
+
 function walk(dir: string, base: string, out: string[] = []): string[] {
   if (!fs.existsSync(dir)) return out;
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
@@ -104,27 +187,31 @@ function walk(dir: string, base: string, out: string[] = []): string[] {
   return out;
 }
 
-// Clears the old build before each build, then writes sw.js with the list of files to
-// precache. Heavy page files (line art, overlays, region maps) are cached when first opened.
+// Clears the old build before each build, writes the book pages and the sitemap, then sw.js
+// with the list of files to precache. Heavy page files (line art, overlays, region maps) are
+// cached when first opened.
 function siteBuild(): Plugin {
   return {
     name: 'webcoloring-site',
     apply: 'build',
     buildStart() {
-      fs.rmSync(path.join(repo, 'assets'), { recursive: true, force: true });
-      for (const f of ['index.html', 'sw.js', 'manifest.webmanifest']) fs.rmSync(path.join(repo, f), { force: true });
+      for (const d of ['assets', BOOK_PAGES]) fs.rmSync(path.join(repo, d), { recursive: true, force: true });
+      for (const f of ['index.html', 'sw.js', 'manifest.webmanifest', 'sitemap.xml', 'robots.txt']) fs.rmSync(path.join(repo, f), { force: true });
     },
     closeBundle() {
+      const bookIds = writeBookPages();
+      writeSitemap(bookIds);
       const built = ['index.html', 'manifest.webmanifest', ...walk(path.join(repo, 'assets'), repo)];
-      const publicFiles = walk(pub, repo).filter((f) => !PAGE_ASSET.test(f) && f !== SHARE_CARD && !COVER_ORIGINAL.test(f) && !f.endsWith('.txt'));
-      const precache = [...built, ...publicFiles].sort();
+      const publicFiles = walk(pub, repo).filter((f) => !PAGE_ASSET.test(f) && f !== SHARE_CARD && !BOOK_CARD.test(f) && !COVER_ORIGINAL.test(f) && !f.endsWith('.txt'));
+      // Book pages are kept under their address (/book/<id>), so they open offline too.
+      const bookPages = bookIds.map((id) => `${BOOK_PAGES}/${id}.html`);
+      const precache = [...built, ...publicFiles, ...bookPages].sort();
       const hash = crypto.createHash('sha256');
       for (const f of precache) hash.update(f).update(fs.readFileSync(path.join(repo, f)));
       const version = hash.digest('hex').slice(0, 12);
+      const urls = precache.filter((f) => f !== 'index.html').map((f) => f.replace(/^(book\/[^/]+)\.html$/, '$1'));
       const template = fs.readFileSync(path.join(repo, 'src/sw-template.js'), 'utf8');
-      const out = template
-        .replace('__VERSION__', version)
-        .replace('__PRECACHE__', JSON.stringify(['./', ...precache.filter((f) => f !== 'index.html')]));
+      const out = template.replace('__VERSION__', version).replace('__PRECACHE__', JSON.stringify(['./', ...urls]));
       fs.writeFileSync(path.join(repo, 'sw.js'), out);
     },
   };
@@ -134,7 +221,8 @@ export default defineConfig(({ command }) => {
   const build = command === 'build';
   return {
     root: path.join(repo, 'src'),
-    base: './',
+    // From the site root, so the app works the same at / and at /book/<id>.
+    base: '/',
     publicDir: pub,
     define: {
       __APP_VERSION__: JSON.stringify(pkg.version),

@@ -28,7 +28,7 @@ function AlsoLink({ site }: { site: Site }) {
     <a class="also-link" href={site.url} aria-label={`${name}. ${copy.alsoBy.hint}`} {...handlers}>
       {'logo' in site ? (
         <img
-          src={`./${__PUBLIC__}also-by/${site.logo}`}
+          src={`${import.meta.env.BASE_URL}${__PUBLIC__}also-by/${site.logo}`}
           width={site.width}
           height={site.height}
           alt=""

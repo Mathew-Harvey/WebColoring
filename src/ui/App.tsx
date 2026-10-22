@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'preact/hooks';
 import { copy } from '../copy';
+import { bookPageCopy } from '../data/books';
 import { Colouring } from './Colouring';
 import { GrownUps } from './GrownUps';
 import { Home } from './Home';
@@ -29,6 +30,12 @@ export function App() {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [route.name, route.name === 'picker' || route.name === 'paper' ? route.bookId : '']);
+
+  // A book's pages carry the book's own title, as its prerendered page does.
+  const pageTitle = route.name === 'picker' ? bookPageCopy(route.bookId)?.title : undefined;
+  useEffect(() => {
+    document.title = pageTitle ?? copy.appName;
+  }, [pageTitle]);
 
   let screen;
   switch (route.name) {

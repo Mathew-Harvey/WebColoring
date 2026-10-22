@@ -33,7 +33,10 @@ npm run prepare-book -- --src <folder> --id <book-id> --title "<title>"
 ```
 
 This writes everything the app needs to `public/books/<book-id>/` and adds the book to
-`public/books/index.json`, which is where the app reads its bookshelf from. Commit the output.
+`public/books/index.json`, which is where the app reads its bookshelf from. Commit the output. The next
+`npm run build` also gives the book its own page at `/book/<book-id>` (see "Book pages and search").
+Write its search title, description and intro in `bookPages` in `src/copy.ts`; until then it uses
+plain wording from the book's title, and the build says so.
 
 For each page the script:
 
@@ -166,7 +169,8 @@ Points use 0 to 1 page coordinates (x across, y down) and snap to the nearest re
 | `src/ui/` | Screens and controls (Preact). |
 | `src/index.html` | The page the build starts from. |
 | `src/sw-template.js` | Service worker, built into `sw.js` with the precache list. |
-| `scripts/` | `prepare-book.mjs`, `make-icons.mjs`, `make-social.mjs`, `inspect-regions.mjs`. |
+| `scripts/` | `prepare-book.mjs`, `clean-line-art.mjs`, `book-cards.mjs`, `make-icons.mjs`, `make-social.mjs`, `inspect-regions.mjs`. |
+| `book/`, `sitemap.xml`, `robots.txt` | Built: each book's own page, and the files for search engines. |
 | `tests/` | Browser checks (Playwright). |
 
 ## Tests
@@ -180,6 +184,7 @@ npm run test:features                # sound unlock, haptics, store card, backup
 npm run test:offline                 # service worker, installability, offline use
 npm run test:regressions             # checks for bugs found in code review
 npm run test:navigation              # back from every screen leads to the bookshelf
+npm run test:book-pages              # /book/<id> pages, sitemap, robots.txt, old #/book links
 npm run test:screens                 # screenshots at five sizes into debug/screens
 ```
 
@@ -205,8 +210,9 @@ updates in the background, so the app takes the bookshelf from the page itself (
 from the network first) rather than from that copy, and the service worker fetches book data from the
 network first. Each visit also asks the browser to look for a newer offline copy.
 
-The site is fully relative, so the same files also work at any path on any static host. The one
-exception is the social preview tags, which need absolute links and use `homepage` in `package.json`.
+The site is served from the root of its domain, and its links start from there (`base: '/'` in
+`vite.config.ts`), since a book's pages have their own path. The social preview tags, the canonical
+links and the sitemap need the full address, and use `homepage` in `package.json`.
 
 ### Social preview
 
@@ -217,6 +223,28 @@ after changing that text, run `npm run social` (Node 22.6 or newer, with a Playw
 
 Sites keep their own copy of a preview for a while. After a change, paste the link into the
 [Facebook Sharing Debugger](https://developers.facebook.com/tools/debug/) and press "Scrape Again".
+
+## Book pages and search
+
+Each book has a real page at `/book/<book-id>` (for example `/book/scaly-pals`). `npm run build`
+writes them to `book/<book-id>.html`, which GitHub Pages serves at that address, each a copy of
+`index.html` with:
+
+- its own `<title>`, meta description, canonical link and link preview tags, from `bookPages` in
+  `src/copy.ts`;
+- the top of the book's pages already drawn (back button, heading, intro), so search engines, link
+  previews and visitors without JavaScript see the book. The app then draws the same screen in its place
+  without anything moving, and shows the same heading and intro;
+- the same Content Security Policy as the rest of the site.
+
+The preview card is `public/books/<book-id>/share.jpg` (1200x630, the whole cover), drawn by
+`prepare-book`, or for every book by `npm run book-cards`. The build also writes `sitemap.xml` (the
+bookshelf and every book page) and `robots.txt` (which names the sitemap) at the root.
+
+In the app, a book's pages show at `/book/<book-id>`, its pictures at `/#/book/<book-id>/<page>`, and
+the other screens as `/#/...`. An old `#/book/<book-id>` link moves to the book's page when it opens.
+Moving between screens never reloads the page, and offline the service worker serves its kept copy of
+each book page.
 
 ## The bookshelf
 
@@ -243,6 +271,9 @@ from). This holds for the in-app back buttons and the browser or phone back butt
   history at the first tap, click or key press, so back goes through its book's pages and the
   bookshelf before leaving the site. Browsers ignore entries a page adds before anyone touches it, so
   a visitor who presses back straight away leaves at once.
+- New history entries are made with plain hash changes, then given their address (`/book/<id>`, say)
+  with `replaceState`. `pushState` would do, but crashes some WebKit builds when the page is reloaded
+  and then left.
 
 ## Privacy
 

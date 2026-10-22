@@ -84,10 +84,16 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Navigations: the app shell.
+  // Navigations: the network, or offline the kept page (a book's own page at /book/<id>), else
+  // the app shell, which can show any screen.
   if (req.mode === 'navigate') {
     event.respondWith(
-      fetch(req).catch(() => caches.match('./', { ignoreSearch: true }).then((r) => r || caches.match('index.html'))),
+      fetch(req).catch(() =>
+        caches
+          .match(req, { ignoreSearch: true })
+          .then((r) => r || caches.match('./', { ignoreSearch: true }))
+          .then((r) => r || caches.match('index.html')),
+      ),
     );
     return;
   }

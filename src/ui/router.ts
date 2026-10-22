@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'preact/hooks';
+import { peekIndex } from '../data/books';
 
 export type Route =
   | { name: 'home' }
@@ -22,22 +23,59 @@ export function parseRoute(hash: string): Route {
   return { name: 'notfound' };
 }
 
-export const href = {
-  home: () => '#/',
-  book: (id: string) => `#/book/${encodeURIComponent(id)}`,
-  page: (book: string, page: string, cbn = false) => `#/book/${encodeURIComponent(book)}/${encodeURIComponent(page)}${cbn ? '?cbn=1' : ''}`,
-  done: (book: string, page: string) => `#/book/${encodeURIComponent(book)}/${encodeURIComponent(page)}/done`,
+// ------------------------------------------------------------------ addresses
+//
+// Every screen is named by its hash route ('#/book/scaly-pals/page05'); history records and the
+// code use those names. In the address bar, a book's pages have a real path, /book/<id>, which
+// the build prerenders so search engines and link previews see each book. The bookshelf is the
+// site root, and every other screen is a hash route on the root ('/#/book/scaly-pals/page05').
+// An old '#/book/<id>' link moves to its path when it opens.
+
+const ROOT = import.meta.env.BASE_URL;
+const BOOK_PATH = new RegExp(`^${ROOT}book/([^/]+?)(?:\\.html)?/?$`);
+const HOME = '#/';
+const enc = encodeURIComponent;
+
+const screens = {
+  book: (id: string) => `#/book/${enc(id)}`,
+  page: (book: string, page: string, cbn = false) => `#/book/${enc(book)}/${enc(page)}${cbn ? '?cbn=1' : ''}`,
+  done: (book: string, page: string) => `#/book/${enc(book)}/${enc(page)}/done`,
   grownUps: () => '#/grown-ups',
-  paper: (book?: string) => (book ? `#/paper/${encodeURIComponent(book)}` : '#/paper'),
+  paper: (book?: string) => (book ? `#/paper/${enc(book)}` : '#/paper'),
 };
 
-export function navigate(to: string, replace = false) {
-  if (replace) {
-    // Keep the entry's record of where it came from (see below).
-    history.replaceState(history.state, '', to);
-    window.dispatchEvent(new HashChangeEvent('hashchange'));
-  } else location.hash = to;
+/** A book on the shelf: its pages have a path of their own. */
+const onShelf = (id: string) => !!peekIndex()?.some((b) => b.id === id);
+
+/** Links to each screen. */
+export const href = {
+  home: () => ROOT,
+  book: (id: string) => (onShelf(id) ? `${ROOT}book/${enc(id)}` : ROOT + screens.book(id)),
+  page: (book: string, page: string, cbn = false) => ROOT + screens.page(book, page, cbn),
+  done: (book: string, page: string) => ROOT + screens.done(book, page),
+  grownUps: () => ROOT + screens.grownUps(),
+  paper: (book?: string) => ROOT + screens.paper(book),
+};
+
+const normal = (hash: string) => (hash && hash !== '#' ? hash : HOME);
+
+/** The screen a link or address names. */
+function screenOf(to: string | URL | Location): string {
+  const url = typeof to === 'string' ? new URL(to, location.href) : to;
+  if (url.hash && url.hash !== '#') return url.hash;
+  const m = BOOK_PATH.exec(url.pathname);
+  return m ? `#/book/${m[1]}` : HOME;
 }
+
+/** Where a screen shows in the address bar. The query string (?e2e, say) stays. */
+function addressOf(screen: string): string {
+  const r = parseRoute(screen);
+  if (r.name === 'home') return ROOT + location.search;
+  if (r.name === 'picker' && onShelf(r.bookId)) return `${ROOT}book/${enc(r.bookId)}${location.search}`;
+  return ROOT + location.search + screen;
+}
+
+const here = () => location.pathname + location.search + location.hash;
 
 // ------------------------------------------------------------------ going back
 //
@@ -51,8 +89,11 @@ export function navigate(to: string, replace = false) {
 // - A link opened straight to an inner screen (a shared page, say) gets the screens above it
 //   added to history, so back goes through its book's pages and the bookshelf before leaving
 //   the site. Browsers ignore entries a page adds before anyone has touched it, so they are
-//   added at the first tap, click or key press. They are made with plain hash changes:
-//   pushState would do, but crashes some WebKit builds when the page is reloaded and then left.
+//   added at the first tap, click or key press.
+//
+// New entries are made with plain hash changes, then given their address with replaceState
+// (which can change the path too). pushState would do, but crashes some WebKit builds when the
+// page is reloaded and then left.
 
 interface NavState {
   wc: 1;
@@ -62,9 +103,7 @@ interface NavState {
   seed?: string[];
 }
 
-const HOME = href.home();
-const normal = (hash: string) => (hash && hash !== '#' ? hash : HOME);
-/** Two hashes name the same screen (a ?cbn=1 setting aside). */
+/** Two names for the same screen (a ?cbn=1 setting aside). */
 const sameScreen = (a: string, b: string) => normal(a).split('?')[0] === normal(b).split('?')[0];
 const navState = (): NavState | null => {
   const s = history.state as NavState | null;
@@ -73,39 +112,87 @@ const navState = (): NavState | null => {
 
 let current = HOME;
 let stack: string[] = [];
+/** Set while this file changes the address itself, so the events that causes are left alone. */
+let quiet = false;
+const listeners = new Set<() => void>();
 
 /** The screen one step back towards the bookshelf, or null on the bookshelf itself. */
-export function parentOf(hash: string): string | null {
-  const r = parseRoute(normal(hash));
+function parentOf(screen: string): string | null {
+  const r = parseRoute(normal(screen));
   switch (r.name) {
     case 'home':
       return null;
     case 'colour':
-      return r.done ? href.page(r.bookId, r.pageId) : href.book(r.bookId);
+      return r.done ? screens.page(r.bookId, r.pageId) : screens.book(r.bookId);
     default:
       return HOME;
   }
+}
+
+/** Brings the records in line with the history entry now showing, and redraws if it changed. */
+function sync() {
+  if (quiet) return;
+  const screen = screenOf(location);
+  // A new entry (a link, or the address bar) follows the screen we were on; a known one
+  // (stepped back or forward to, or replaced) keeps its record.
+  const known = navState();
+  const s: NavState = known ?? { wc: 1, stack: [...stack, current] };
+  stack = s.stack;
+  const address = addressOf(screen);
+  if (!known || here() !== address) history.replaceState(s, '', address);
+  if (screen === current) return;
+  current = screen;
+  for (const fn of listeners) fn();
+}
+
+/** Opens a screen, as a new history entry unless `replace`. */
+export function navigate(to: string, replace = false) {
+  const screen = screenOf(to);
+  if (replace) history.replaceState(history.state, '', addressOf(screen));
+  else if (screen !== current) {
+    quiet = true;
+    location.hash = screen;
+    quiet = false;
+  }
+  sync();
 }
 
 /** Adds the screens above a screen opened straight from a link, once someone has touched it. */
 function addScreensAbove() {
   const s = navState();
   const chain = s?.seed;
-  if (!s || !chain || stack.length || !sameScreen(location.hash, chain[chain.length - 1])) return;
+  if (!s || !chain || stack.length || !sameScreen(screenOf(location), chain[chain.length - 1])) return;
   if (document.readyState !== 'complete') return; // hash changes made while loading replace, not add
-  const here = normal(location.hash);
-  history.replaceState({ wc: 1, stack: [] } satisfies NavState, '', chain[0]);
-  for (let i = 1; i < chain.length; i++) {
-    location.hash = i === chain.length - 1 ? here : chain[i];
-    history.replaceState({ wc: 1, stack: chain.slice(0, i) } satisfies NavState, '');
+  const last = screenOf(location);
+  quiet = true;
+  try {
+    history.replaceState({ wc: 1, stack: [] } satisfies NavState, '', addressOf(chain[0]));
+    for (let i = 1; i < chain.length; i++) {
+      const screen = i === chain.length - 1 ? last : chain[i];
+      location.hash = screen;
+      history.replaceState({ wc: 1, stack: chain.slice(0, i) } satisfies NavState, '', addressOf(screen));
+    }
+  } finally {
+    quiet = false;
   }
   stack = chain.slice(0, -1);
-  current = here;
+  current = last;
+}
+
+/** In-app links open their screen without reloading the page. */
+function followLink(e: MouseEvent) {
+  if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+  const a = (e.target as Element | null)?.closest?.('a[href]');
+  if (!(a instanceof HTMLAnchorElement) || (a.target && a.target !== '_self') || a.hasAttribute('download')) return;
+  const url = new URL(a.href);
+  if (url.origin !== location.origin || (url.pathname !== ROOT && !BOOK_PATH.test(url.pathname))) return;
+  e.preventDefault();
+  navigate(url.href);
 }
 
 /** Sets up the history records. Call once, before the first render. */
 export function startHistory() {
-  current = normal(location.hash);
+  current = screenOf(location);
   const saved = navState();
   if (saved) {
     // A reload: this tab already has its history.
@@ -115,6 +202,8 @@ export function startHistory() {
     for (let h: string | null = current; h; h = parentOf(h)) chain.unshift(h);
     history.replaceState({ wc: 1, stack: [], ...(chain.length > 1 && { seed: chain }) } satisfies NavState, '');
   }
+  // Show the screen at its own address (an old #/book/<id> link moves to /book/<id>).
+  if (here() !== addressOf(current)) history.replaceState(history.state, '', addressOf(current));
   if (navState()?.seed) {
     const onTouch = () => {
       const active = (navigator as { userActivation?: { hasBeenActive: boolean } }).userActivation;
@@ -124,17 +213,9 @@ export function startHistory() {
     };
     for (const t of TOUCH) window.addEventListener(t, onTouch, true);
   }
-  window.addEventListener('hashchange', () => {
-    const next = normal(location.hash);
-    const s = navState();
-    if (s) stack = s.stack; // stepped back or forward to a known entry, or replaced one
-    else {
-      // A new entry (a link, or the address bar): it follows the screen we were on.
-      stack = [...stack, current];
-      history.replaceState({ wc: 1, stack } satisfies NavState, '');
-    }
-    current = next;
-  });
+  window.addEventListener('popstate', sync);
+  window.addEventListener('hashchange', sync);
+  document.addEventListener('click', followLink);
 }
 
 // The events that count as someone touching the page (they carry user activation).
@@ -145,8 +226,9 @@ const TOUCH = ['pointerdown', 'pointerup', 'keydown', 'click'] as const;
  * browser and phone back buttons stay in step; otherwise opens it.
  */
 export function goBackTo(to: string) {
+  const screen = screenOf(to);
   for (let i = stack.length - 1; i >= 0; i--) {
-    if (sameScreen(stack[i], to)) {
+    if (sameScreen(stack[i], screen)) {
       history.go(i - stack.length);
       return;
     }
@@ -161,16 +243,17 @@ export function goBack(fallback: string) {
 }
 
 export function useRoute(): Route {
-  const [route, setRoute] = useState(() => parseRoute(location.hash));
+  const [route, setRoute] = useState(() => parseRoute(current));
   useEffect(() => {
-    let seen = location.hash;
+    let seen = current;
     const on = () => {
-      if (location.hash === seen) return; // the same screen (entries being added above it)
-      seen = location.hash;
-      setRoute(parseRoute(location.hash));
+      if (current === seen) return;
+      seen = current;
+      setRoute(parseRoute(current));
     };
-    window.addEventListener('hashchange', on);
-    return () => window.removeEventListener('hashchange', on);
+    listeners.add(on);
+    on(); // in case the screen changed before this ran
+    return () => void listeners.delete(on);
   }, []);
   return route;
 }

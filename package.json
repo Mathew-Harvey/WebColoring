@@ -11,6 +11,7 @@
     "typecheck": "tsc --noEmit",
     "prepare-book": "node scripts/prepare-book.mjs",
     "clean-art": "node scripts/clean-line-art.mjs",
+    "book-cards": "node scripts/book-cards.mjs",
     "icons": "node scripts/make-icons.mjs",
     "social": "node scripts/make-social.mjs",
     "test:e2e": "node tests/e2e.mjs",
@@ -18,7 +19,8 @@
     "test:offline": "node tests/offline.mjs",
     "test:screens": "node tests/screens.mjs",
     "test:regressions": "node tests/regressions.mjs",
-    "test:navigation": "node tests/navigation.mjs"
+    "test:navigation": "node tests/navigation.mjs",
+    "test:book-pages": "node tests/book-pages.mjs"
   },
   "dependencies": {
     "fflate": "^0.8.3",

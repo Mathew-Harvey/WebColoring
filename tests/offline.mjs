@@ -89,6 +89,14 @@ check('offline: a page opened before still works', opened);
 await page.goto(`${BASE}#/grown-ups`);
 await page.waitForSelector('.gu-body');
 check('offline: grown-ups page works', true);
+// A book's own address, opened offline: its kept page, and the app on it.
+for (const id of ['scaly-pals', 'doodles-through-the-decades']) {
+  await page.goto(`${BASE}book/${id}`);
+  await page.waitForSelector('.page-tile img');
+  await page.waitForTimeout(500);
+  const { title, tiles } = await page.evaluate(() => ({ title: document.title, tiles: document.querySelectorAll('.page-tile').length }));
+  check(`offline: /book/${id} opens, with its own title and pages`, tiles === 30 && title !== 'WebColoring' && new URL(page.url()).pathname === `/book/${id}`, `${tiles} pages, "${title}"`);
+}
 await ctx.setOffline(false);
 check('no requests to other sites', foreign.length === 0, foreign.join(' '));
 await browser.close();

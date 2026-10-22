@@ -25,6 +25,7 @@ import path from 'node:path';
 import zlib from 'node:zlib';
 import crypto from 'node:crypto';
 import sharp from 'sharp';
+import { writeBookCard } from './book-cards.mjs';
 
 // ---------------------------------------------------------------- args
 
@@ -791,6 +792,8 @@ async function main() {
   if (coverFile) {
     await sharp(path.join(srcDir, coverFile)).resize(960).webp({ quality: 80 }).toFile(path.join(outDir, 'cover.webp'));
     await sharp(path.join(srcDir, coverFile)).resize(480).webp({ quality: 78 }).toFile(path.join(outDir, 'cover-small.webp'));
+    // The link preview card for the book's own page (/book/<id>).
+    await writeBookCard(path.join(srcDir, coverFile), path.join(outDir, 'share.jpg'));
   }
   // The real front cover of the paperback, shown where the paper book is offered.
   const frontFile = fs.readdirSync(srcDir).find((f) => /^front\.(jpe?g|png|webp)$/i.test(f));

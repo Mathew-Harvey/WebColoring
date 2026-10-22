@@ -186,12 +186,12 @@ check('taken apart: page uses the web copy (max 1200 px wide, under 300 KB)', co
 check('taken apart: original kept as taken-apart-cover.jpg', fs.existsSync(new URL('../public/books/taken-apart/taken-apart-cover.jpg', import.meta.url)));
 await page2.goto(`${BASE}#/paper/taken-apart`);
 await page2.waitForSelector('#paper-taken-apart.is-highlight');
-check('taken apart: back from its card goes to its pages', (await page2.getAttribute('.paper-page .round-btn', 'href')) === '#/book/taken-apart');
+check('taken apart: back from its card goes to its pages', (await page2.getAttribute('.paper-page .round-btn', 'href')) === '/book/taken-apart');
 await page2.goto(`${BASE}#/`);
 await page2.waitForSelector('a.book-tile');
 const tiles = await page2.locator('a.book-tile').evaluateAll((els) => els.map((a) => a.getAttribute('href')));
-check('taken apart: on the shelf, beside Still Water Mandalas', tiles.indexOf('#/book/taken-apart') === tiles.indexOf('#/book/still-water-mandalas') + 1, tiles.join(' '));
-const pair = await page2.evaluate(() => ['still-water-mandalas', 'taken-apart'].map((id) => Math.round(document.querySelector(`a.book-tile[href="#/book/${id}"]`).getBoundingClientRect().top)));
+check('taken apart: on the shelf, beside Still Water Mandalas', tiles.indexOf('/book/taken-apart') === tiles.indexOf('/book/still-water-mandalas') + 1, tiles.join(' '));
+const pair = await page2.evaluate(() => ['still-water-mandalas', 'taken-apart'].map((id) => Math.round(document.querySelector(`a.book-tile[href="/book/${id}"]`).getBoundingClientRect().top)));
 check('taken apart: same row as Still Water Mandalas on a wide screen', pair[0] === pair[1], pair.join(' '));
 await page2.goto(`${BASE}#/book/taken-apart`);
 await page2.waitForSelector('.page-tile img');
@@ -223,7 +223,7 @@ if (soonOnShelf) {
 }
 await page2.goto(`${BASE}?e2e#/book/${onSale[0].id}/page05/done`);
 await page2.waitForSelector('.finished .paper-finished');
-check('store: finished screen links to the paper book', (await page2.getAttribute('.paper-finished', 'href')) === `#/paper/${onSale[0].id}`);
+check('store: finished screen links to the paper book', (await page2.getAttribute('.paper-finished', 'href')) === `/#/paper/${onSale[0].id}`);
 await page2.screenshot({ path: `${OUT}/finished-store.png` });
 await page2.goto(`${BASE}#/grown-ups`);
 await page2.waitForSelector('.gu-paper .paper-card');
@@ -328,8 +328,8 @@ await ctx3.close();
   await p.waitForTimeout(2600);
   await p.goto(`${BASE}#/`);
   await p.waitForSelector('.keep-tile img');
-  check('home: "Keep colouring" offers the page just coloured', (await p.getAttribute('.keep-tile', 'href')).startsWith('#/book/scaly-pals/page06'));
-  check('home: the book shows it has a page started', (await p.locator('a.book-tile[href="#/book/scaly-pals"] .book-started').count()) === 1);
+  check('home: "Keep colouring" offers the page just coloured', (await p.getAttribute('.keep-tile', 'href')).startsWith('/#/book/scaly-pals/page06'));
+  check('home: the book shows it has a page started', (await p.locator('a.book-tile[href="/book/scaly-pals"] .book-started').count()) === 1);
   await p.goto(`${BASE}#/book/scaly-pals`);
   await p.waitForSelector('.picker-sub');
   check('picker: shows pages and progress', /30 pages · 1 started/.test(await p.textContent('.picker-sub')));
@@ -345,7 +345,7 @@ await ctx3.close();
   // A friendly not-found screen that leads back to the bookshelf.
   await p.goto(`${BASE}#/no-such-thing`);
   await p.waitForSelector('.not-found-card');
-  check('not found: says so, and leads back to the bookshelf', (await p.getAttribute('.not-found-card a.btn', 'href')) === '#/');
+  check('not found: says so, and leads back to the bookshelf', (await p.getAttribute('.not-found-card a.btn', 'href')) === '/');
   await ux.close();
 
   // On a phone held upright, a wide page offers the tip to turn the phone.

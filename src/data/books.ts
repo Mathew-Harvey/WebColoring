@@ -1,5 +1,7 @@
 // Book manifests produced by scripts/prepare-book.mjs.
 
+import { copy } from '../copy';
+
 /** What the printed book is like, from book.config.json. Every field is optional. */
 export interface Paperback {
   ages?: string;
@@ -52,9 +54,10 @@ export interface Book {
   pages: PageInfo[];
 }
 
-// The built site lives at the repository root and reads book data from public/.
+// The built site lives at the repository root and reads book data from public/. The address is
+// from the site root, since a book's pages have their own path (/book/<id>).
 declare const __PUBLIC__: string;
-const BASE = `./${__PUBLIC__}books/`;
+const BASE = `${import.meta.env.BASE_URL}${__PUBLIC__}books/`;
 
 let indexPromise: Promise<BookIndexEntry[]> | null = null;
 const bookCache = new Map<string, Promise<Book>>();
@@ -77,6 +80,12 @@ const inlineIndex: BookIndexEntry[] | null = (() => {
 
 /** The bookshelf as built into the page, so screens can draw it straight away. */
 export const peekIndex = () => inlineIndex;
+
+/** The copy for a book's own page (/book/<id>): its title, description and intro. */
+export function bookPageCopy(id: string): { title: string; description: string; h1?: string; intro: string } | null {
+  const entry = inlineIndex?.find((b) => b.id === id);
+  return copy.bookPages[id] ?? (entry ? copy.bookPageFallback(entry.title, entry.pageCount) : null);
+}
 
 /**
  * The bookshelf. The copy built into the page wins: the page always comes from the network

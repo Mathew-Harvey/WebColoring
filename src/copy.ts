@@ -33,6 +33,77 @@ export const copy = {
     keepGoingPage: (book: string, n: number) => `${book}, page ${n}`,
   },
 
+  // Each book's own page, /book/<id>: its search result and link preview (title, description),
+  // and the heading and intro at the top of its pages. The build prerenders these
+  // (vite.config.ts). A book with none here uses bookPageFallback.
+  // DRAFT: to be replaced with the BookMaker copy (traffic/seo-book-pages.md).
+  bookPages: {
+    'blocky-builders': {
+      title: 'Blocky Builders: free block town colouring pages | WebColoring',
+      description:
+        '30 free block town colouring pages for kids aged 6 to 10. Fill, paint or colour by numbers on any phone, tablet or computer. No ads, works offline.',
+      intro:
+        '30 block town pictures for kids aged 6 to 10, full of towers, bridges and busy builders. Tap to fill, paint with crayons and brushes, or colour by numbers. Free, with no ads or accounts.',
+    },
+    'scaly-pals': {
+      title: 'Scaly Pals: free dragon colouring pages for kids | WebColoring',
+      description:
+        '30 free dragon colouring pages for kids aged 6 to 11. Fill, paint or colour by numbers on any phone, tablet or computer. No ads, works offline.',
+      intro:
+        '30 friendly dragons to colour, for kids aged 6 to 11. Tap to fill, paint with crayons and brushes, or colour by numbers. Free, with no ads or accounts.',
+    },
+    'still-water-mandalas': {
+      title: 'Still Water Mandalas: free mandala colouring pages | WebColoring',
+      description:
+        '30 free mandala colouring pages for adults. Detailed designs to fill and paint online, for a calm few minutes. No ads, no accounts, works offline.',
+      intro:
+        '30 detailed mandalas for grown-ups, made for slow, calm colouring. Fill each part with a tap, or paint it by hand. Free, with no ads or accounts.',
+    },
+    'taken-apart': {
+      title: 'Taken Apart: exploded view colouring pages for adults | WebColoring',
+      description:
+        '30 free exploded view colouring pages for adults: car engines, gramophones, cassette players, phones and drones. Colour online, no ads, works offline.',
+      intro:
+        'Thirty machines pulled apart piece by piece, from a 1910s car engine to drones and electric cars. Detailed exploded view drawings for grown-ups to colour. Free, with no ads or accounts.',
+    },
+    'kart-kingdom-racers': {
+      title: 'Kart Kingdom Racers: free kart colouring pages for kids | WebColoring',
+      description:
+        '30 free kart racing colouring pages for kids aged 6 to 10. Fill, paint or colour by numbers on any phone, tablet or computer. No ads, works offline.',
+      intro:
+        'A raccoon, a frog and a bunny race their karts through mushroom lands, castles, space and the sea. 30 pictures for kids aged 6 to 10. Free, with no ads or accounts.',
+    },
+    'doodles-through-the-decades': {
+      title: 'Doodles Through the Decades: retro colouring pages | WebColoring',
+      description:
+        '30 free retro doodle colouring pages for grown-ups: smileys, peace signs, cassettes, pixel art and more. Colour online, no ads, works offline.',
+      intro:
+        'Retro doodles from the 1950s on: atoms and boomerangs, flower power, smileys, cassettes, synthwave grids and pixel art. 30 pages for grown-ups. Free, with no ads or accounts.',
+    },
+    'deep-sea-friends': {
+      title: 'Deep Sea Friends: free ocean colouring pages for kids | WebColoring',
+      description:
+        '30 free ocean colouring pages for kids aged 4 to 8: an octopus, sea turtle, whale, seahorses and a coral reef. Big, bold shapes on any phone, tablet or computer.',
+      intro:
+        'A grinning anglerfish lights the way to a whole sea full of friends: an octopus, a sea turtle, jellyfish, whales and a coral reef. 30 big, friendly pictures for kids aged 4 to 8. Free, with no ads or accounts.',
+    },
+    'aussie-bush-buddies': {
+      title: 'Aussie Bush Buddies: free Australian animal colouring pages | WebColoring',
+      description:
+        '30 free Australian animal colouring pages for kids aged 4 to 8: a kangaroo, koala, wombat, platypus and kookaburra. Big, bold shapes on any phone, tablet or computer.',
+      intro:
+        "A joey peeks out of its mum's pouch, a koala hugs a gum tree and a wombat says g'day. 30 big, friendly pictures of Australian animals for kids aged 4 to 8. Free, with no ads or accounts.",
+    },
+  } as Record<string, { title: string; description: string; h1?: string; intro: string }>,
+  // For a new book until it has its own copy above.
+  bookPageFallback: (title: string, pages: number) => ({
+    title: `${title}: free colouring pages | WebColoring`,
+    description: `${pages} free colouring pages from ${title}, a colouring book by Mat Harvey. Colour online on any phone, tablet or computer. No ads, works offline.`,
+    intro: `${pages} pictures to colour from ${title}, a colouring book by Mat Harvey. Free, with no ads or accounts.`,
+  }),
+  // The link preview image on a book's page.
+  bookShareAlt: (title: string) => `The cover of ${title}, a colouring book by Mat Harvey`,
+
   // The real paperbacks. Gentle, never pushy: the site stays free either way.
   paper: {
     bannerTitle: 'Colour it on paper too',

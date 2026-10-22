@@ -23,7 +23,7 @@ jobs:
       - name: Built site is committed and up to date
         run: |
           # GitHub Pages serves the main branch as committed, so the build must be checked in.
-          git add -A index.html assets sw.js manifest.webmanifest
+          git add -A index.html assets sw.js manifest.webmanifest book sitemap.xml robots.txt
           if ! git diff --cached --quiet; then
             git diff --cached --stat
             echo "::error::The built site is out of date. Run 'npm run build' and commit the result."

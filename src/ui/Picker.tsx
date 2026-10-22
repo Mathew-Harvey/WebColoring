@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'preact/hooks';
 import { copy } from '../copy';
 import { getLocal, setLocal } from '../data/settings';
-import { loadBook, pageAsset, type Book, type PageInfo } from '../data/books';
+import { bookPageCopy, loadBook, pageAsset, peekIndex, type Book, type PageInfo } from '../data/books';
 import { listMeta, type PageMeta } from '../data/storage';
 import { Icon, type IconName } from './icons';
 import { NotFound } from './NotFound';
@@ -61,6 +61,12 @@ export function Picker({ bookId }: { bookId: string }) {
   const pages = all.filter((p) => matches(active, p));
   const started = metas.size;
   const finished = [...metas.values()].filter((m) => m.complete).length;
+  // The heading draws straight away from the bookshelf built into the page, so it does not jump
+  // when the book loads (on /book/<id> it matches the prerendered heading).
+  const shelfEntry = peekIndex()?.find((b) => b.id === bookId);
+  const intro = bookPageCopy(bookId);
+  const title = intro?.h1 ?? book?.title ?? shelfEntry?.title ?? '';
+  const pageCount = book ? all.length : shelfEntry?.pageCount;
 
   if (error) return <NotFound />;
 
@@ -71,15 +77,16 @@ export function Picker({ bookId }: { bookId: string }) {
           <Icon name="back" size={30} />
         </BackLink>
         <div class="picker-heading">
-          <h1 class="picker-title">{book?.title ?? ''}</h1>
-          {book && (
+          <h1 class="picker-title">{title}</h1>
+          {pageCount !== undefined && (
             <p class="picker-sub">
-              {copy.home.pages(all.length)}
+              {copy.home.pages(pageCount)}
               {started > 0 && <span class="picker-progress"> · {copy.picker.progress(started, finished)}</span>}
             </p>
           )}
         </div>
       </header>
+      {intro && <p class="picker-intro">{intro.intro}</p>}
 
       {shown.length > 0 && (
         <nav class="filters" aria-label={copy.picker.filterLabel}>
