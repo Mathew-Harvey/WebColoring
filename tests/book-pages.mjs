@@ -135,10 +135,14 @@ for (const { id } of shelf) {
   await p.waitForSelector('.page-tile');
   const q = new URL(p.url());
   check('...keeping the query string', q.pathname === '/book/taken-apart' && q.search === '?e2e' && !q.hash, p.url());
-  await p.goto(`${BASE}#/book/no-such-book`);
-  await p.waitForSelector('.not-found-card');
-  check('a book that is not on the shelf keeps its old address', new URL(p.url()).hash === '#/book/no-such-book');
   await p.close();
+  // A book that is not on the shelf: its data is missing (a 404 the browser logs, as expected),
+  // so this page is not watched for errors.
+  const missing = await ctx.newPage();
+  await missing.goto(`${BASE}#/book/no-such-book`);
+  await missing.waitForSelector('.not-found-card');
+  check('a book that is not on the shelf keeps its old address', new URL(missing.url()).hash === '#/book/no-such-book');
+  await missing.close();
 }
 
 // The bookshelf links to every book's own page; following one does not reload the page, and the
