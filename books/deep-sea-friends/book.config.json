@@ -1,0 +1,14 @@
+{
+  "title": "Deep Sea Friends",
+  "subtitle": "An Ocean Colouring Book for Kids Ages 4-8",
+  "order": 6,
+  "canvas": [
+    2560,
+    1920
+  ],
+  "paperback": {
+    "ages": "4 to 8",
+    "size": "11 x 8.5 in",
+    "singleSided": true
+  }
+}

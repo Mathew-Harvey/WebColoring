@@ -75,6 +75,34 @@
    },
    "pageCount": 30,
    "order": 5
+  },
+  {
+   "id": "deep-sea-friends",
+   "title": "Deep Sea Friends",
+   "subtitle": "An Ocean Colouring Book for Kids Ages 4-8",
+   "cover": "deep-sea-friends/cover-small.webp",
+   "front": null,
+   "paperback": {
+    "ages": "4 to 8",
+    "size": "11 x 8.5 in",
+    "singleSided": true
+   },
+   "pageCount": 30,
+   "order": 6
+  },
+  {
+   "id": "aussie-bush-buddies",
+   "title": "Aussie Bush Buddies",
+   "subtitle": "Australian Animals to Colour for Kids 4-8",
+   "cover": "aussie-bush-buddies/cover-small.webp",
+   "front": null,
+   "paperback": {
+    "ages": "4 to 8",
+    "size": "11 x 8.5 in",
+    "singleSided": true
+   },
+   "pageCount": 30,
+   "order": 7
   }
  ]
 }

@@ -288,7 +288,7 @@ async function desktop(browser) {
 
   // Every page of the other books opens, and one page of each can be finished by numbers
   // (the mandala book also checks a square canvas).
-  for (const [book, pid] of [['scaly-pals', 'page26'], ['still-water-mandalas', 'page20'], ['taken-apart', 'page27'], ['kart-kingdom-racers', 'page10'], ['doodles-through-the-decades', 'page24']]) {
+  for (const [book, pid] of [['scaly-pals', 'page26'], ['still-water-mandalas', 'page20'], ['taken-apart', 'page27'], ['kart-kingdom-racers', 'page10'], ['doodles-through-the-decades', 'page24'], ['deep-sea-friends', 'page12'], ['aussie-bush-buddies', 'page11']]) {
     const info = JSON.parse(fs.readFileSync(new URL(`../public/books/${book}/book.json`, import.meta.url), 'utf8'));
     const failed = [];
     for (const p of info.pages) {

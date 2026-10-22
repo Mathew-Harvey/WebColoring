@@ -1,0 +1,547 @@
+{
+ "id": "deep-sea-friends",
+ "title": "Deep Sea Friends",
+ "subtitle": "An Ocean Colouring Book for Kids Ages 4-8",
+ "cover": "cover.webp",
+ "coverSmall": "cover-small.webp",
+ "front": null,
+ "paperback": {
+  "ages": "4 to 8",
+  "size": "11 x 8.5 in",
+  "singleSided": true
+ },
+ "width": 2560,
+ "height": 1920,
+ "cbnPalette": [
+  {
+   "key": "sky",
+   "hex": "#7cc8f8"
+  },
+  {
+   "key": "grass",
+   "hex": "#7ccf5e"
+  },
+  {
+   "key": "leaf",
+   "hex": "#2f9e5a"
+  },
+  {
+   "key": "yellow",
+   "hex": "#ffd83d"
+  },
+  {
+   "key": "orange",
+   "hex": "#ff9a3c"
+  },
+  {
+   "key": "red",
+   "hex": "#ef5a52"
+  },
+  {
+   "key": "pink",
+   "hex": "#ff8fc8"
+  },
+  {
+   "key": "purple",
+   "hex": "#a57de0"
+  },
+  {
+   "key": "brown",
+   "hex": "#a8714a"
+  },
+  {
+   "key": "sand",
+   "hex": "#f3cf98"
+  },
+  {
+   "key": "grey",
+   "hex": "#a9b2bd"
+  },
+  {
+   "key": "blue",
+   "hex": "#3e7fe0"
+  }
+ ],
+ "pages": [
+  {
+   "id": "page01",
+   "n": 1,
+   "title": null,
+   "difficulty": "easy",
+   "cbn": true,
+   "regionCount": 79,
+   "numbered": 40,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1920
+   ],
+   "v": "78bbd39493"
+  },
+  {
+   "id": "page02",
+   "n": 2,
+   "title": null,
+   "difficulty": "easy",
+   "cbn": true,
+   "regionCount": 211,
+   "numbered": 48,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1920
+   ],
+   "v": "d736c09d87"
+  },
+  {
+   "id": "page03",
+   "n": 3,
+   "title": null,
+   "difficulty": "easy",
+   "cbn": true,
+   "regionCount": 96,
+   "numbered": 68,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1920
+   ],
+   "v": "99cb5b9d12"
+  },
+  {
+   "id": "page04",
+   "n": 4,
+   "title": null,
+   "difficulty": "easy",
+   "cbn": true,
+   "regionCount": 61,
+   "numbered": 24,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1920
+   ],
+   "v": "525935012c"
+  },
+  {
+   "id": "page05",
+   "n": 5,
+   "title": null,
+   "difficulty": "easy",
+   "cbn": true,
+   "regionCount": 26,
+   "numbered": 14,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1920
+   ],
+   "v": "af6a9520e5"
+  },
+  {
+   "id": "page06",
+   "n": 6,
+   "title": null,
+   "difficulty": "easy",
+   "cbn": true,
+   "regionCount": 145,
+   "numbered": 66,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1920
+   ],
+   "v": "2de8e3ef62"
+  },
+  {
+   "id": "page07",
+   "n": 7,
+   "title": null,
+   "difficulty": "easy",
+   "cbn": true,
+   "regionCount": 41,
+   "numbered": 27,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1920
+   ],
+   "v": "630ffd0e65"
+  },
+  {
+   "id": "page08",
+   "n": 8,
+   "title": null,
+   "difficulty": "easy",
+   "cbn": true,
+   "regionCount": 187,
+   "numbered": 78,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1920
+   ],
+   "v": "2812e18fad"
+  },
+  {
+   "id": "page09",
+   "n": 9,
+   "title": null,
+   "difficulty": "easy",
+   "cbn": true,
+   "regionCount": 233,
+   "numbered": 87,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1920
+   ],
+   "v": "f4b6318bae"
+  },
+  {
+   "id": "page10",
+   "n": 10,
+   "title": null,
+   "difficulty": "easy",
+   "cbn": true,
+   "regionCount": 105,
+   "numbered": 58,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1920
+   ],
+   "v": "8a83ea59b4"
+  },
+  {
+   "id": "page11",
+   "n": 11,
+   "title": null,
+   "difficulty": "easy",
+   "cbn": true,
+   "regionCount": 111,
+   "numbered": 50,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1920
+   ],
+   "v": "1a807e9704"
+  },
+  {
+   "id": "page12",
+   "n": 12,
+   "title": null,
+   "difficulty": "easy",
+   "cbn": true,
+   "regionCount": 20,
+   "numbered": 17,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1920
+   ],
+   "v": "30da5711d1"
+  },
+  {
+   "id": "page13",
+   "n": 13,
+   "title": null,
+   "difficulty": "easy",
+   "cbn": true,
+   "regionCount": 53,
+   "numbered": 37,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1920
+   ],
+   "v": "c9a9daa606"
+  },
+  {
+   "id": "page14",
+   "n": 14,
+   "title": null,
+   "difficulty": "easy",
+   "cbn": true,
+   "regionCount": 57,
+   "numbered": 36,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1920
+   ],
+   "v": "ecfb8778a7"
+  },
+  {
+   "id": "page15",
+   "n": 15,
+   "title": null,
+   "difficulty": "easy",
+   "cbn": true,
+   "regionCount": 32,
+   "numbered": 28,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1920
+   ],
+   "v": "c74463b13b"
+  },
+  {
+   "id": "page16",
+   "n": 16,
+   "title": null,
+   "difficulty": "easy",
+   "cbn": true,
+   "regionCount": 161,
+   "numbered": 69,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1920
+   ],
+   "v": "f0324d9313"
+  },
+  {
+   "id": "page17",
+   "n": 17,
+   "title": null,
+   "difficulty": "easy",
+   "cbn": true,
+   "regionCount": 96,
+   "numbered": 65,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1920
+   ],
+   "v": "3a491eb8ed"
+  },
+  {
+   "id": "page18",
+   "n": 18,
+   "title": null,
+   "difficulty": "easy",
+   "cbn": true,
+   "regionCount": 47,
+   "numbered": 25,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1920
+   ],
+   "v": "cf20f7f39c"
+  },
+  {
+   "id": "page19",
+   "n": 19,
+   "title": null,
+   "difficulty": "easy",
+   "cbn": true,
+   "regionCount": 133,
+   "numbered": 26,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1920
+   ],
+   "v": "f28be25d80"
+  },
+  {
+   "id": "page20",
+   "n": 20,
+   "title": null,
+   "difficulty": "easy",
+   "cbn": true,
+   "regionCount": 70,
+   "numbered": 40,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1920
+   ],
+   "v": "eae726a547"
+  },
+  {
+   "id": "page21",
+   "n": 21,
+   "title": null,
+   "difficulty": "easy",
+   "cbn": true,
+   "regionCount": 65,
+   "numbered": 42,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1920
+   ],
+   "v": "5629e5b6d5"
+  },
+  {
+   "id": "page22",
+   "n": 22,
+   "title": null,
+   "difficulty": "easy",
+   "cbn": true,
+   "regionCount": 74,
+   "numbered": 50,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1920
+   ],
+   "v": "d92f0162be"
+  },
+  {
+   "id": "page23",
+   "n": 23,
+   "title": null,
+   "difficulty": "easy",
+   "cbn": true,
+   "regionCount": 64,
+   "numbered": 47,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1920
+   ],
+   "v": "2e70ed8979"
+  },
+  {
+   "id": "page24",
+   "n": 24,
+   "title": null,
+   "difficulty": "easy",
+   "cbn": true,
+   "regionCount": 163,
+   "numbered": 56,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1920
+   ],
+   "v": "f90e9bb625"
+  },
+  {
+   "id": "page25",
+   "n": 25,
+   "title": null,
+   "difficulty": "easy",
+   "cbn": true,
+   "regionCount": 42,
+   "numbered": 34,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1920
+   ],
+   "v": "789e087d73"
+  },
+  {
+   "id": "page26",
+   "n": 26,
+   "title": null,
+   "difficulty": "easy",
+   "cbn": true,
+   "regionCount": 45,
+   "numbered": 30,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1920
+   ],
+   "v": "389322ba73"
+  },
+  {
+   "id": "page27",
+   "n": 27,
+   "title": null,
+   "difficulty": "easy",
+   "cbn": true,
+   "regionCount": 102,
+   "numbered": 49,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1920
+   ],
+   "v": "ba956cbeb2"
+  },
+  {
+   "id": "page28",
+   "n": 28,
+   "title": null,
+   "difficulty": "easy",
+   "cbn": true,
+   "regionCount": 123,
+   "numbered": 61,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1920
+   ],
+   "v": "c2a2bd4a1e"
+  },
+  {
+   "id": "page29",
+   "n": 29,
+   "title": null,
+   "difficulty": "easy",
+   "cbn": true,
+   "regionCount": 49,
+   "numbered": 30,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1920
+   ],
+   "v": "152e02cdc9"
+  },
+  {
+   "id": "page30",
+   "n": 30,
+   "title": null,
+   "difficulty": "easy",
+   "cbn": true,
+   "regionCount": 192,
+   "numbered": 43,
+   "artRect": [
+    0,
+    0,
+    2560,
+    1920
+   ],
+   "v": "4be565beea"
+  }
+ ]
+}

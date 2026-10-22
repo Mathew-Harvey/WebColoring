@@ -56,6 +56,40 @@ export const PAPERBACKS: Record<string, Listing> = {
   'kart-kingdom-racers': { url: null },
   // Coming soon: not on Amazon yet.
   'doodles-through-the-decades': { url: null },
+  // Coming soon: not on Amazon yet.
+  'deep-sea-friends': {
+    url: null,
+    price: 'US$9.99',
+    format: 'paperback',
+    details: {
+      author: 'Mat Harvey',
+      blurb:
+        'A grinning anglerfish swings its little lamp through the dark water, lighting the way to a whole sea full of new friends. An octopus waves hello with every arm, and a sea turtle glides over the seagrass. Inside are 30 big, friendly pictures made for small hands, with bold outlines and roomy shapes that are easy to colour.',
+      cover: {
+        src: 'deep-sea-friends/deep-sea-friends-cover-1200.jpg',
+        width: 1200,
+        height: 927,
+        alt: 'Deep Sea Friends cover showing a smiling octopus, a sea turtle, a jellyfish, an anglerfish and a seahorse on a coral reef',
+      },
+    },
+  },
+  // Coming soon: not on Amazon yet.
+  'aussie-bush-buddies': {
+    url: null,
+    price: 'US$9.99',
+    format: 'paperback',
+    details: {
+      author: 'Mat Harvey',
+      blurb:
+        "A tiny joey peeks out of its mum's pouch, a sleepy koala hugs a gum tree, and a cheeky wombat sits by his burrow to say g'day. Inside are 30 big, friendly pictures made for small hands, from echidnas and platypuses to kookaburras and quokkas, with bold outlines and roomy shapes that are easy to colour.",
+      cover: {
+        src: 'aussie-bush-buddies/aussie-bush-buddies-cover-1200.jpg',
+        width: 1200,
+        height: 927,
+        alt: 'Aussie Bush Buddies cover showing a kangaroo, a wombat, an echidna and a platypus by a billabong, with a koala in a gum tree and a cockatoo',
+      },
+    },
+  },
   // Coming soon: on Amazon from about 27 October 2026.
   'taken-apart': {
     url: null,

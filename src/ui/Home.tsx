@@ -117,6 +117,8 @@ export function Home() {
   const grownUps = (books ?? []).filter(isForGrownUps);
   // One shelf needs no heading.
   const grouped = kids.length > 0 && grownUps.length > 0;
+  // Two short shelves can share a row on wide screens; longer ones each take the full width.
+  const paired = grouped && kids.length <= 3 && grownUps.length <= 3;
 
   return (
     <div class="screen home">
@@ -150,7 +152,7 @@ export function Home() {
           </div>
         )}
         {books && (
-          <div class={`shelves${grouped ? ' is-grouped' : ''}`}>
+          <div class={`shelves${paired ? ' is-paired' : ''}`}>
             <Shelf id="kids" title={grouped ? copy.home.kidsShelf : null} books={kids} started={started} />
             <Shelf id="grown-ups" title={grouped ? copy.home.grownUpsShelf : null} books={grownUps} started={started} />
           </div>
