@@ -5,7 +5,7 @@ import { bookPageCopy, loadBook, pageAsset, peekIndex, type Book, type PageInfo 
 import { listMeta, type PageMeta } from '../data/storage';
 import { Icon, type IconName } from './icons';
 import { NotFound } from './NotFound';
-import { PaperPickerCard } from './Paper';
+import { PaperPickerCard, PaperStrip } from './Paper';
 import { href } from './router';
 import { BackLink } from './BackLink';
 
@@ -87,6 +87,7 @@ export function Picker({ bookId }: { bookId: string }) {
         </div>
       </header>
       {intro && <p class="picker-intro">{intro.intro}</p>}
+      <PaperStrip bookId={bookId} />
 
       {shown.length > 0 && (
         <nav class="filters" aria-label={copy.picker.filterLabel}>

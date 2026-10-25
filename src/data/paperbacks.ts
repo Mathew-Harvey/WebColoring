@@ -6,10 +6,15 @@
 // a cover for the paper cards. A book that is only on paper (no pages to colour here yet) carries
 // all of its details in `book`, and shows on the paper books page and in the grown-ups area.
 //
-// A book with a `url` shows "Available now", its price and a "Get the paperback" button. A book
-// with `url: null` shows "Coming soon" with its price (if set) and a disabled button. Links are
-// plain product pages, with no affiliate or tracking parameters. After an edit, run
-// `npm run build`.
+// A book with an `asin` (its Amazon product id, from its amazon.com link: amazon.com/dp/<asin>)
+// shows "Available now" and a "Get the paperback" button, which opens the book in the visitor's
+// own Amazon store (src/data/stores.ts; the id is the same in every store). A book with
+// `asin: null` shows "Coming soon" with a disabled button. `price` is the amazon.com price, shown
+// to visitors shopping there. Links are plain product pages, with no affiliate or tracking
+// parameters. After an edit, run `npm run build`.
+
+// With its extension, so Node can load this file too (the tests read the listings).
+import { activeStore, storeUrl, type StoreId } from './stores.ts';
 
 export type PaperFormat = 'paperback';
 
@@ -40,7 +45,8 @@ export interface PaperOnlyBook extends PaperDetails {
 }
 
 export interface Listing {
-  url: string | null;
+  asin: string | null;
+  /** The amazon.com price. */
   price?: string;
   format?: PaperFormat;
   details?: PaperDetails;
@@ -48,17 +54,17 @@ export interface Listing {
 }
 
 export const PAPERBACKS: Record<string, Listing> = {
-  'blocky-builders': { url: 'https://www.amazon.com/dp/B0HNHZQHBB', price: 'US$9.99', format: 'paperback' },
-  'scaly-pals': { url: 'https://www.amazon.com/dp/B0HNHSR2T9', price: 'US$9.99', format: 'paperback' },
+  'blocky-builders': { asin: 'B0HNHZQHBB', price: 'US$9.99', format: 'paperback' },
+  'scaly-pals': { asin: 'B0HNHSR2T9', price: 'US$9.99', format: 'paperback' },
   // On Amazon from 26 October 2026.
-  'still-water-mandalas': { url: null },
+  'still-water-mandalas': { asin: null },
   // Coming soon: not on Amazon yet.
-  'kart-kingdom-racers': { url: null },
-  // Coming soon: not on Amazon yet.
-  'doodles-through-the-decades': { url: null },
+  'kart-kingdom-racers': { asin: null },
+  // On Amazon from 25 October 2026.
+  'doodles-through-the-decades': { asin: 'B0HP76NQ53', price: 'US$9.99', format: 'paperback' },
   // Coming soon: not on Amazon yet.
   'deep-sea-friends': {
-    url: null,
+    asin: null,
     price: 'US$9.99',
     format: 'paperback',
     details: {
@@ -75,7 +81,7 @@ export const PAPERBACKS: Record<string, Listing> = {
   },
   // Coming soon: not on Amazon yet.
   'aussie-bush-buddies': {
-    url: null,
+    asin: null,
     price: 'US$9.99',
     format: 'paperback',
     details: {
@@ -90,9 +96,9 @@ export const PAPERBACKS: Record<string, Listing> = {
       },
     },
   },
-  // Coming soon: on Amazon from about 27 October 2026.
+  // On Amazon from 25 October 2026.
   'taken-apart': {
-    url: null,
+    asin: 'B0HP7BYF53',
     price: 'US$8.99',
     format: 'paperback',
     details: {
@@ -109,22 +115,12 @@ export const PAPERBACKS: Record<string, Listing> = {
   },
 };
 
-/** Only http(s) links are ever shown as store links. */
-export function safeStoreUrl(url: string | null | undefined): string | null {
-  if (!url) return null;
-  try {
-    const u = new URL(url);
-    return u.protocol === 'https:' || u.protocol === 'http:' ? u.href : null;
-  } catch {
-    return null;
-  }
-}
-
-/** The book's store listing, or null while it is not on sale yet. */
-export function listingFor(bookId: string): (Listing & { url: string }) | null {
+/** The book's listing with its product page in `store` (the visitor's, by default), or null
+ * while it is not on sale. */
+export function listingFor(bookId: string, store: StoreId = activeStore()): (Listing & { url: string; store: StoreId }) | null {
   const listing = PAPERBACKS[bookId];
-  const url = safeStoreUrl(listing?.url);
-  return listing && url ? { ...listing, url } : null;
+  const url = storeUrl(listing?.asin, store);
+  return listing && url ? { ...listing, url, store } : null;
 }
 
 /** The books that are only on paper, with their ids. */

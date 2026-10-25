@@ -3,13 +3,22 @@ import { useEffect, useState } from 'preact/hooks';
 import { copy } from '../copy';
 import { indexAsset, loadIndex, peekIndex, type BookIndexEntry } from '../data/books';
 import { listingFor, paperOnlyBooks, PAPERBACKS } from '../data/paperbacks';
+import { activeStore, chooseStore, isStore, onStore, STORES, type StoreId } from '../data/stores';
 import { HoldButton } from './HoldButton';
 import { Icon } from './icons';
 import { href } from './router';
 import { BackLink } from './BackLink';
 
-// Everything that offers the printed books: the home banner, the picker card, the line on the
-// finished screen, the grown-ups list and the "paper books" page where they can be bought.
+// Everything that offers the printed books: the home banner, the strip at the top of a book's
+// pages and the card under them, the line on the finished screen, the grown-ups list and the
+// "paper books" page where they can be bought. Buttons open the visitor's own Amazon store.
+
+/** The Amazon store the buttons open; follows a change made on the paper books page. */
+export function useStore(): StoreId {
+  const [store, setStore] = useState<StoreId>(activeStore);
+  useEffect(() => onStore(() => setStore(activeStore())), []);
+  return store;
+}
 
 /** The shelf entry for one book, with its paper details. index.json carries the paperback details. */
 export function useBookEntry(bookId: string): PaperBook | null {
@@ -67,9 +76,15 @@ export function withPaperOnly(shelf: BookIndexEntry[]): PaperBook[] {
 
 const isSoon = (book: BookIndexEntry) => !listingFor(book.id);
 
-const priceText = (bookId: string) => {
+/** Books on sale first, keeping their order otherwise. */
+const onSaleFirst = <T extends BookIndexEntry>(books: T[]) => [...books.filter((b) => !isSoon(b)), ...books.filter(isSoon)];
+
+/** "Paperback, US$9.99" for amazon.com, where the price is known; elsewhere just the format. */
+const priceText = (bookId: string, store: StoreId) => {
   const l = PAPERBACKS[bookId];
-  return l?.price ? copy.paper.price(copy.paper.formats[l.format ?? 'paperback'], l.price) : null;
+  const format = copy.paper.formats[l?.format ?? 'paperback'];
+  if (l?.price && store === 'US') return copy.paper.price(format, l.price);
+  return l?.asin ? format : null;
 };
 
 /** A wax crayon, for decoration. */
@@ -130,8 +145,9 @@ export function PaperCover({
  * cover beside it has no sticker).
  */
 export function BuyAction({ book, gated = true, badge = true }: { book: BookIndexEntry; gated?: boolean; badge?: boolean }) {
-  const listing = listingFor(book.id);
-  const cost = priceText(book.id);
+  const store = useStore();
+  const listing = listingFor(book.id, store);
+  const cost = priceText(book.id, store);
   if (!listing) {
     return (
       <>
@@ -160,7 +176,7 @@ export function BuyAction({ book, gated = true, badge = true }: { book: BookInde
       <>
         {price}
         <a class="btn btn-buy" href={url} target="_blank" rel="noopener">
-          <Icon name="book" size={24} /> {copy.paper.buyLink} <span class="sr-only">{copy.paper.opensNewTab}</span>
+          <Icon name="book" size={24} /> {copy.paper.buyLink(STORES[store])} <span class="sr-only">{copy.paper.opensNewTab}</span>
         </a>
       </>
     );
@@ -170,7 +186,7 @@ export function BuyAction({ book, gated = true, badge = true }: { book: BookInde
       {price}
       <HoldButton
         label={copy.paper.buy}
-        hint={copy.paper.buyHint}
+        hint={copy.paper.buyHint(STORES[store])}
         href={url}
         onDone={() => window.open(url, '_blank', 'noopener')}
         class="hold-buy"
@@ -243,7 +259,8 @@ const FAN: Record<number, [number, number, number][]> = {
 /** Below the shelf: the books on paper, with a way to the paper books page. */
 export function PaperBanner({ books }: { books: BookIndexEntry[] }) {
   if (!books.length) return null;
-  const shown = books.slice(0, 3);
+  const shown = onSaleFirst(books.map(withDetails)).slice(0, 3);
+  const onSale = books.filter((b) => !isSoon(b));
   const covers = shown.filter((b) => b.front);
   const art = shown.filter((b) => !b.front);
   return (
@@ -269,6 +286,7 @@ export function PaperBanner({ books }: { books: BookIndexEntry[] }) {
       <div class="paper-banner-text">
         <h2 id="paper-banner-title">{copy.paper.bannerTitle}</h2>
         <p>{copy.paper.bannerBody}</p>
+        {onSale.length > 0 && <p class="paper-banner-sale">{copy.paper.bannerOnSale(onSale.map((b) => b.title))}</p>}
         <div class="paper-banner-actions">
           <a class="btn btn-paper" href={href.paper()}>
             <Icon name="book" size={26} /> {copy.paper.bannerButton}
@@ -301,6 +319,50 @@ export function PaperPickerCard({ bookId }: { bookId: string }) {
   );
 }
 
+/** At the top of a book's pages, while it is on sale: it is a paperback too, and the way to get it. */
+export function PaperStrip({ bookId }: { bookId: string }) {
+  const book = useBookEntry(bookId);
+  if (!book || isSoon(book)) return null;
+  return (
+    <aside class="paper-strip" aria-labelledby="paper-strip-title">
+      <PaperCover book={book} ribbon={false} lazy={false} />
+      <div class="paper-strip-text">
+        <h2 class="paper-strip-title" id="paper-strip-title">
+          {copy.paper.stripTitle(book.title)}
+        </h2>
+        <p class="small">{copy.paper.stripBody}</p>
+      </div>
+      <div class="paper-strip-buy">
+        <BuyAction book={book} badge={false} />
+      </div>
+    </aside>
+  );
+}
+
+/** Which Amazon store the buttons open. */
+export function StorePicker() {
+  const store = useStore();
+  const ids = (Object.keys(STORES) as StoreId[]).sort((a, b) => copy.paper.storeNames[a].localeCompare(copy.paper.storeNames[b]));
+  return (
+    <label class="store-picker">
+      <span>{copy.paper.storeLabel}</span>
+      <select
+        value={store}
+        onChange={(e) => {
+          const v = (e.currentTarget as HTMLSelectElement).value;
+          if (isStore(v)) chooseStore(v);
+        }}
+      >
+        {ids.map((id) => (
+          <option key={id} value={id}>
+            {copy.paper.storeOption(copy.paper.storeNames[id], STORES[id])}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
 /** A quiet line on the finished screen. */
 export function PaperFinished({ bookId }: { bookId: string }) {
   const book = useBookEntry(bookId);
@@ -310,7 +372,7 @@ export function PaperFinished({ bookId }: { bookId: string }) {
       <PaperCover book={book} ribbon={false} lazy={false} />
       <span class="paper-finished-text">
         <strong>{copy.paper.finished}</strong>
-        <span class="small">{isSoon(book) ? copy.paper.comingSoon : copy.paper.seeBook}</span>
+        <span class="small">{isSoon(book) ? copy.paper.comingSoon : copy.paper.onAmazon}</span>
       </span>
     </a>
   );
@@ -322,8 +384,8 @@ export function PaperPage({ bookId }: { bookId: string | null }) {
   const [error, setError] = useState(false);
   const books = shelf && withPaperOnly(shelf);
   // Grouped like the bookshelf: kids first, then grown-ups.
-  const kids = (books ?? []).filter((b) => !b.paperback?.forGrownUps);
-  const adults = (books ?? []).filter((b) => b.paperback?.forGrownUps);
+  const kids = onSaleFirst((books ?? []).filter((b) => !b.paperback?.forGrownUps));
+  const adults = onSaleFirst((books ?? []).filter((b) => b.paperback?.forGrownUps));
   const grouped = kids.length > 0 && adults.length > 0;
   const groups: [string, string | null, PaperBook[]][] = grouped
     ? [
@@ -358,6 +420,7 @@ export function PaperPage({ bookId }: { bookId: string | null }) {
             {copy.paper.pageIntro.map((p) => (
               <p key={p}>{p}</p>
             ))}
+            <StorePicker />
           </div>
           <div class="paper-hero-art" aria-hidden="true">
             <Crayon colour="#ef5a52" dark="#c43c36" class="crayon-1" />

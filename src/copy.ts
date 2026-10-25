@@ -109,6 +109,9 @@ export const copy = {
     bannerTitle: 'Colour it on paper too',
     bannerBody: 'Every picture here comes from a real book. Some days are made for crayons, paper and no screen at all.',
     bannerButton: 'See the paper books',
+    // Under the banner text, once some books are on sale: their titles.
+    bannerOnSale: (titles: string[]) =>
+      `On Amazon now: ${titles.length > 1 ? `${titles.slice(0, -1).join(', ')} and ${titles[titles.length - 1]}` : titles[0]}.`,
     pageTitle: 'The paper books',
     pageIntro: [
       'Every picture on WebColoring comes from a real colouring book by Mat Harvey.',
@@ -122,8 +125,8 @@ export const copy = {
     price: (format: string, price: string) => `${format}, ${price}`,
     by: (author: string) => `By ${author}`,
     buy: 'Get the paperback',
-    buyHint: 'Grown-ups: hold to open Amazon',
-    buyLink: 'Get the paperback on Amazon',
+    buyHint: (store: string) => `Grown-ups: hold to open ${store}`,
+    buyLink: (store: string) => `Get the paperback on ${store}`,
     opensNewTab: '(opens in a new tab)',
     pictures: (n: number) => `${n} pictures to colour`,
     ages: (a: string) => `For ages ${a}`,
@@ -134,6 +137,29 @@ export const copy = {
     pickerBody: 'All of these pictures in a real book, for colouring away from the screen.',
     finished: 'Colour this one with real crayons too',
     seeBook: 'See the paper book',
+    onAmazon: 'On Amazon now',
+    // At the top of a book's pages, when it is on sale.
+    stripTitle: (title: string) => `${title} is a real paperback too`,
+    stripBody: 'Try every page here for free, then colour them all on paper. Every copy sold keeps WebColoring free.',
+    // Which Amazon store the buttons open (a guess from the device, which a visitor can change).
+    storeLabel: 'Your Amazon store',
+    storeOption: (country: string, store: string) => `${country} (${store})`,
+    storeNames: {
+      US: 'United States',
+      UK: 'United Kingdom',
+      DE: 'Germany',
+      FR: 'France',
+      ES: 'Spain',
+      IT: 'Italy',
+      NL: 'Netherlands',
+      PL: 'Poland',
+      SE: 'Sweden',
+      BE: 'Belgium',
+      IE: 'Ireland',
+      JP: 'Japan',
+      CA: 'Canada',
+      AU: 'Australia',
+    } as Record<string, string>,
     coverAlt: (title: string) => `Front cover of ${title}`,
   },
 

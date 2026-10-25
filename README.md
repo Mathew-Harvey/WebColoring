@@ -111,15 +111,22 @@ Optional settings for art that is not landscape scenes:
 
 ### The paper books
 
-Every book is offered as a paperback on the home screen (below the shelf), under its page picker, on
-the finished screen, in the grown-ups area and on its own page (`#/paper`). That page has the covers,
-the details and the way to buy.
+Every book is offered as a paperback on the home screen (below the shelf, which names the books on
+Amazon now), at the top of its pages while it is on sale and again under them, on the finished screen,
+in the grown-ups area and on the paper books page (`#/paper`, books on sale first). That page has the
+covers, the details and the way to buy.
 
-- Store links, prices and formats live in one place, `src/data/paperbacks.ts`, keyed by book id. A book
-  with a link shows "Available now", its price and a "Get the paperback" button. A book with `url: null`
-  (or no entry) shows a "Coming soon" badge, its price if set, and a disabled button. Links are plain
+- Store links, prices and formats live in one place, `src/data/paperbacks.ts`, keyed by book id. When a
+  book goes on sale, put its Amazon product id (the `B0...` part of its `amazon.com/dp/...` link) in
+  `asin`: it then shows "Available now" and a "Get the paperback" button. A book with `asin: null` (or
+  no entry) shows a "Coming soon" badge, its price if set, and a disabled button. Links are plain
   product pages with no affiliate or tracking parameters, and open in a new tab. Outside the grown-ups
   area the button opens Amazon only after a grown-up holds it down. After an edit, run `npm run build`.
+- The button opens the visitor's own Amazon store (any of the 14 KDP sells in, `src/data/stores.ts`; a
+  paperback's id is the same in all of them). The store is a guess from the device's time zone, then
+  its language, made on the device; the paper books page and the grown-ups area have a "Your Amazon
+  store" picker, and a pick is kept in that browser. `price` is the amazon.com price, so it shows to
+  visitors shopping there; elsewhere the button just says "Paperback".
 - `details` on a book's entry adds an author, a blurb and a cover for its paper cards (Taken Apart uses
   this). A book with no pages to colour here yet can still be offered: give its entry a `book` block
   with its title, subtitle, number of pictures, order and cover, and it shows on the paper books page

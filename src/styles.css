@@ -786,6 +786,99 @@ a {
   width: 190px;
 }
 
+/* The top of a book's pages, while it is on sale: lined up with the heading and intro. */
+.paper-strip {
+  display: flex;
+  align-items: center;
+  gap: 14px 20px;
+  max-width: 860px;
+  margin: 0 0 16px max(0px, calc((100% - 1200px) / 2));
+  padding: 14px 18px;
+  border-radius: 22px;
+  background:
+    repeating-linear-gradient(180deg, transparent 0 31px, rgba(124, 200, 248, 0.16) 31px 32px),
+    #fffdf7;
+  box-shadow: var(--shadow);
+}
+
+.paper-strip .paperback {
+  width: 64px;
+}
+
+.paper-strip .paperback-art {
+  width: 120px;
+}
+
+.paper-strip-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.paper-strip-title {
+  margin: 0 0 4px;
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.paper-strip-text .small {
+  margin: 0;
+}
+
+.paper-strip-buy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  flex: none;
+}
+
+@media (max-width: 760px) {
+  .paper-strip {
+    flex-wrap: wrap;
+    gap: 12px 14px;
+    padding: 12px 14px;
+  }
+  .paper-strip .paperback {
+    width: 48px;
+  }
+  .paper-strip .paperback-art {
+    width: 84px;
+  }
+  .paper-strip-title {
+    font-size: 16px;
+  }
+  .paper-strip-buy {
+    flex-basis: 100%;
+  }
+}
+
+/* Which Amazon store the buy buttons open. */
+.store-picker {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  margin: 14px 0 0;
+  font-weight: 800;
+}
+
+.store-picker select {
+  min-height: 44px;
+  max-width: 100%;
+  padding: 6px 12px;
+  border: 2px solid rgba(61, 53, 80, 0.18);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+  font-weight: 700;
+}
+
+.paper-banner-text .paper-banner-sale {
+  color: #1f6b3b;
+  font-weight: 800;
+}
+
 /* Finished screen: one quiet line. */
 .paper-finished {
   display: flex;
