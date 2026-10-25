@@ -219,10 +219,11 @@ await page2.waitForTimeout(300);
 await page2.mouse.up();
 await page2.waitForTimeout(300);
 check('store: a quick tap does not open the store', (await page2.evaluate(() => window.__opened ?? null)) === null && ctx2.pages().length === 1);
+// Buy buttons open after a 1 second hold.
 await page2.mouse.down();
-await page2.waitForTimeout(1800);
+await page2.waitForTimeout(1300);
 await page2.mouse.up();
-check('store: holding the button opens the product page', (await page2.evaluate(() => window.__opened)) === US(onSale[0].id).url);
+check('store: holding the button for a second opens the product page', (await page2.evaluate(() => window.__opened)) === US(onSale[0].id).url);
 await page2.goto(`${BASE}#/book/${onSale[0].id}`);
 await page2.waitForSelector('.paper-picker a.hold-buy');
 check('store: picker card links to the product page', (await page2.getAttribute('.paper-picker a.hold-buy', 'href')) === US(onSale[0].id).url);

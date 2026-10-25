@@ -76,6 +76,9 @@ export function withPaperOnly(shelf: BookIndexEntry[]): PaperBook[] {
 
 const isSoon = (book: BookIndexEntry) => !listingFor(book.id);
 
+/** How long a buy button is held before the store opens: long enough to stop a stray tap. */
+const BUY_HOLD_MS = 1000;
+
 /** Books on sale first, keeping their order otherwise. */
 const onSaleFirst = <T extends BookIndexEntry>(books: T[]) => [...books.filter((b) => !isSoon(b)), ...books.filter(isSoon)];
 
@@ -189,6 +192,7 @@ export function BuyAction({ book, gated = true, badge = true }: { book: BookInde
         hint={copy.paper.buyHint(STORES[store])}
         href={url}
         onDone={() => window.open(url, '_blank', 'noopener')}
+        ms={BUY_HOLD_MS}
         class="hold-buy"
       >
         <Icon name="book" size={20} />
