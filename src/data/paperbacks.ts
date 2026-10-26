@@ -96,6 +96,17 @@ export const PAPERBACKS: Record<string, Listing> = {
       },
     },
   },
+  // Coming soon: not on Amazon yet.
+  'haybale-hill-farm': {
+    asin: null,
+    price: 'US$5.99',
+    format: 'paperback',
+    details: {
+      author: 'Mat Harvey',
+      blurb:
+        'Three piglets sit in a big mud puddle, grinning and waving their trotters. A calf drinks beside its mother at the water trough, a hen leads four chicks past the henhouse, a farmer drives a tractor full of pumpkins, and on the last page the cow, pig, sheep and hen sleep together on the hay under the moon. Thick outlines and large shapes, so children from about 3 can manage most pages.',
+    },
+  },
   // On Amazon from 25 October 2026.
   'taken-apart': {
     asin: 'B0HP7BYF53',

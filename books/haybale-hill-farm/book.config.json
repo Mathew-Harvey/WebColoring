@@ -1,0 +1,14 @@
+{
+  "title": "Haybale Hill Farm",
+  "subtitle": "Barnyard Animals and Farm Days to Colour for Kids",
+  "order": 8,
+  "canvas": [
+    2560,
+    1920
+  ],
+  "paperback": {
+    "ages": "3 to 8",
+    "size": "8.5 x 11 in",
+    "singleSided": true
+  }
+}

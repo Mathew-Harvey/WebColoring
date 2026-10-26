@@ -94,6 +94,13 @@ export const copy = {
       intro:
         "A joey peeks out of its mum's pouch, a koala hugs a gum tree and a wombat says g'day. 30 big, friendly pictures of Australian animals for kids aged 4 to 8. Free, with no ads or accounts.",
     },
+    'haybale-hill-farm': {
+      title: 'Haybale Hill Farm: free farm animal colouring pages for kids | WebColoring',
+      description:
+        '30 free farm animal colouring pages for kids aged 3 to 8: piglets, cows, hens, lambs and a tractor full of pumpkins. Big, simple shapes on any phone, tablet or computer.',
+      intro:
+        'Three piglets in a mud puddle, a hen and her chicks, a goat on a stump and a tractor full of pumpkins. 30 big, simple farm pictures for kids aged 3 to 8. Free, with no ads or accounts.',
+    },
   } as Record<string, { title: string; description: string; h1?: string; intro: string }>,
   // For a new book until it has its own copy above.
   bookPageFallback: (title: string, pages: number) => ({
