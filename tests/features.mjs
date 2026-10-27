@@ -175,7 +175,7 @@ check(
     (await taCard.locator('.paper-by').textContent()) === 'By Mat Harvey' &&
     (await taCard.locator('.paper-blurb').textContent()) === ta.details.blurb,
 );
-check('taken apart: on sale at US$8.99', (await taCard.locator('.paper-price').textContent()).includes('Paperback, US$8.99') && (await taCard.locator('.soon-ribbon').count()) === 0);
+check('taken apart: on sale at US$6.99', (await taCard.locator('.paper-price').textContent()).includes('Paperback, US$6.99') && (await taCard.locator('.soon-ribbon').count()) === 0);
 check('taken apart: links to its amazon.com page', (await taCard.locator('a.hold-buy').getAttribute('href')) === 'https://www.amazon.com/dp/B0HP7BYF53');
 await taCard.locator('img').scrollIntoViewIfNeeded();
 await page2.waitForFunction(() => document.querySelector('#paper-taken-apart img').complete && document.querySelector('#paper-taken-apart img').naturalWidth > 0);

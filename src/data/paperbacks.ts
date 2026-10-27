@@ -54,14 +54,14 @@ export interface Listing {
 }
 
 export const PAPERBACKS: Record<string, Listing> = {
-  'blocky-builders': { asin: 'B0HNHZQHBB', price: 'US$9.99', format: 'paperback' },
-  'scaly-pals': { asin: 'B0HNHSR2T9', price: 'US$9.99', format: 'paperback' },
+  'blocky-builders': { asin: 'B0HNHZQHBB', price: 'US$5.99', format: 'paperback' },
+  'scaly-pals': { asin: 'B0HNHSR2T9', price: 'US$5.99', format: 'paperback' },
   // On Amazon from 26 October 2026.
   'still-water-mandalas': { asin: null },
   // Coming soon: not on Amazon yet.
   'kart-kingdom-racers': { asin: null },
   // On Amazon from 25 October 2026.
-  'doodles-through-the-decades': { asin: 'B0HP76NQ53', price: 'US$9.99', format: 'paperback' },
+  'doodles-through-the-decades': { asin: 'B0HP76NQ53', price: 'US$6.99', format: 'paperback' },
   // Coming soon: not on Amazon yet.
   'deep-sea-friends': {
     asin: null,
@@ -110,7 +110,7 @@ export const PAPERBACKS: Record<string, Listing> = {
   // On Amazon from 25 October 2026.
   'taken-apart': {
     asin: 'B0HP7BYF53',
-    price: 'US$8.99',
+    price: 'US$6.99',
     format: 'paperback',
     details: {
       author: 'Mat Harvey',
