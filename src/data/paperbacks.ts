@@ -65,7 +65,7 @@ export const PAPERBACKS: Record<string, Listing> = {
   // Coming soon: not on Amazon yet.
   'deep-sea-friends': {
     asin: null,
-    price: 'US$9.99',
+    // The price goes in when the book is live on Amazon.
     format: 'paperback',
     details: {
       author: 'Mat Harvey',
@@ -82,7 +82,7 @@ export const PAPERBACKS: Record<string, Listing> = {
   // Coming soon: not on Amazon yet.
   'aussie-bush-buddies': {
     asin: null,
-    price: 'US$9.99',
+    // The price goes in when the book is live on Amazon.
     format: 'paperback',
     details: {
       author: 'Mat Harvey',
@@ -99,7 +99,7 @@ export const PAPERBACKS: Record<string, Listing> = {
   // Coming soon: not on Amazon yet.
   'haybale-hill-farm': {
     asin: null,
-    price: 'US$5.99',
+    // The price goes in when the book is live on Amazon.
     format: 'paperback',
     details: {
       author: 'Mat Harvey',
