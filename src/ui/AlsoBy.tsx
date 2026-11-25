@@ -6,7 +6,10 @@ declare const __PUBLIC__: string;
 // "Also by Mat Harvey": the other sites, each in its own mark, as on thebodyweightgym.org and
 // webfpv.org. Those sites are dark, so their logos are drawn light; this page is light, so the
 // logos in public/also-by are the same files drawn in the ink colour, and the WebFPV wordmark
-// borrows its accent a few shades deeper so it can be read on cream.
+// borrows its accent a few shades deeper so it can be read on cream. andAgainSoftware, the
+// publisher every one of these sites comes from, leads the row (Mat's ask of 2026-11-25, that
+// every site's footer carries it); its mark is the publisher's lettering in the ink colour, with
+// the box's word cut out of the box.
 //
 // This is the children's home screen, so like every link that leaves the site, each one opens
 // only after a grown-up holds it down.
@@ -16,6 +19,7 @@ type Site =
   | { key: keyof typeof copy.alsoBy.sites; url: string; mark: [string, string]; accent: string };
 
 const SITES: Site[] = [
+  { key: 'andagain', url: 'https://andagainsoftware.com/', logo: 'andagainsoftware.png', width: 371, height: 72 },
   { key: 'gym', url: 'https://thebodyweightgym.org/', logo: 'the-bodyweight-gym.png', width: 268, height: 72 },
   { key: 'webfpv', url: 'https://webfpv.org/', mark: ['WEB', 'FPV'], accent: '#b0486a' },
   { key: 'apphub', url: 'https://my-app-hub.com/', logo: 'apphub.png', width: 98, height: 66 },
